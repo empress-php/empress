@@ -1,2 +1,3 @@
 vendor/
 src/app.php
+.php_cs.cache
