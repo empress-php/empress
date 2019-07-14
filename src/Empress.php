@@ -9,7 +9,7 @@ use Amp\Promise;
 use Amp\Socket;
 use Psr\Log\LoggerInterface;
 use Pimple\Container;
-use Amp\Util\CallableRequestHandlerWithParams;
+use Empress\Util\CallableRequestHandlerWithParams;
 
 class Empress
 {
