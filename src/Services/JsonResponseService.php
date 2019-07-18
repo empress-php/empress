@@ -2,18 +2,22 @@
 
 namespace Empress\Services;
 
-class JsonResponseService extends AbstractService
+class JsonResponseService
 {
-    public function getServiceObject()
+    /** @var \Empress\Services\ResponseService */
+    private $responseService;
+
+    public function __construct(ResponseService $responseService)
     {
-        return $this;
+        $this->responseService = $responseService;
     }
+
     public function with(array $payload)
     {
         $headers = [
             'content-type' => 'application/json; charset=utf-8'
         ];
 
-        return $this->container['response']->with(json_encode($payload), $headers);
+        return $this->responseService->with(json_encode($payload), $headers);
     }
 }

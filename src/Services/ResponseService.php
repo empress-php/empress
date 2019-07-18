@@ -4,21 +4,22 @@ namespace Empress\Services;
 
 use Amp\Http\Status;
 use Amp\Http\Server\Response;
-use Pimple\Container;
 
-class ResponseService extends AbstractService
+class ResponseService
 {
-    public function getServiceObject()
+
+    /** @var array */
+    private $headers;
+
+    public function __construct()
     {
-        return $this;
+        $this->headers = [
+            'content-type' => 'text/plain; charset=utf-8'
+        ];
     }
 
-    public function with($payload, $headers = [], $status = Status::OK)
+    public function with($payload, $headers = [], $status = Status::OK): Response
     {
-        $headers = array_merge([
-            'content-type' => 'text/plain; charset=utf-8'
-        ], $headers);
-
-        return new Response($status, $headers, $payload);
+        return new Response($status, $headers ?: $this->headers, $payload);
     }
 }

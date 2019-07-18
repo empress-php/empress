@@ -1,28 +1,40 @@
 <?php
+
 namespace Empress;
 
 use Amp\Http\Server\Server;
-use Amp\Http\Server\Response;
-use Amp\Http\Server\Router;
-use Amp\Http\Server\Options;
-use Amp\Promise;
+use Amp\MultiReasonException;
 use Amp\Socket;
-use Psr\Log\LoggerInterface;
+use Empress\Exceptions\StartupException;
+use Empress\Services\Providers\CoreServicesProvider;
+use Empress\Services\Providers\DefaultLoggerServiceProvider;
+use Empress\Util\CallableRequestHandler;
 use Pimple\Container;
-use Empress\Util\CallableRequestHandlerWithParams;
+use Psr\Log\LoggerInterface;
+use function Amp\call;
+use Amp\Promise;
+use Empress\Exceptions\ShutdownException;
 
 class Empress
 {
     /** @var \Pimple\Container */
     private $container;
 
+    /** @var \Amp\Http\Server\Server */
+    private $server;
+
     /**
-     * @param array $container
-     * @param \Amp\Http\Server\Options $optons
+     * @param mixed $container
+     * @param \Psr\Log\LoggerInterface|null $logger
      * @param int $port
      */
-    public function __construct($container = [], Options $options = null, int $port = 1337)
-    {
+    public function __construct(
+        $container = [],
+        LoggerInterface $logger = null,
+        int $port = 1337
+    ) {
+
+        // Initialize DI
         if (is_array($container)) {
             $container = new Container($container);
         }
@@ -32,50 +44,80 @@ class Empress
         }
 
         $this->container = $container;
-        $this->options = $options;
-        $this->port = $port;
 
-        $this->router = new Router;
+        if (!is_null($logger)) {
+            $this->container['logger'] = $logger;
+        } else {
+            $loggerProvider = new DefaultLoggerServiceProvider;
+            $loggerProvider->register($this->container);
+        }
 
-        $defaultServicesProvider = new Services\DefaultServicesProvider($this);
-        $defaultServicesProvider->register($this->container);
+        $this->container['port'] = $port;
+
+        $provider = new CoreServicesProvider;
+        $provider->register($this->container);
+
+        // Prepare server instance
+        $this->initializeServer();
     }
 
-    public function get(string $uri, callable $callable)
+    public function get(string $uri, callable $callable): void
     {
         $this->registerCallableHandler('GET', $uri, $callable);
     }
 
-    public function post(string $uri, callabe $callable)
+    public function post(string $uri, callable $callable): void
     {
         $this->registerCallableHandler('POST', $uri, $callable);
     }
 
-    public function run()
+    public function run(): Promise
+    {
+        return $this->handleMultiReasonException($this->server->start(), StartupException::class);
+    }
+
+    public function shutDown(): Promise
+    {
+        return $this->handleMultiReasonException($this->server->stop(), ShutdownException::class);
+    }
+
+    private function registerCallableHandler(string $method, string $uri, callable $callable): void
+    {
+        $closure = \Closure::fromCallable($callable);
+        $closure = $closure->bindTo($this->container);
+
+        $this->container['router']->addRoute($method, $uri, new CallableRequestHandler($closure));
+    }
+
+    private function initializeServer()
     {
         $sockets = [
-            Socket\listen('0.0.0.0:' . $this->port),
-            Socket\listen('[::]:' . $this->port),
+            Socket\listen('0.0.0.0:' . $this->container['port']),
+            Socket\listen('[::]:' . $this->container['port']),
         ];
 
-        $server = new Server($sockets, $this->router, $this->container['logger'], $this->options);
-
-        return $server->start();
+        $this->server = new Server($sockets, $this->container['router'], $this->container['logger'], $this->container['options']);
     }
 
-    public function getContainer(): ContainerInterface
+    private function handleMultiReasonException(Promise $promise, string $exceptionClass = \Exception::class)
     {
-        return $this->container;
-    }
+        return call(function () use ($promise, $exceptionClass) {
+            try {
+                yield $promise;
+            } catch (MultiReasonException $e) {
+                $reasons = $e->getReasons();
 
-    private function registerCallableHandler(string $method, string $uri, callable $callable)
-    {
-        if (!$callable instanceof Closure) {
-            $callable = \Closure::fromCallable($callable);
-        }
+                if (count($reasons) === 1) {
+                    $reason = array_shift($reasons);
+                    throw new $exceptionClass($reason->getMessage(), $reason->getCode(), $reason);
+                }
 
-        $callable = $callable->bindTo($this->container);
+                $messages = array_map(function (\Throwable $reason) {
+                    return $reason->getMessage();
+                }, $reasons);
 
-        $this->router->addRoute($method, $uri, new CallableRequestHandlerWithParams($callable));
+                throw new $exceptionClass(implode(PHP_EOL, $messages));
+            }
+        });
     }
 }

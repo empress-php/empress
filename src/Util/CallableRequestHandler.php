@@ -8,7 +8,7 @@ use Amp\Http\Server\Router;
 use Amp\Promise;
 use function Amp\call;
 
-final class CallableRequestHandlerWithParams implements RequestHandler
+final class CallableRequestHandler implements RequestHandler
 {
     /** @var callable */
     private $callable;
