@@ -1,6 +1,6 @@
 <?php
 
-namespace Empress\Services\Providers;
+namespace Empress\Provider;
 
 use Amp\ByteStream\ResourceOutputStream;
 use Amp\Log\ConsoleFormatter;
@@ -8,8 +8,9 @@ use Amp\Log\StreamHandler;
 use Monolog\Logger;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\Log\LoggerInterface;
 
-class DefaultLoggerServiceProvider implements ServiceProviderInterface
+class DefaultLoggerProvider implements ServiceProviderInterface
 {
     public function register(Container $container)
     {
