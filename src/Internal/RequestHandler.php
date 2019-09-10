@@ -4,20 +4,24 @@ namespace Empress\Internal;
 
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler as RequestHandlerInterface;
-use Amp\Http\Server\Response;
 use Amp\Http\Server\Router;
 use Amp\Promise;
+use Psr\Container\ContainerInterface;
+
 use function Amp\call;
 
 final class RequestHandler implements RequestHandlerInterface
 {
-    /** @var callable */
-    private $callable;
+    /** @var \Closure */
+    private $closure;
 
+    /** @var Psr\Container\ContainerInterface */
+    private $container;
 
-    public function __construct(callable $callable)
+    public function __construct(\Closure $closure, ContainerInterface $container = null)
     {
-        $this->callable = $callable;
+        $this->callable = $closure;
+        $this->container = $container;
     }
 
     /**
@@ -26,8 +30,11 @@ final class RequestHandler implements RequestHandlerInterface
     public function handleRequest(Request $request): Promise
     {
         $params = $request->getAttribute(Router::class);
-        $response = new Response;
 
-        return call($this->callable, $request, $response, $params);
+        if (is_null($this->container)) {
+            return call($this->closure, $request, $params);
+        }
+
+        return call($this->closure, $request, $params, $this->container);
     }
 }
