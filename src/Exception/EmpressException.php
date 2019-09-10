@@ -1,6 +1,6 @@
 <?php
 
-namespace Empress\Exceptions;
+namespace Empress\Exception;
 
 class EmpressException extends \Exception
 { }
