@@ -11,7 +11,10 @@
         "pimple/pimple": "^3.2",
         "psr/container": "^1.0",
         "amphp/file": "^0.3.5",
-        "amphp/http-server-form-parser": "^1.1"
+        "amphp/http-server-form-parser": "^1.1",
+        "symfony/dependency-injection": "^4.3",
+        "symfony/yaml": "^4.3",
+        "symfony/config": "^4.3"
     },
     "repositories": [
         {
