@@ -20,7 +20,7 @@ final class RequestHandler implements RequestHandlerInterface
 
     public function __construct(\Closure $closure, ContainerInterface $container = null)
     {
-        $this->callable = $closure;
+        $this->closure = $closure;
         $this->container = $container;
     }
 
@@ -32,9 +32,9 @@ final class RequestHandler implements RequestHandlerInterface
         $params = $request->getAttribute(Router::class);
 
         if (is_null($this->container)) {
-            return call($this->closure, $request, $params);
+            return call($this->closure, $params, $request);
         }
 
-        return call($this->closure, $request, $params, $this->container);
+        return call($this->closure, $params, $request, $this->container);
     }
 }
