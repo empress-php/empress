@@ -14,7 +14,8 @@
         "amphp/http-server-form-parser": "^1.1",
         "symfony/dependency-injection": "^4.3",
         "symfony/yaml": "^4.3",
-        "symfony/config": "^4.3"
+        "symfony/config": "^4.3",
+        "amphp/http-server-static-content": "^1.0"
     },
     "repositories": [
         {
