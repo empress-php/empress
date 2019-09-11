@@ -190,7 +190,7 @@ class Empress
 
     private function getDefaultLogger()
     {
-        $logHandler = new StreamHandler(new ResourceOutputStream(\STDOUT));
+        $logHandler = new StreamHandler(getStdout());
         $logHandler->setFormatter(new ConsoleFormatter);
         $logger = new Logger('Empress');
         $logger->pushHandler($logHandler);
