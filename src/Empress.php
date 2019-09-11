@@ -18,7 +18,6 @@ use Empress\Internal\RequestHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use function Amp\call;
 use function Amp\ByteStream\getStdout;
