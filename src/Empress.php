@@ -120,12 +120,12 @@ class Empress
         }
     }
 
-    private function registerCallableHandler(string $method, string $uri, $handler): void
+    private function registerCallableHandler(string $verb, string $uri, $handler): void
     {
         $allowedMethods = $this->options->getAllowedMethods();
 
-        if (!in_array($method, $allowedMethods, true)) {
-            throw new \InvalidArgumentException(sprintf('Method %s is not allowed', $method));
+        if (!in_array($verb, $allowedMethods, true)) {
+            throw new \InvalidArgumentException(sprintf('Method %s is not allowed', $verb));
         }
 
         if (is_array($handler)) {
@@ -133,11 +133,13 @@ class Empress
             $service = $this->container->get($class);
             $handler = [$service, $method];
             $closure = \Closure::fromCallable($handler);
-
-            $this->router->addRoute($method, $uri, new RequestHandler($closure));
+            $this->router->addRoute($verb, $uri, new RequestHandler($closure));
 
             return;
         }
+
+        $closure = \Closure::fromCallable($handler);
+        $this->router->addRoute($verb, $uri, new RequestHandler($closure, $this->container));
     }
 
     private function initializeServer(): void
