@@ -144,11 +144,8 @@ class Empress
 
     private function initializeServer(): void
     {
-        try {
-            $logger = $this->container->get(LoggerInterface::class);
-        } catch (NotFoundExceptionInterface $e) {
-            $logger = $this->getDefaultLogger();
-        }
+        $logger = $this->container->has(LoggerInterface::class) ?
+            $this->container->get(LoggerInterface::class) : $this->getDefaultLogger();
 
         $sockets = [
             Socket\listen('0.0.0.0:' . $this->port),
