@@ -2,11 +2,12 @@
 
 namespace Empress;
 
-use Amp\ByteStream\ResourceOutputStream;
+use Amp\File\Driver;
 use Amp\Http\Server\Middleware;
 use Amp\Http\Server\Options;
 use Amp\Http\Server\Router;
 use Amp\Http\Server\Server;
+use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Log\ConsoleFormatter;
 use Amp\MultiReasonException;
 use Amp\Promise;
@@ -20,6 +21,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use function Amp\call;
+use function Amp\ByteStream\getStdout;
 use function Amp\Http\Server\Middleware\stack;
 
 class Empress
@@ -85,6 +87,12 @@ class Empress
     public function head(string $uri, $handler): void
     {
         $this->registerCallableHandler('HEAD', $uri, $handler);
+    }
+
+    public function serveStatic(string $root, Driver $filesystem): void
+    {
+        $documentRoot = new DocumentRoot($root, $filesystem);
+        $this->router->setFallback($documentRoot);
     }
 
     public function run(): Promise
