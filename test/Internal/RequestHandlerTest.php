@@ -54,4 +54,27 @@ class RequestHandlerTest extends AsyncTestCase
 
         $this->assertEquals(json_encode(['status' => 'ok']), yield $response->getBody()->read());
     }
+
+    public function testHandlerWithRequestParams()
+    {
+        $closure = function (array $params) {
+            $name = $params['name'];
+            return new Response(Status::OK, [], "Hello, $name");
+        };
+
+        $client = $this->createMock(Client::class);
+        $request = new Request($client, 'GET', Http::createFromString('/'));
+
+        // Mock request params
+        $request->setAttribute(Router::class, [
+            'name' => 'Jakob',
+        ]);
+
+        $handler = new RequestHandler($closure);
+
+        /** @var \Amp\Http\Server\Response $response */
+        $response = yield $handler->handleRequest($request);
+
+        $this->assertEquals('Hello, Jakob', yield $response->getBody()->read());
+    }
 }
