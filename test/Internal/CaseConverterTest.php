@@ -8,7 +8,7 @@ use Empress\Internal\CaseConverter;
 class CaseConverterTest extends AsyncTestCase
 {
 
-    /** @dataProvider casedDataProvider */
+    /** @dataProvider provideCasedNames */
     public function testKebabCase(string $actual)
     {
         $converter = new CaseConverter($actual);
@@ -16,7 +16,7 @@ class CaseConverterTest extends AsyncTestCase
         $this->assertEquals('camel-case', $converter->kebabCasify());
     }
 
-    /** @dataProvider casedDataProvider */
+    /** @dataProvider provideCasedNames */
     public function testSnakeCase(string $actual)
     {
         $converter = new CaseConverter($actual);
@@ -24,7 +24,7 @@ class CaseConverterTest extends AsyncTestCase
         $this->assertEquals('camel_case', $converter->snakeCasify());
     }
 
-    /** @dataProvider casedDataProvider */
+    /** @dataProvider provideCasedNames */
     public function testPascalCase(string $actual)
     {
         $converter = new CaseConverter($actual);
@@ -32,7 +32,7 @@ class CaseConverterTest extends AsyncTestCase
         $this->assertEquals('CamelCase', $converter->pascalCasify());
     }
 
-    /** @dataProvider casedDataProvider */
+    /** @dataProvider provideCasedNames */
     public function testCamelCase(string $actual)
     {
         $converter = new CaseConverter($actual);
@@ -40,7 +40,7 @@ class CaseConverterTest extends AsyncTestCase
         $this->assertEquals('camelCase', $converter->camelCasify());
     }
 
-    public function casedDataProvider()
+    public function provideCasedNames()
     {
         return [
             ['camelCase'],
