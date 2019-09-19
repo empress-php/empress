@@ -23,6 +23,7 @@ class RequestHandlerTest extends AsyncTestCase
         $client = $this->createMock(Client::class);
         $request = new Request($client, 'GET', Http::createFromString('/'));
 
+        // Request object is router-aware
         $request->setAttribute(Router::class, null);
 
         $handler = new RequestHandler($closure);
@@ -43,6 +44,7 @@ class RequestHandlerTest extends AsyncTestCase
         $client = $this->createMock(Client::class);
         $request = new Request($client, 'GET', Http::createFromString('/'));
 
+        // Request object is router-aware
         $request->setAttribute(Router::class, null);
 
         $handler = new RequestHandler($closure, new JsonTransformer());
