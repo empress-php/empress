@@ -17,7 +17,7 @@ class JsonTransformer implements ResponseTransformerInterface
         return call(function () use ($promise) {
 
             /** @var \Amp\Http\Server\Response $response */
-            $result = json_encode(yield $promise, JSON_THROW_ON_ERROR);
+            $result = json_encode(yield $promise, \JSON_THROW_ON_ERROR);
 
             $response = new Response;
             $response->setHeader('content-type', 'application/json');
