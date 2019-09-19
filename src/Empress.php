@@ -2,19 +2,16 @@
 
 namespace Empress;
 
-use Amp\File\Driver;
 use Amp\Http\Server\Middleware;
 use Amp\Http\Server\Options;
-use Amp\Http\Server\Router;
 use Amp\Http\Server\Server;
-use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Log\ConsoleFormatter;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
+use Empress\Routing\RouterBuilder;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
-use Empress\Internal\RequestHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
@@ -37,61 +34,21 @@ class Empress
     /** @var \Amp\Http\Server\Options */
     private $options;
 
-    /** @var \Amp\Http\Server\Router */
-    private $router;
+    /** @var \Empress\Routing\RouterBuilder */
+    private $routerBuilder;
 
     /**
      * @param \Psr\Log\LoggerInterface $logger
      * @param int $port
      */
     public function __construct(
-        ContainerInterface $container = null,
-        array $middlewares = [],
-        int $port = 1337,
-        Options $options = null
+        ContainerInterface $container,
+        int $port = 1337
     ) {
         $this->container = $container;
+        $this->routerBuilder = new RouterBuilder($container);
         $this->port = $port;
-        $this->options = $options ?? new Options;
-        $this->router = new Router;
-
-        $this->registerMiddlewares($middlewares);
-    }
-
-    public function get(string $uri, $handler): void
-    {
-        $this->registerCallableHandler('GET', $uri, $handler);
-    }
-
-    public function post(string $uri, $handler): void
-    {
-        $this->registerCallableHandler('POST', $uri, $handler);
-    }
-
-    public function put(string $uri, $handler): void
-    {
-        $this->registerCallableHandler('PUT', $uri, $handler);
-    }
-
-    public function patch(string $uri, $handler): void
-    {
-        $this->registerCallableHandler('PATCH', $uri, $handler);
-    }
-
-    public function delete(string $uri, $handler): void
-    {
-        $this->registerCallableHandler('DELETE', $uri, $handler);
-    }
-
-    public function head(string $uri, $handler): void
-    {
-        $this->registerCallableHandler('HEAD', $uri, $handler);
-    }
-
-    public function serveStatic(string $root, Driver $filesystem): void
-    {
-        $documentRoot = new DocumentRoot($root, $filesystem);
-        $this->router->setFallback($documentRoot);
+        $this->options = new Options;
     }
 
     public function run(): Promise
@@ -102,43 +59,22 @@ class Empress
         return $this->handleMultiReasonException($closure, StartupException::class);
     }
 
+    public function addMiddleware(Middleware $middleware)
+    {
+        $this->middlewares[] = $middleware;
+
+        return $this;
+    }
+
     public function shutDown(): Promise
     {
         $closure = \Closure::fromCallable([$this->server, 'stop']);
         return $this->handleMultiReasonException($closure, ShutdownException::class);
     }
 
-    private function registerMiddlewares($middlewares)
+    public function getRouterBuilder(): RouterBuilder
     {
-        foreach ($middlewares as $middleware) {
-            if (!$middleware instanceof Middleware) {
-                throw new \InvalidArgumentException(sprintf('Array of objects implementing %s was expected', Middleware::class));
-            }
-
-            $this->middlewares[] = $middleware;
-        }
-    }
-
-    private function registerCallableHandler(string $verb, string $uri, $handler): void
-    {
-        $allowedMethods = $this->options->getAllowedMethods();
-
-        if (!in_array($verb, $allowedMethods, true)) {
-            throw new \InvalidArgumentException(sprintf('Method %s is not allowed', $verb));
-        }
-
-        if (is_array($handler)) {
-            [$class, $method] = $handler;
-            $service = $this->container->get($class);
-            $handler = [$service, $method];
-            $closure = \Closure::fromCallable($handler);
-            $this->router->addRoute($verb, $uri, new RequestHandler($closure));
-
-            return;
-        }
-
-        $closure = \Closure::fromCallable($handler);
-        $this->router->addRoute($verb, $uri, new RequestHandler($closure, $this->container));
+        return $this->routerBuilder;
     }
 
     private function initializeServer(): void
@@ -151,10 +87,12 @@ class Empress
             Socket\listen('[::]:' . $this->port),
         ];
 
+        $router = $this->getRouterBuilder()->getRouter();
+
         $this->server = new Server(
             $sockets,
             stack(
-                $this->router,
+                $router,
                 ...$this->middlewares
             ),
             $logger,
@@ -184,9 +122,9 @@ class Empress
         });
     }
 
-    private function getDefaultLogger()
+    private function getDefaultLogger(): Logger
     {
-        $logHandler = new StreamHandler(getStdout());
+        $logHandler = new StreamHandler(getStdout()->getResource());
         $logHandler->setFormatter(new ConsoleFormatter);
         $logger = new Logger('Empress');
         $logger->pushHandler($logHandler);
