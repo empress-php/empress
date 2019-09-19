@@ -2,8 +2,6 @@
 
 namespace Empress\Test\Internal;
 
-use Amp\Promise;
-use Amp\Success;
 use Amp\Http\Server\Driver\Client;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\Response;
@@ -12,9 +10,7 @@ use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Internal\RequestHandler;
 use Empress\JsonTransformer;
-use Empress\ResponseTransformerInterface;
 use League\Uri\Http;
-use function Amp\call;
 
 class RequestHandlerTest extends AsyncTestCase
 {
