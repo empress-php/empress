@@ -8,25 +8,20 @@
         "monolog/monolog": "^1.24",
         "amphp/log": "^1.0",
         "amphp/http-server-router": "^1.0",
-        "pimple/pimple": "^3.2",
         "psr/container": "^1.0",
         "amphp/file": "^0.3.5",
         "amphp/http-server-form-parser": "^1.1",
-        "symfony/dependency-injection": "^4.3",
         "symfony/yaml": "^4.3",
         "symfony/config": "^4.3",
         "amphp/http-server-static-content": "^1.0"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/cspray/phpunit-util"
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Empress\\": "src/"
-        }
+        },
+        "files": [
+            "src/Routing/functions.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
@@ -34,7 +29,9 @@
         }
     },
     "require-dev": {
-        "amphp/phpunit-util": "dev-feature/phpunit-7",
-        "amphp/artax": "^3.0"
+        "amphp/artax": "^3.0",
+        "psy/psysh": "^0.9.9",
+        "phpunit/phpunit": "^8.3",
+        "amphp/phpunit-util": "^1.1"
     }
 }
