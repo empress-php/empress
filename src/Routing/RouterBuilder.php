@@ -4,8 +4,6 @@ namespace Empress\Routing;
 
 use Empress\Internal\RequestHandler;
 
-use Amp\Promise;
-use Amp\Success;
 use Amp\File\Driver;
 use Amp\Http\Server\Router;
 use Amp\Http\Server\StaticContent\DocumentRoot;
