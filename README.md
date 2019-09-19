@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/jakobmats/empress.svg?branch=master)](https://travis-ci.com/jakobmats/empress)
 
-# EVERYTHING'S STILL VERY MUCH IN EARLY PROGRESS
+# EVERYTHING'S STILL VERY MUCH IN EARLY STAGE
 
 # Empress
 Empress is a flexible microframework for creating async web applications, based on Amp concurrency framework.
