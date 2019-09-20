@@ -5,20 +5,20 @@ namespace Empress\Routing;
 use Empress\ResponseTransformerInterface;
 
 /**
- * Enable definitions to be embellished with response transformers
+ * Enable definitions to be embellished with response transformers.
  */
 interface TransformableDefinitionInterface
 {
 
     /**
-     * Get a response tranformer associated with this instance
+     * Get a response tranformer associated with this instance.
      *
      * @return \Empress\Routing\ResponseTransformerInterface|null
      */
     public function getResponseTransformer(): ?ResponseTransformerInterface;
 
     /**
-     * Register a response transformer on this instance
+     * Register a response transformer on this instance.
      *
      * @param \Empress\ResponseTransformerInterface $responseTransformer
      * @return void

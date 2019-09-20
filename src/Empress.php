@@ -9,15 +9,15 @@ use Amp\Log\ConsoleFormatter;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
-use Empress\Routing\RouterBuilder;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
+use Empress\Routing\RouterBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use function Amp\call;
 use function Amp\ByteStream\getStdout;
+use function Amp\call;
 use function Amp\Http\Server\Middleware\stack;
 
 class Empress
@@ -108,16 +108,16 @@ class Empress
             } catch (MultiReasonException $e) {
                 $reasons = $e->getReasons();
 
-                if (count($reasons) === 1) {
-                    $reason = array_shift($reasons);
+                if (\count($reasons) === 1) {
+                    $reason = \array_shift($reasons);
                     throw new $exceptionClass($reason->getMessage(), $reason->getCode(), $reason);
                 }
 
-                $messages = array_map(function (\Throwable $reason) {
+                $messages = \array_map(function (\Throwable $reason) {
                     return $reason->getMessage();
                 }, $reasons);
 
-                throw new $exceptionClass(implode(PHP_EOL, $messages));
+                throw new $exceptionClass(\implode(PHP_EOL, $messages));
             }
         });
     }

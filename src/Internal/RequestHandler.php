@@ -37,7 +37,7 @@ final class RequestHandler implements RequestHandlerInterface
         $params = $request->getAttribute(Router::class);
         $promise = call($this->closure, $params, $request, $this->container);
 
-        if (!is_null($this->responseTransformer)) {
+        if (!\is_null($this->responseTransformer)) {
             $promise = $this->responseTransformer->transform($promise);
         }
 

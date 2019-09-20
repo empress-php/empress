@@ -2,11 +2,11 @@
 
 namespace Empress\Routing;
 
-use Empress\Internal\RequestHandler;
-
 use Amp\File\Driver;
+
 use Amp\Http\Server\Router;
 use Amp\Http\Server\StaticContent\DocumentRoot;
+use Empress\Internal\RequestHandler;
 use Empress\ResponseTransformerInterface;
 use Psr\Container\ContainerInterface;
 
@@ -72,7 +72,7 @@ class RouterBuilder
 
     private function registerCallableHandler(string $verb, string $uri, $handler, Router $router, ResponseTransformerInterface $reponseTransformer = null): void
     {
-        if (is_array($handler) && $router !== $this->mainRouter) {
+        if (\is_array($handler) && $router !== $this->mainRouter) {
             [$class, $method] = $handler;
             $service = $this->container->get($class);
             $handler = [$service, $method];

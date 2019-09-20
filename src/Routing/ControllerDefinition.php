@@ -2,8 +2,8 @@
 
 namespace Empress\Routing;
 
-use Empress\ResponseTransformerInterface;
 use Empress\Internal\CaseConverter;
+use Empress\ResponseTransformerInterface;
 
 class ControllerDefinition implements TransformableDefinitionInterface
 {
@@ -19,13 +19,13 @@ class ControllerDefinition implements TransformableDefinitionInterface
 
     public function __construct(string $class = '', RouteDefinition ...$routeDefinitions)
     {
-        $classBasename = array_slice(explode('\\', $class), -1)[0];
+        $classBasename = \array_slice(\explode('\\', $class), -1)[0];
 
-        if ($class !== '' && !preg_match('/Controller$/', $classBasename)) {
-            throw new \InvalidArgumentException(sprintf('Wrong class name: "%s"', $classBasename));
+        if ($class !== '' && !\preg_match('/Controller$/', $classBasename)) {
+            throw new \InvalidArgumentException(\sprintf('Wrong class name: "%s"', $classBasename));
         }
 
-        $bareName = preg_split('/Controller$/', $classBasename)[0];
+        $bareName = \preg_split('/Controller$/', $classBasename)[0];
         $converter = new CaseConverter($bareName);
 
         $this->routerPrefix = $class ? $converter->kebabCasify() : '';

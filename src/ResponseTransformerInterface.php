@@ -10,7 +10,7 @@ interface ResponseTransformerInterface
 
     /**
      * Takes a value and transforms it into a promise that will
-     * eventually resolve to a response
+     * eventually resolve to a response.
      *
      * @param \Amp\Promise<\Amp\Http\Server\Response> $promise
      * @return \Amp\Promise<\Amp\Http\Server\Response>
