@@ -42,7 +42,7 @@ class ControllerDefinition implements TransformableDefinitionInterface
         return $this->routeDefinitions;
     }
 
-    public function getResponseTransformer(): ResponseTransformerInterface
+    public function getResponseTransformer(): ?ResponseTransformerInterface
     {
         return $this->responseTransformer;
     }

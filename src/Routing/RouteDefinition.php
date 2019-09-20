@@ -42,7 +42,7 @@ class RouteDefinition implements TransformableDefinitionInterface
     }
 
     /** @inheritDoc */
-    public function getResponseTransformer(): ResponseTransformerInterface
+    public function getResponseTransformer(): ?ResponseTransformerInterface
     {
         return $this->reponseTransformer;
     }

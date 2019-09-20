@@ -13,9 +13,9 @@ interface TransformableDefinitionInterface
     /**
      * Get a response tranformer associated with this instance
      *
-     * @return \Empress\Routing\ResponseTransformerInterface
+     * @return \Empress\Routing\ResponseTransformerInterface|null
      */
-    public function getResponseTransformer(): ResponseTransformerInterface;
+    public function getResponseTransformer(): ?ResponseTransformerInterface;
 
     /**
      * Register a response transformer on this instance
