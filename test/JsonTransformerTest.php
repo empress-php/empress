@@ -2,8 +2,8 @@
 
 namespace Empress\Test;
 
-use Amp\Success;
 use Amp\PHPUnit\AsyncTestCase;
+use Amp\Success;
 use Empress\JsonTransformer;
 
 class JsonTransformerTest extends AsyncTestCase
@@ -26,6 +26,6 @@ class JsonTransformerTest extends AsyncTestCase
         /** @var \Amp\Http\Server\Response $transformed */
         $transformed = yield $responseTransformer->transform($array);
 
-        $this->assertEquals(json_encode(['status' => 'ok']), yield $transformed->getBody()->read());
+        $this->assertEquals(\json_encode(['status' => 'ok']), yield $transformed->getBody()->read());
     }
 }

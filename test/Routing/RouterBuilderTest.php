@@ -4,17 +4,15 @@ namespace Empress\Test\Routing;
 
 use Amp\Http\Server\Driver\Client;
 use Amp\Http\Server\Request;
-use Amp\Http\Server\Router;
 use Amp\Http\Server\Response;
-use Amp\Http\Status;
+use Amp\Http\Server\Router;
 use Amp\Http\Server\Server;
-use Amp\MultiReasonException;
+use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Routing\RouterBuilder;
 use League\Uri\Http;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-
 use function Amp\Socket\listen;
 use function Empress\Routing\controller;
 use function Empress\Routing\route;
@@ -39,8 +37,7 @@ class RouterBuilderTest extends AsyncTestCase
 
     public function testArrayHandler()
     {
-        $controller = new class
-        {
+        $controller = new class {
             public function index()
             {
                 return new Response(Status::OK, [], 'Hello, World!');

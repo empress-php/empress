@@ -52,7 +52,7 @@ class RequestHandlerTest extends AsyncTestCase
         /** @var \Amp\Http\Server\Response $response */
         $response = yield $handler->handleRequest($request);
 
-        $this->assertEquals(json_encode(['status' => 'ok']), yield $response->getBody()->read());
+        $this->assertEquals(\json_encode(['status' => 'ok']), yield $response->getBody()->read());
     }
 
     public function testHandlerWithRequestParams()
