@@ -21,7 +21,7 @@ class ControllerDefinition implements TransformableDefinitionInterface
     {
         $classBasename = array_slice(explode('\\', $class), -1)[0];
 
-        if (!preg_match('/Controller$/', $classBasename)) {
+        if ($class !== '' && !preg_match('/Controller$/', $classBasename)) {
             throw new \InvalidArgumentException(sprintf('Wrong class name: "%s"', $classBasename));
         }
 
