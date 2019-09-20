@@ -12,5 +12,12 @@ matrix:
     - php: nightly
   fast_finish: true
 
+cache:
+  directories:
+    - $HOME/.php-cs-fixer
+
 install:
   - composer update -n --prefer-dist
+
+script:
+  - vendor/bin/php-cs-fixer fix --config=.php_cs.dist --verbose --diff --dry-run
