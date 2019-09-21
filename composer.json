@@ -17,10 +17,7 @@
     "autoload": {
         "psr-4": {
             "Empress\\": "src/"
-        },
-        "files": [
-            "src/Routing/functions.php"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {
