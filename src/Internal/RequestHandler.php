@@ -16,17 +16,13 @@ final class RequestHandler implements RequestHandlerInterface
     /** @var \Closure */
     private $closure;
 
-    /** @var Psr\Container\ContainerInterface|null */
-    private $container;
-
     /** @var \Empress\ResponseTransformerInterface|null */
     private $responseTransformer;
 
-    public function __construct(\Closure $closure, ResponseTransformerInterface $responseTransformer = null, ContainerInterface $container = null)
+    public function __construct(\Closure $closure, ResponseTransformerInterface $responseTransformer = null)
     {
         $this->closure = $closure;
         $this->responseTransformer = $responseTransformer;
-        $this->container = $container;
     }
 
     /**
@@ -35,7 +31,7 @@ final class RequestHandler implements RequestHandlerInterface
     public function handleRequest(Request $request): Promise
     {
         $params = $request->getAttribute(Router::class);
-        $promise = call($this->closure, $params, $request, $this->container);
+        $promise = call($this->closure, $params, $request);
 
         if (!\is_null($this->responseTransformer)) {
             $promise = $this->responseTransformer->transform($promise);
