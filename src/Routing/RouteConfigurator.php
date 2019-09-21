@@ -61,7 +61,7 @@ class RouteConfigurator
     {
         $newSelf = new self($this->currentPrefix . $prefix, $responseTransformer ?? $this->currentResponseTransformer);
         $closure($newSelf);
-        $this->routes = array_merge($this->routes, $newSelf->getRoutes());
+        $this->routes = \array_merge($this->routes, $newSelf->getRoutes());
     }
 
     public function getRoutes(): array

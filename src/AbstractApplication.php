@@ -10,7 +10,6 @@ use Amp\Log\ConsoleFormatter;
 use Amp\Promise;
 use Amp\Success;
 use Empress\Routing\RouteConfigurator;
-use Empress\Routing\RoutesTrait;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -21,7 +20,7 @@ abstract class AbstractApplication implements ServerObserver
 
     /** @var \Amp\Http\Server\Middleware[] */
     private $middlewares = [];
-    
+
     abstract public function configureRoutes(RouteConfigurator $configurator): void;
 
     public function addMiddleware(Middleware $middleware): void

@@ -7,7 +7,6 @@ use Amp\Http\Server\RequestHandler as RequestHandlerInterface;
 use Amp\Http\Server\Router;
 use Amp\Promise;
 use Empress\ResponseTransformerInterface;
-use Psr\Container\ContainerInterface;
 
 use function Amp\call;
 
