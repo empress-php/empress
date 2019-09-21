@@ -32,7 +32,6 @@ class RouterBuilder
             $acc->merge($router);
         }
 
-        \dump($routers);
         return $acc;
     }
 
