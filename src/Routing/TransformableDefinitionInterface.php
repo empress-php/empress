@@ -23,5 +23,5 @@ interface TransformableDefinitionInterface
      * @param \Empress\ResponseTransformerInterface $responseTransformer
      * @return void
      */
-    public function setResponseTransformer(ResponseTransformerInterface $responseTransformer): void;
+    public function setResponseTransformer(?ResponseTransformerInterface $responseTransformer): void;
 }
