@@ -2,6 +2,7 @@
 
 namespace Empress\Test\Routing;
 
+use Empress\ResponseTransformerInterface;
 use Empress\Routing\RouteDefinition;
 use PHPUnit\Framework\TestCase;
 
@@ -12,5 +13,14 @@ class RouteDefinitionTest extends TestCase
         $route = new RouteDefinition('post', '/', 'someHandler');
 
         $this->assertEquals('POST', $route->getVerb());
+    }
+
+    public function testResponseTransformerIsSet()
+    {
+        $route = new RouteDefinition('', '', '');
+        $responseTransformer = $this->createMock(ResponseTransformerInterface::class);
+        $route->setResponseTransformer($responseTransformer);
+
+        $this->assertEquals($responseTransformer, $route->getResponseTransformer());
     }
 }
