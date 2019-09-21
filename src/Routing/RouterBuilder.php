@@ -2,13 +2,11 @@
 
 namespace Empress\Routing;
 
-use Amp\File\Driver;
-
+use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Router;
-use Amp\Http\Server\StaticContent\DocumentRoot;
-use Empress\Internal\RequestHandler;
+use Empress\Exception\RouterBuilderException;
+use Empress\Internal\RequestHandler as EmpressRequestHandler;
 use Empress\ResponseTransformerInterface;
-use Psr\Container\ContainerInterface;
 
 class RouterBuilder
 {
@@ -16,73 +14,59 @@ class RouterBuilder
     /** @var \Amp\Http\Server\Router[] */
     private $routers = [];
 
-    /** @var \Psr\Container\ContainerInterface */
-    private $container;
+    /** @var \Empress\Routing\RouteConfigurator */
+    private $routeConfigurator;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(RouteConfigurator $routeConfigurator)
     {
-        $this->container = $container;
-        $this->mainRouter = new Router();
+        $this->routeConfigurator = $routeConfigurator;
+        $this->buildRoutes();
     }
 
-    public function routes(ControllerDefinition ...$controllerDefinitions): void
+    public function getRouter(): Router
     {
-        foreach ($controllerDefinitions as $controllerDefinition) {
-            if (($prefix = $controllerDefinition->getRouterPrefix()) !== '') {
-                $router = new Router();
-                $router->prefix($prefix);
-            } else {
-                $router = $this->mainRouter;
-            }
+        $routers = $this->routers;
+        $acc = new Router();
 
-            $controllerResponseTransformer = $controllerDefinition->getResponseTransformer();
+        foreach ($routers as $router) {
+            $acc->merge($router);
+        }
 
-            /** @var \Empress\Routing\RouteDefinition $routeDefinition */
-            foreach ($controllerDefinition->getRouteDefinitions() as $routeDefinition) {
-                $responseTransformer = $controllerResponseTransformer ?? $routeDefinition->getResponseTransformer();
-                $this->registerCallableHandler(
-                    $routeDefinition->getVerb(),
-                    $routeDefinition->getUri(),
-                    $routeDefinition->getHandler(),
+        \dump($routers);
+        return $acc;
+    }
+
+    private function buildRoutes(): void
+    {
+        $routes = $this->routeConfigurator->getRoutes();
+
+        foreach ($routes as $prefix => $definitions) {
+            $router = new Router;
+            $router->prefix($prefix);
+            $this->routers[] = $router;
+
+            /** @var \Empress\Routing\RouteDefinition $definition */
+            foreach ($definitions as $definition) {
+                $this->registerHandler(
+                    $definition->getVerb(),
+                    $definition->getUri(),
+                    $definition->getHandler(),
                     $router,
-                    $responseTransformer
+                    $definition->getResponseTransformer()
                 );
             }
         }
     }
 
-    public function serveStaticContent(string $root, Driver $filesystem = null): self
+    private function registerHandler(string $verb, string $uri, $handler, Router $router, ResponseTransformerInterface $reponseTransformer = null): void
     {
-        $documentRoot = new DocumentRoot($root, $filesystem);
-        $this->mainRouter->setFallback($documentRoot);
-
-        return $this;
-    }
-
-    public function getRouter(): Router
-    {
-        $mergedRouter = clone $this->mainRouter;
-
-        foreach ($this->routers as $router) {
-            $mergedRouter->merge($router);
+        if (\is_callable($handler)) {
+            $closure = ($handler instanceof \Closure) ? $handler : \Closure::fromCallable($handler);
+            $router->addRoute($verb, $uri, new EmpressRequestHandler($closure, $reponseTransformer));
+        } elseif ($handler instanceof RequestHandler) {
+            $router->addRoute($verb, $uri, $handler);
+        } else {
+            throw new RouterBuilderException('Invalid handler type');
         }
-
-        return $mergedRouter;
-    }
-
-    private function registerCallableHandler(string $verb, string $uri, $handler, Router $router, ResponseTransformerInterface $reponseTransformer = null): void
-    {
-        if (\is_array($handler) && $router !== $this->mainRouter) {
-            [$class, $method] = $handler;
-            $service = $this->container->get($class);
-            $handler = [$service, $method];
-            $closure = \Closure::fromCallable($handler);
-            $router->addRoute($verb, $uri, new RequestHandler($closure, $reponseTransformer));
-
-            return;
-        }
-
-        $closure = \Closure::fromCallable($handler);
-        $router->addRoute($verb, $uri, new RequestHandler($closure, $reponseTransformer, $this->container));
     }
 }

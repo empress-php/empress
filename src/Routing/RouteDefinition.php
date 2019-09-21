@@ -21,7 +21,7 @@ class RouteDefinition implements TransformableDefinitionInterface
 
     public function __construct(string $verb, string $uri, $handler)
     {
-        $this->verb = $verb;
+        $this->verb = \strtoupper($verb);
         $this->uri = $uri;
         $this->handler = $handler;
     }
@@ -48,7 +48,7 @@ class RouteDefinition implements TransformableDefinitionInterface
     }
 
     /** @inheritDoc */
-    public function setResponseTransformer(ResponseTransformerInterface $reponseTransformer): void
+    public function setResponseTransformer(?ResponseTransformerInterface $reponseTransformer): void
     {
         $this->reponseTransformer = $reponseTransformer;
     }

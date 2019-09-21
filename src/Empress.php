@@ -2,68 +2,41 @@
 
 namespace Empress;
 
-use Amp\Http\Server\Middleware;
-use Amp\Http\Server\Options;
 use Amp\Http\Server\Server;
-use Amp\Log\ConsoleFormatter;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
+use Empress\Routing\RouteConfigurator;
 use Empress\Routing\RouterBuilder;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
-use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
-use function Amp\ByteStream\getStdout;
 use function Amp\call;
 use function Amp\Http\Server\Middleware\stack;
 
 class Empress
 {
-    /** @var \Psr\Container\ContainerInterface */
-    private $container;
-
     /** @var \Amp\Http\Server\Server */
     private $server;
 
-    /** @var \Amp\Http\Server\Middleware[] */
-    private $middlewares = [];
-
-    /** @var \Amp\Http\Server\Options */
-    private $options;
-
-    /** @var \Empress\Routing\RouterBuilder */
-    private $routerBuilder;
+    /** @var \Empress\AbstractApplication */
+    private $application;
 
     /**
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Empress\AbstractApplication $application
      * @param int $port
      */
-    public function __construct(
-        ContainerInterface $container,
-        int $port = 1337
-    ) {
-        $this->container = $container;
-        $this->routerBuilder = new RouterBuilder($container);
+    public function __construct(AbstractApplication $application, int $port = 1337)
+    {
+        $this->application = $application;
         $this->port = $port;
-        $this->options = new Options;
     }
 
-    public function run(): Promise
+    public function boot(): Promise
     {
         $this->initializeServer();
 
         $closure = \Closure::fromCallable([$this->server, 'start']);
         return $this->handleMultiReasonException($closure, StartupException::class);
-    }
-
-    public function addMiddleware(Middleware $middleware)
-    {
-        $this->middlewares[] = $middleware;
-
-        return $this;
     }
 
     public function shutDown(): Promise
@@ -72,32 +45,34 @@ class Empress
         return $this->handleMultiReasonException($closure, ShutdownException::class);
     }
 
-    public function getRouterBuilder(): RouterBuilder
-    {
-        return $this->routerBuilder;
-    }
-
     private function initializeServer(): void
     {
-        $logger = $this->container->has(LoggerInterface::class) ?
-            $this->container->get(LoggerInterface::class) : $this->getDefaultLogger();
+        $routeConfigurator = new RouteConfigurator;
+        $this->application->configureRoutes($routeConfigurator);
+
+        $routerBuilder = new RouterBuilder($routeConfigurator);
+        $router = $routerBuilder->getRouter();
+
+        $middlewares = $this->application->getMiddlewares();
+        $logger = $this->application->getLogger();
+        $options = $this->application->getOptions();
 
         $sockets = [
             Socket\listen('0.0.0.0:' . $this->port),
             Socket\listen('[::]:' . $this->port),
         ];
 
-        $router = $this->getRouterBuilder()->getRouter();
-
         $this->server = new Server(
             $sockets,
             stack(
                 $router,
-                ...$this->middlewares
+                ...$middlewares
             ),
             $logger,
-            $this->options
+            $options
         );
+
+        $this->server->attach($this->application);
     }
 
     private function handleMultiReasonException(\Closure $closure, string $exceptionClass = \Exception::class): Promise
@@ -120,15 +95,5 @@ class Empress
                 throw new $exceptionClass(\implode(PHP_EOL, $messages));
             }
         });
-    }
-
-    private function getDefaultLogger(): Logger
-    {
-        $logHandler = new StreamHandler(getStdout()->getResource());
-        $logHandler->setFormatter(new ConsoleFormatter);
-        $logger = new Logger('Empress');
-        $logger->pushHandler($logHandler);
-
-        return $logger;
     }
 }
