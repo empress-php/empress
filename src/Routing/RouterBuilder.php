@@ -4,7 +4,6 @@ namespace Empress\Routing;
 
 use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Router;
-use Empress\Exception\RouterBuilderException;
 use Empress\Internal\RequestHandler as EmpressRequestHandler;
 use Empress\ResponseTransformerInterface;
 
@@ -25,7 +24,7 @@ class RouterBuilder
 
     public function getRouter(): Router
     {
-        if (count($this->routers) === 1) {
+        if (\count($this->routers) === 1) {
             return clone $this->routers[0];
         }
 

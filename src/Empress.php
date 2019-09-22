@@ -2,13 +2,10 @@
 
 namespace Empress;
 
-use Amp\Http\Server\Driver\Http2Driver;
 use Amp\Http\Server\Server;
-use Amp\Loop\DriverFactory;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
-use Amp\Socket\ServerTlsContext;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
 use Empress\Routing\RouteConfigurator;

@@ -4,7 +4,6 @@ namespace Empress\Test\Routing;
 
 use Empress\Routing\RouteConfigurator;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 
 class RouteConfiguratorTest extends TestCase
 {
@@ -77,7 +76,7 @@ class RouteConfiguratorTest extends TestCase
     public function testClosureArgumentIsNotSelf()
     {
         $configurator = new RouteConfigurator();
-        $configurator->prefix('/prefix1', function ($c) use(&$configurator) {
+        $configurator->prefix('/prefix1', function ($c) use (&$configurator) {
             $this->assertNotSame($configurator, $c);
         });
 

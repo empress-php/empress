@@ -5,13 +5,10 @@ namespace Empress\Internal;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler as RequestHandlerInterface;
 use Amp\Http\Server\Router;
-use Amp\Http\Server\Session\Session;
-use Amp\Http\Server\Session\SessionMiddleware;
 use Amp\Promise;
 use Empress\ResponseTransformerInterface;
 
 use function Amp\call;
-use function Amp\Promise\wait;
 
 final class RequestHandler implements RequestHandlerInterface
 {

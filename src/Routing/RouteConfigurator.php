@@ -2,11 +2,8 @@
 
 namespace Empress\Routing;
 
-use Amp\Http\Server\RequestHandler\RedirectHandler;
-use Amp\Http\Server\Response;
 use Amp\Http\Status;
 use Empress\ResponseTransformerInterface;
-use League\Uri\Http;
 
 use function Amp\Http\Server\redirectTo;
 

@@ -5,7 +5,6 @@ namespace Empress\Test\Routing;
 use Amp\Http\Server\Driver\Client;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler;
-use Amp\Http\Server\Router;
 use Amp\Http\Server\Server;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
@@ -45,7 +44,7 @@ class RouterBuilderTest extends AsyncTestCase
 
         $request = new Request($this->createMock(Client::class), 'GET', Http::createFromString('/hello'));
         $response = yield $router->handleRequest($request);
-        
+
         $this->assertEquals(Status::OK, $response->getStatus());
 
         $request = new Request($this->createMock(Client::class), 'GET', Http::createFromString('/world'));
