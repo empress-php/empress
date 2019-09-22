@@ -2,7 +2,13 @@
 
 namespace Empress\Routing;
 
+use Amp\Http\Server\RequestHandler\RedirectHandler;
+use Amp\Http\Server\Response;
+use Amp\Http\Status;
 use Empress\ResponseTransformerInterface;
+use League\Uri\Http;
+
+use function Amp\Http\Server\redirectTo;
 
 class RouteConfigurator
 {
@@ -22,39 +28,60 @@ class RouteConfigurator
         $this->currentResponseTransformer = $responseTransformer;
     }
 
-    public function get(string $uri, $handler, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function get(...$args): self
     {
-        $this->route('GET', $uri, $handler, $responseTransformer);
+        $this->route('GET', ...$args);
+
+        return $this;
     }
 
-    public function post(string $uri, $handler, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function post(...$args): self
     {
-        $this->route('POST', $uri, $handler, $responseTransformer);
+        $this->route('POST', ...$args);
+
+        return $this;
     }
 
-    public function put(string $uri, $handler, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function put(...$args): self
     {
-        $this->route('PUT', $uri, $handler, $responseTransformer);
+        $this->route('PUT', ...$args);
+
+        return $this;
     }
 
-    public function patch(string $uri, $handler, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function patch(...$args): self
     {
-        $this->route('PATCH', $uri, $handler, $responseTransformer);
+        $this->route('PATCH', ...$args);
+
+        return $this;
     }
 
-    public function head(string $uri, $handler, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function head(...$args): self
     {
-        $this->route('HEAD', $uri, $handler, $responseTransformer);
+        $this->route('HEAD', ...$args);
+
+        return $this;
     }
 
-    public function options(string $uri, $handler, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function options(...$args): self
     {
-        $this->route('OPTIONS', $uri, $handler, $responseTransformer);
+        $this->route('OPTIONS', ...$args);
+
+        return $this;
     }
 
-    public function delete(string $uri, $handler, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function delete(...$args): self
     {
-        $this->route('DELETE', $uri, $handler, $responseTransformer);
+        $this->route('DELETE', ...$args);
+
+        return $this;
+    }
+
+    public function redirectTo(string $targetUri, int $statusCode = Status::FOUND): \Closure
+    {
+        return function () use ($targetUri, $statusCode) {
+            return redirectTo($targetUri, $statusCode);
+        };
     }
 
     public function prefix(string $prefix, \Closure $closure, ?ResponseTransformerInterface $responseTransformer = null): void
