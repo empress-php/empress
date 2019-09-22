@@ -59,13 +59,12 @@ class RouterBuilder
 
     private function registerHandler(string $verb, string $uri, $handler, Router $router, ResponseTransformerInterface $reponseTransformer = null): void
     {
-        if (\is_callable($handler)) {
-            $closure = ($handler instanceof \Closure) ? $handler : \Closure::fromCallable($handler);
-            $router->addRoute($verb, $uri, new EmpressRequestHandler($closure, $reponseTransformer));
-        } elseif ($handler instanceof RequestHandler) {
+        if ($handler instanceof RequestHandler) {
             $router->addRoute($verb, $uri, $handler);
-        } else {
-            throw new RouterBuilderException('Invalid handler type');
+
+            return;
         }
+
+        $router->addRoute($verb, $uri, new EmpressRequestHandler($handler, $reponseTransformer));
     }
 }
