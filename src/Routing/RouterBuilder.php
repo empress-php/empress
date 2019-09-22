@@ -25,6 +25,10 @@ class RouterBuilder
 
     public function getRouter(): Router
     {
+        if (count($this->routers) === 1) {
+            return clone $this->routers[0];
+        }
+
         $routers = $this->routers;
         $acc = new Router();
 
