@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "000fb41e6e4d429fefd887324c3617cc",
+    "content-hash": "697cbd6c3c0b4ad59dd28f7be18296d3",
     "packages": [
         {
             "name": "amphp/amp",
@@ -645,6 +645,64 @@
             "time": "2019-08-21T15:51:20+00:00"
         },
         {
+            "name": "amphp/http-server-session",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/amphp/http-server-session.git",
+                "reference": "569693913da3d80e33c78927f55dc33eb29bf193"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/amphp/http-server-session/zipball/569693913da3d80e33c78927f55dc33eb29bf193",
+                "reference": "569693913da3d80e33c78927f55dc33eb29bf193",
+                "shasum": ""
+            },
+            "require": {
+                "amphp/amp": "^2",
+                "amphp/cache": "^1",
+                "amphp/http-server": "^2 || ^1 || ^0.8",
+                "amphp/redis": "^0.3.3, !=0.3.4",
+                "amphp/sync": "^1",
+                "kelunik/redis-mutex": "^0.2",
+                "paragonie/constant_time_encoding": "^2.2",
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "amphp/http": "^1",
+                "amphp/php-cs-fixer-config": "dev-master",
+                "amphp/phpunit-util": "^1",
+                "phpunit/phpunit": "^6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Amp\\Http\\Server\\Session\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Aaron Piotrowski",
+                    "email": "aaron@trowski.com"
+                },
+                {
+                    "name": "Bob Weinand",
+                    "email": "bobwei9@hotmail.com"
+                },
+                {
+                    "name": "Niklas Keller",
+                    "email": "me@kelunik.com"
+                }
+            ],
+            "description": "Session management for Amp's HTTP server.",
+            "homepage": "https://github.com/amphp/http-server-session",
+            "time": "2019-08-21T17:04:30+00:00"
+        },
+        {
             "name": "amphp/http-server-static-content",
             "version": "v1.0.5",
             "source": {
@@ -943,6 +1001,58 @@
             "time": "2019-02-26T16:33:03+00:00"
         },
         {
+            "name": "amphp/redis",
+            "version": "v0.3.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/amphp/redis.git",
+                "reference": "5f62ce215c257c35adaec80f32ccd6da4da9927f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/amphp/redis/zipball/5f62ce215c257c35adaec80f32ccd6da4da9927f",
+                "reference": "5f62ce215c257c35adaec80f32ccd6da4da9927f",
+                "shasum": ""
+            },
+            "require": {
+                "amphp/amp": "^2",
+                "amphp/cache": "^1",
+                "amphp/socket": "^0.10",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "amphp/php-cs-fixer-config": "dev-master",
+                "amphp/phpunit-util": "^1",
+                "phpunit/phpunit": "^6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Amp\\Redis\\": "lib"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Niklas Keller",
+                    "email": "me@kelunik.com"
+                }
+            ],
+            "description": "A non-blocking Redis client for Amp.",
+            "homepage": "https://github.com/amphp/redis",
+            "keywords": [
+                "amp",
+                "amphp",
+                "async",
+                "client",
+                "redis"
+            ],
+            "time": "2019-06-05T21:46:12+00:00"
+        },
+        {
             "name": "amphp/socket",
             "version": "v0.10.12",
             "source": {
@@ -1230,6 +1340,45 @@
                 "dns"
             ],
             "time": "2018-01-10T15:56:17+00:00"
+        },
+        {
+            "name": "kelunik/redis-mutex",
+            "version": "v0.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kelunik/redis-mutex.git",
+                "reference": "c1f0cbbdf545a010d618b7f84e0e3b169f5c2125"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kelunik/redis-mutex/zipball/c1f0cbbdf545a010d618b7f84e0e3b169f5c2125",
+                "reference": "c1f0cbbdf545a010d618b7f84e0e3b169f5c2125",
+                "shasum": ""
+            },
+            "require": {
+                "amphp/redis": "^0.3"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.3",
+                "phpunit/phpunit": "^6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Kelunik\\RedisMutex\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Niklas Keller",
+                    "email": "me@kelunik.com"
+                }
+            ],
+            "time": "2019-01-20T21:25:08+00:00"
         },
         {
             "name": "league/uri-interfaces",
@@ -1546,6 +1695,68 @@
                 "routing"
             ],
             "time": "2018-02-13T20:26:39+00:00"
+        },
+        {
+            "name": "paragonie/constant_time_encoding",
+            "version": "v2.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/paragonie/constant_time_encoding.git",
+                "reference": "55af0dc01992b4d0da7f6372e2eac097bbbaffdb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/paragonie/constant_time_encoding/zipball/55af0dc01992b4d0da7f6372e2eac097bbbaffdb",
+                "reference": "55af0dc01992b4d0da7f6372e2eac097bbbaffdb",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6|^7",
+                "vimeo/psalm": "^1|^2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ParagonIE\\ConstantTime\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Paragon Initiative Enterprises",
+                    "email": "security@paragonie.com",
+                    "homepage": "https://paragonie.com",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Steve 'Sc00bz' Thomas",
+                    "email": "steve@tobtu.com",
+                    "homepage": "https://www.tobtu.com",
+                    "role": "Original Developer"
+                }
+            ],
+            "description": "Constant-time Implementations of RFC 4648 Encoding (Base-64, Base-32, Base-16)",
+            "keywords": [
+                "base16",
+                "base32",
+                "base32_decode",
+                "base32_encode",
+                "base64",
+                "base64_decode",
+                "base64_encode",
+                "bin2hex",
+                "encoding",
+                "hex",
+                "hex2bin",
+                "rfc4648"
+            ],
+            "time": "2019-01-03T20:26:31+00:00"
         },
         {
             "name": "psr/container",

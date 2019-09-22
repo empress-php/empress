@@ -12,7 +12,8 @@
         "amphp/file": "^0.3.5",
         "amphp/http-server-form-parser": "^1.1",
         "amphp/http-server-static-content": "^1.0",
-        "symfony/polyfill-php73": "^1.12"
+        "symfony/polyfill-php73": "^1.12",
+        "amphp/http-server-session": "^1.0"
     },
     "autoload": {
         "psr-4": {
