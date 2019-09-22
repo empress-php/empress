@@ -2,10 +2,13 @@
 
 namespace Empress;
 
+use Amp\Http\Server\Driver\Http2Driver;
 use Amp\Http\Server\Server;
+use Amp\Loop\DriverFactory;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
+use Amp\Socket\ServerTlsContext;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
 use Empress\Routing\RouteConfigurator;
@@ -53,9 +56,12 @@ class Empress
         $routerBuilder = new RouterBuilder($routeConfigurator);
         $router = $routerBuilder->getRouter();
 
-        $middlewares = $this->application->getMiddlewares();
-        $logger = $this->application->getLogger();
-        $options = $this->application->getOptions();
+        $applicationConfigurator = new ApplicationConfigurator;
+        $this->application->configureApplication($applicationConfigurator);
+
+        $middlewares = $applicationConfigurator->getMiddlewares();
+        $logger = $applicationConfigurator->getLogger();
+        $options = $applicationConfigurator->getServerOptions();
 
         $sockets = [
             Socket\listen('0.0.0.0:' . $this->port),
