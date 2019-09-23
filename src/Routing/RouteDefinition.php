@@ -5,7 +5,7 @@ namespace Empress\Routing;
 use Empress\ResponseTransformerInterface;
 
 /**
- * Defines a single route
+ * Defines a single route.
  */
 class RouteDefinition implements TransformableDefinitionInterface
 {
@@ -35,7 +35,7 @@ class RouteDefinition implements TransformableDefinitionInterface
     }
 
     /**
-     * Get the HTTP verb for the route
+     * Get the HTTP verb for the route.
      *
      * @return string
      */
@@ -45,7 +45,7 @@ class RouteDefinition implements TransformableDefinitionInterface
     }
 
     /**
-     * Gets the URI for the route
+     * Gets the URI for the route.
      *
      * @return string
      */
@@ -55,7 +55,7 @@ class RouteDefinition implements TransformableDefinitionInterface
     }
 
     /**
-     * Gets the request handler associated with this route
+     * Gets the request handler associated with this route.
      *
      * @return void
      */

@@ -8,7 +8,7 @@ use Empress\Internal\RequestHandler as EmpressRequestHandler;
 use Empress\ResponseTransformerInterface;
 
 /**
- * Transforms route definitions into one final router
+ * Transforms route definitions into one final router.
  */
 class RouterBuilder
 {
@@ -29,7 +29,7 @@ class RouterBuilder
     }
 
     /**
-     * Gets the assembled router
+     * Gets the assembled router.
      *
      * @return \Amp\Http\Server\Router
      */
