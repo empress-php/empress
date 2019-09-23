@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/jakobmats/empress.svg?branch=master)](https://travis-ci.com/jakobmats/empress)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Work in progress ⚡
 
