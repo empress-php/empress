@@ -8,11 +8,17 @@ use Amp\Promise;
 use Amp\Success;
 use Empress\Routing\RouteConfigurator;
 
+/**
+ * Defines an application object that will be run against http-server.
+ * Since it implements the ServerObserver interface it has two
+ * lifecycle methods - onStart() and onStop() that can be used
+ * when the application is booted and shut down respectively.
+ */
 abstract class AbstractApplication implements ServerObserver
 {
 
     /**
-     * Define routes for the application.
+     * Defines routes for the application.
      *
      * @param \Empress\Routing\RouteConfigurator $configurator
      * @return void
@@ -20,7 +26,7 @@ abstract class AbstractApplication implements ServerObserver
     abstract public function configureRoutes(RouteConfigurator $configurator): void;
 
     /**
-     * Configure the application instance before the server starts.
+     * Configures the application instance before the server starts.
      *
      * @param \Empress\ApplicationConfigurator $configurator
      * @return void

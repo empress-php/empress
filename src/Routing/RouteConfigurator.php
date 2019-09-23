@@ -7,6 +7,9 @@ use Empress\ResponseTransformerInterface;
 
 use function Amp\Http\Server\redirectTo;
 
+/**
+ * Configures application routes.
+ */
 class RouteConfigurator
 {
     /** @var array */
@@ -19,12 +22,22 @@ class RouteConfigurator
     private $currentResponseTransformer;
 
 
+    /**
+     * @param string $prefix
+     * @param \Empress\ResponseTransformerInterface|null $responseTransformer
+     */
     public function __construct(string $prefix = '', ?ResponseTransformerInterface $responseTransformer = null)
     {
         $this->currentPrefix = $prefix;
         $this->currentResponseTransformer = $responseTransformer;
     }
 
+    /**
+     * Defines a GET route.
+     *
+     * @param mixed ...$args
+     * @return self
+     */
     public function get(...$args): self
     {
         $this->route('GET', ...$args);
@@ -32,6 +45,12 @@ class RouteConfigurator
         return $this;
     }
 
+    /**
+     * Defines a POST route.
+     *
+     * @param mixed ...$args
+     * @return self
+     */
     public function post(...$args): self
     {
         $this->route('POST', ...$args);
@@ -39,6 +58,12 @@ class RouteConfigurator
         return $this;
     }
 
+    /**
+     * Defines a PUT route.
+     *
+     * @param mixed ...$args
+     * @return self
+     */
     public function put(...$args): self
     {
         $this->route('PUT', ...$args);
@@ -46,6 +71,12 @@ class RouteConfigurator
         return $this;
     }
 
+    /**
+     * Defines a PATCH route.
+     *
+     * @param mixed ...$args
+     * @return self
+     */
     public function patch(...$args): self
     {
         $this->route('PATCH', ...$args);
@@ -53,6 +84,12 @@ class RouteConfigurator
         return $this;
     }
 
+    /**
+     * Defines a HEAD route.
+     *
+     * @param mixed ...$args
+     * @return self
+     */
     public function head(...$args): self
     {
         $this->route('HEAD', ...$args);
@@ -60,6 +97,12 @@ class RouteConfigurator
         return $this;
     }
 
+    /**
+     * Defines an OPTION route.
+     *
+     * @param mixed ...$args
+     * @return self
+     */
     public function options(...$args): self
     {
         $this->route('OPTIONS', ...$args);
@@ -67,6 +110,12 @@ class RouteConfigurator
         return $this;
     }
 
+    /**
+     * Defines a DELETE route.
+     *
+     * @param mixed ...$args
+     * @return self
+     */
     public function delete(...$args): self
     {
         $this->route('DELETE', ...$args);
@@ -74,6 +123,13 @@ class RouteConfigurator
         return $this;
     }
 
+    /**
+     * Creates a handler returning a Response with a specific redirect header.
+     *
+     * @param string $targetUri
+     * @param int $statusCode
+     * @return \Closure
+     */
     public function redirectTo(string $targetUri, int $statusCode = Status::FOUND): \Closure
     {
         return function () use ($targetUri, $statusCode) {
@@ -81,6 +137,15 @@ class RouteConfigurator
         };
     }
 
+    /**
+     * Routes can be prefixed with one or more prefixes.
+     * This allows for grouping routes that logically belong together.
+     *
+     * @param string $prefix
+     * @param \Closure $closure
+     * @param \Empress\ResponseTransformerInterface|null $responseTransformer
+     * @return void
+     */
     public function prefix(string $prefix, \Closure $closure, ?ResponseTransformerInterface $responseTransformer = null): void
     {
         $newSelf = new self($this->currentPrefix . $prefix, $responseTransformer ?? $this->currentResponseTransformer);
@@ -88,6 +153,11 @@ class RouteConfigurator
         $this->routes = \array_merge($this->routes, $newSelf->getRoutes());
     }
 
+    /**
+     * Gets all defined routes.
+     *
+     * @return array
+     */
     public function getRoutes(): array
     {
         return $this->routes;

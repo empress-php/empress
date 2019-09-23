@@ -2,14 +2,13 @@
 
 namespace Empress;
 
-use Amp\Http\Server\Response;
 use Amp\Promise;
 
 interface ResponseTransformerInterface
 {
 
     /**
-     * Takes a value and transforms it into a promise that will
+     * Takes a value wrapped in a promise and transforms it into another promise that will
      * eventually resolve to a response.
      *
      * @param \Amp\Promise<\Amp\Http\Server\Response> $promise

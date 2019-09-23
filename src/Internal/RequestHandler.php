@@ -10,6 +10,10 @@ use Empress\ResponseTransformerInterface;
 
 use function Amp\call;
 
+/**
+ * Empress-tailored request handler that injects the param array
+ * and handles response transformers.
+ */
 final class RequestHandler implements RequestHandlerInterface
 {
     /** @var callable */

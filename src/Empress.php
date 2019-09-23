@@ -21,6 +21,12 @@ class Empress
     /** @var \Empress\AbstractApplication */
     private $application;
 
+    /** @var \Empress\ApplicationConfigurator */
+    private $applicationConfigurator;
+
+    /** @var \Amp\Http\Server\Router */
+    private $router;
+
     /**
      * @param \Empress\AbstractApplication $application
      * @param int $port
@@ -29,36 +35,52 @@ class Empress
     {
         $this->application = $application;
         $this->port = $port;
+        $this->applicationConfigurator = new ApplicationConfigurator;
     }
 
+    /**
+     * Initializes routes and configure the environment for the application
+     * and then runs it on http-server.
+     *
+     * @return \Amp\Promise
+     */
     public function boot(): Promise
     {
+        $this->initializeApplication();
         $this->initializeServer();
 
         $closure = \Closure::fromCallable([$this->server, 'start']);
         return $this->handleMultiReasonException($closure, StartupException::class);
     }
 
+    /**
+     * Stops the server. As the application implements the ServerObserver interface
+     * this will also call the onStop() method on the application instance.
+     *
+     * @return \Amp\Promise
+     */
     public function shutDown(): Promise
     {
         $closure = \Closure::fromCallable([$this->server, 'stop']);
         return $this->handleMultiReasonException($closure, ShutdownException::class);
     }
 
-    private function initializeServer(): void
+    private function initializeApplication()
     {
         $routeConfigurator = new RouteConfigurator;
         $this->application->configureRoutes($routeConfigurator);
 
         $routerBuilder = new RouterBuilder($routeConfigurator);
-        $router = $routerBuilder->getRouter();
+        $this->router = $routerBuilder->getRouter();
 
-        $applicationConfigurator = new ApplicationConfigurator;
-        $this->application->configureApplication($applicationConfigurator);
+        $this->application->configureApplication($this->applicationConfigurator);
+    }
 
-        $middlewares = $applicationConfigurator->getMiddlewares();
-        $logger = $applicationConfigurator->getLogger();
-        $options = $applicationConfigurator->getServerOptions();
+    private function initializeServer(): void
+    {
+        $middlewares = $this->applicationConfigurator->getMiddlewares();
+        $logger = $this->applicationConfigurator->getLogger();
+        $options = $this->applicationConfigurator->getServerOptions();
 
         $sockets = [
             Socket\listen('0.0.0.0:' . $this->port),
@@ -68,7 +90,7 @@ class Empress
         $this->server = new Server(
             $sockets,
             stack(
-                $router,
+                $this->router,
                 ...$middlewares
             ),
             $logger,

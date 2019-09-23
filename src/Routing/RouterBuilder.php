@@ -7,6 +7,9 @@ use Amp\Http\Server\Router;
 use Empress\Internal\RequestHandler as EmpressRequestHandler;
 use Empress\ResponseTransformerInterface;
 
+/**
+ * Transforms route definitions into one final router
+ */
 class RouterBuilder
 {
 
@@ -16,12 +19,20 @@ class RouterBuilder
     /** @var \Empress\Routing\RouteConfigurator */
     private $routeConfigurator;
 
+    /**
+     * @param RouteConfigurator $routeConfigurator
+     */
     public function __construct(RouteConfigurator $routeConfigurator)
     {
         $this->routeConfigurator = $routeConfigurator;
         $this->buildRoutes();
     }
 
+    /**
+     * Gets the assembled router
+     *
+     * @return \Amp\Http\Server\Router
+     */
     public function getRouter(): Router
     {
         if (\count($this->routers) === 1) {

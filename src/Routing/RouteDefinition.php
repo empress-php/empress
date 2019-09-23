@@ -4,6 +4,9 @@ namespace Empress\Routing;
 
 use Empress\ResponseTransformerInterface;
 
+/**
+ * Defines a single route
+ */
 class RouteDefinition implements TransformableDefinitionInterface
 {
 
@@ -19,6 +22,11 @@ class RouteDefinition implements TransformableDefinitionInterface
     /** @var \Empress\ResponseTransformerInterface */
     private $reponseTransformer;
 
+    /**
+     * @param string $verb
+     * @param string $uri
+     * @param mixed $handler
+     */
     public function __construct(string $verb, string $uri, $handler)
     {
         $this->verb = \strtoupper($verb);
@@ -26,16 +34,31 @@ class RouteDefinition implements TransformableDefinitionInterface
         $this->handler = $handler;
     }
 
+    /**
+     * Get the HTTP verb for the route
+     *
+     * @return string
+     */
     public function getVerb(): string
     {
         return $this->verb;
     }
 
+    /**
+     * Gets the URI for the route
+     *
+     * @return string
+     */
     public function getUri(): string
     {
         return $this->uri;
     }
 
+    /**
+     * Gets the request handler associated with this route
+     *
+     * @return void
+     */
     public function getHandler()
     {
         return $this->handler;

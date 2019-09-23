@@ -10,6 +10,10 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use function Amp\ByteStream\getStdout;
 
+/**
+ * Defines the application environment that will be used by http-server.
+ * Logging, server options and middlewares are all registered using this class.
+ */
 class ApplicationConfigurator
 {
 
@@ -22,15 +26,22 @@ class ApplicationConfigurator
     /** @var \Psr\Log\LoggerInterface */
     private $logger;
 
-    public function __construct()
-    {
-    }
-
+    /**
+     * Gets all configured middlewares.
+     *
+     * @return array
+     */
     public function getMiddlewares(): array
     {
         return $this->middlewares;
     }
 
+    /**
+     * Adds a middleware.
+     *
+     * @param \Amp\Http\Server\Middleware $middleware
+     * @return self
+     */
     public function addMiddleware(Middleware $middleware): self
     {
         $this->middlewares[] = $middleware;
@@ -38,7 +49,11 @@ class ApplicationConfigurator
         return $this;
     }
 
-
+    /**
+     * Gets the logger.
+     *
+     * @return \Psr\Log\LoggerInterface
+     */
     public function getLogger(): LoggerInterface
     {
         if (isset($this->logger)) {
@@ -53,6 +68,12 @@ class ApplicationConfigurator
         return $this->logger;
     }
 
+    /**
+     * Sets the logger.
+     *
+     * @param \Psr\Log\LoggerInterface $logger
+     * @return self
+     */
     public function setLogger(LoggerInterface $logger): self
     {
         $this->logger = $logger;
@@ -60,11 +81,22 @@ class ApplicationConfigurator
         return $this;
     }
 
+    /**
+     * Gets http-server options.
+     *
+     * @return void
+     */
     public function getServerOptions()
     {
         $this->options ?? new Options;
     }
 
+    /**
+     * Sets http-server options.
+     *
+     * @param \Amp\Http\Server\Options $options
+     * @return self
+     */
     public function setServerOptions(Options $options): self
     {
         $this->options = $options;
