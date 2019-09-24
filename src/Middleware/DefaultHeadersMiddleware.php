@@ -34,7 +34,6 @@ class DefaultHeadersMiddleware implements Middleware
             /** @var \Amp\Http\Server\Response $response */
             $response = yield $requestHandler->handleRequest($request);
             $response->setHeaders($this->headers);
-            \dump($response->getHeaders());
 
             return $response;
         });
