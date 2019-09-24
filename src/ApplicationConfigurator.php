@@ -18,13 +18,19 @@ class ApplicationConfigurator
 {
 
     /** @var \Amp\Http\Server\Middleware[] */
-    private $middlewares;
+    private $middlewares = [];
 
     /** @var \Amp\Http\Server\Options */
     private $options;
 
     /** @var \Psr\Log\LoggerInterface */
     private $logger;
+
+
+    public function __construct()
+    {
+        $this->options = new Options;
+    }
 
     /**
      * Gets all configured middlewares.
@@ -84,11 +90,11 @@ class ApplicationConfigurator
     /**
      * Gets http-server options.
      *
-     * @return void
+     * @return \Amp\Http\Server\Options
      */
-    public function getServerOptions()
+    public function getServerOptions(): Options
     {
-        $this->options ?? new Options;
+        return $this->options;
     }
 
     /**
