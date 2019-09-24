@@ -2,6 +2,8 @@
 
 namespace Empress;
 
+use Amp\Http\Server\Request;
+use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
@@ -20,18 +22,16 @@ abstract class AbstractApplication implements ServerObserver
     /**
      * Defines routes for the application.
      *
-     * @param \Empress\Routing\RouteConfigurator $configurator
-     * @return void
+     * @return \Empress\Routing\RouteConfigurator
      */
-    abstract public function configureRoutes(RouteConfigurator $configurator): void;
+    abstract public function configureRoutes(): RouteConfigurator;
 
     /**
      * Configures the application instance before the server starts.
      *
-     * @param \Empress\ApplicationConfigurator $configurator
-     * @return void
+     * @return ApplicationConfigurator
      */
-    abstract public function configureApplication(ApplicationConfigurator $configurator): void;
+    abstract public function configureApplication(): ApplicationConfigurator;
 
     /** @inheritDoc */
     public function onStart(Server $server): Promise

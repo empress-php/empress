@@ -67,13 +67,11 @@ class Empress
 
     private function initializeApplication()
     {
-        $routeConfigurator = new RouteConfigurator;
-        $this->application->configureRoutes($routeConfigurator);
-
+        $routeConfigurator = $this->application->configureRoutes();
         $routerBuilder = new RouterBuilder($routeConfigurator);
         $this->router = $routerBuilder->getRouter();
 
-        $this->application->configureApplication($this->applicationConfigurator);
+        $this->applicationConfigurator = $this->application->configureApplication();
     }
 
     private function initializeServer(): void
