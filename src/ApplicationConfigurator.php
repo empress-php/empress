@@ -26,6 +26,8 @@ class ApplicationConfigurator
     /** @var \Psr\Log\LoggerInterface */
     private $logger;
 
+    /** @var string|null */
+    private $staticContentPath;
 
     public function __construct()
     {
@@ -109,4 +111,28 @@ class ApplicationConfigurator
 
         return $this;
     }
+
+    /**
+     * Gets static content path
+     *
+     * @return string|null
+     */
+    public function getStaticContentPath(): ?string
+    {
+        return $this->staticContentPath;
+    }
+
+    /**
+     * Sets static content path
+     *
+     * @param string $path
+     * @return self
+     */
+    public function setStaticContentPath(string $path): self
+    {
+        $this->staticContentPath = $path;
+
+        return $this;
+    }
+
 }

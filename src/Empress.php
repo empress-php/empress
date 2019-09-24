@@ -3,6 +3,7 @@
 namespace Empress;
 
 use Amp\Http\Server\Server;
+use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
@@ -79,6 +80,11 @@ class Empress
         $middlewares = $this->applicationConfigurator->getMiddlewares();
         $logger = $this->applicationConfigurator->getLogger();
         $options = $this->applicationConfigurator->getServerOptions();
+
+        if (($path = $this->applicationConfigurator->getStaticContentPath()) !== null) {
+            $documentRoot = new DocumentRoot($path);
+            $this->router->setFallback($documentRoot);
+        }
 
         $sockets = [
             Socket\listen('0.0.0.0:' . $this->port),
