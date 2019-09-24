@@ -9,7 +9,6 @@ use Amp\Promise;
 use Amp\Socket;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
-use Empress\Routing\RouteConfigurator;
 use Empress\Routing\RouterBuilder;
 use function Amp\call;
 use function Amp\Http\Server\Middleware\stack;

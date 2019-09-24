@@ -2,8 +2,6 @@
 
 namespace Empress;
 
-use Amp\Http\Server\Request;
-use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Promise;

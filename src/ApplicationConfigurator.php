@@ -113,7 +113,7 @@ class ApplicationConfigurator
     }
 
     /**
-     * Gets static content path
+     * Gets static content path.
      *
      * @return string|null
      */
@@ -123,7 +123,7 @@ class ApplicationConfigurator
     }
 
     /**
-     * Sets static content path
+     * Sets static content path.
      *
      * @param string $path
      * @return self
@@ -134,5 +134,4 @@ class ApplicationConfigurator
 
         return $this;
     }
-
 }
