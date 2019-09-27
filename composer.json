@@ -1,5 +1,5 @@
 {
-    "name": "jakobmats/empress",
+    "name": "empress-php/empress",
     "description": "Small library built on top of amphp/http-server for creating async web apps.",
     "type": "project",
     "require": {
