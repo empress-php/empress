@@ -124,7 +124,7 @@ class ApplicationConfigurator
     }
 
     /**
-     * Gets document root fallback handler
+     * Gets document root fallback handler.
      *
      * @return \Amp\Http\Server\StaticContent\DocumentRoot|null
      */
@@ -132,7 +132,7 @@ class ApplicationConfigurator
     {
         if ($this->getStaticContentPath()) {
             $documentRoot = new DocumentRoot($this->getStaticContentPath());
-    
+
             return $documentRoot;
         }
 
