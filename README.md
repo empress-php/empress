@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/empress-php/empress.svg?branch=master)](https://travis-ci.com/empress-php/empress)
+[![Coverage Status](https://coveralls.io/repos/github/empress-php/empress/badge.svg)](https://coveralls.io/github/empress-php/empress)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Work in progress ⚡
