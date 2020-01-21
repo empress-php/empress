@@ -1,10 +1,11 @@
 <?php
 
-namespace Empress;
+namespace Empress\Internal;
 
 use Amp\Http\Server\Response;
 use Amp\Promise;
 use Amp\Success;
+use Empress\ResponseTransformerInterface;
 
 use function Amp\call;
 

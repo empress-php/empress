@@ -38,6 +38,9 @@ final class RequestHandler implements RequestHandlerInterface
 
         if (!\is_null($this->responseTransformer)) {
             $promise = $this->responseTransformer->transform($promise);
+        } else {
+            $defaultTransformer = new DefaultTransformer;
+            $promise = $defaultTransformer->transform($promise);
         }
 
         return $promise;
