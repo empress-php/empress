@@ -29,7 +29,10 @@ abstract class AbstractApplication implements ServerObserver
      *
      * @return ApplicationConfigurator
      */
-    abstract public function configureApplication(): ApplicationConfigurator;
+    public function configureApplication(): ApplicationConfigurator
+    {
+        return new ApplicationConfigurator;
+    }
 
     /** @inheritDoc */
     public function onStart(Server $server): Promise

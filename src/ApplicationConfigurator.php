@@ -71,7 +71,7 @@ class ApplicationConfigurator
 
         $logHandler = new StreamHandler(getStdout());
         $logHandler->setFormatter(new ConsoleFormatter);
-        $this->logger = new Logger(static::class);
+        $this->logger = new Logger('Empress');
         $this->logger->pushHandler($logHandler);
 
         return $this->logger;
