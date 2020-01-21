@@ -4,6 +4,7 @@ namespace Empress;
 
 use Amp\Http\Server\Middleware;
 use Amp\Http\Server\Options;
+use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Log\ConsoleFormatter;
 use Amp\Log\StreamHandler;
 use Monolog\Logger;
@@ -120,6 +121,22 @@ class ApplicationConfigurator
     public function getStaticContentPath(): ?string
     {
         return $this->staticContentPath;
+    }
+
+    /**
+     * Gets document root fallback handler
+     *
+     * @return \Amp\Http\Server\StaticContent\DocumentRoot|null
+     */
+    public function getDocumentRootHandler(): ?DocumentRoot
+    {
+        if ($this->getStaticContentPath()) {
+            $documentRoot = new DocumentRoot($this->getStaticContentPath());
+    
+            return $documentRoot;
+        }
+
+        return null;
     }
 
     /**

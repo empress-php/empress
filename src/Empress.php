@@ -3,7 +3,6 @@
 namespace Empress;
 
 use Amp\Http\Server\Server;
-use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
@@ -39,7 +38,7 @@ class Empress
     }
 
     /**
-     * Initializes routes and configure the environment for the application
+     * Initializes routes and configures the environment for the application
      * and then runs it on http-server.
      *
      * @return \Amp\Promise
@@ -70,7 +69,6 @@ class Empress
         $routeConfigurator = $this->application->configureRoutes();
         $routerBuilder = new RouterBuilder($routeConfigurator);
         $this->router = $routerBuilder->getRouter();
-
         $this->applicationConfigurator = $this->application->configureApplication();
     }
 
@@ -80,9 +78,9 @@ class Empress
         $logger = $this->applicationConfigurator->getLogger();
         $options = $this->applicationConfigurator->getServerOptions();
 
-        if (($path = $this->applicationConfigurator->getStaticContentPath()) !== null) {
-            $documentRoot = new DocumentRoot($path);
-            $this->router->setFallback($documentRoot);
+        // Static content serving
+        if ($handler = $this->applicationConfigurator->getDocumentRootHandler()) {
+            $this->router->setFallback($handler);
         }
 
         $sockets = [
