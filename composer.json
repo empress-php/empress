@@ -13,7 +13,8 @@
         "amphp/http-server-form-parser": "^1.1",
         "amphp/http-server-static-content": "^1.0",
         "symfony/polyfill-php73": "^1.12",
-        "amphp/http-server-session": "^1.0"
+        "amphp/http-server-session": "^1.0",
+        "reactivex/rxphp": "@dev"
     },
     "autoload": {
         "psr-4": {
@@ -31,5 +32,11 @@
         "phpunit/phpunit": "^8.3",
         "amphp/phpunit-util": "^1.1",
         "amphp/php-cs-fixer-config": "dev-master"
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/jakobmats/repos/RxPHP"
+        }
+    ]
 }
