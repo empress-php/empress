@@ -37,7 +37,7 @@ Loop::run(function () {
 });
 ```
 ## Request params
-Working with request params is very easy. Just substitue the get route from the previous example:
+Working with request params is very easy. Just substitute the get route from the previous example:
 ```php
 // ...
 $r->get('/{name}', fn ($params, $request) => "Hello, ${params['name']}");
