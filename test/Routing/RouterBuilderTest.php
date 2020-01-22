@@ -8,9 +8,9 @@ use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Server;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
-use Empress\PlainTextTransformer;
 use Empress\Routing\RouteConfigurator;
 use Empress\Routing\RouterBuilder;
+use Empress\Transformer\HtmlTransformer;
 use League\Uri\Http;
 use Psr\Log\LoggerInterface;
 use function Amp\Socket\listen;
@@ -36,7 +36,7 @@ class RouterBuilderTest extends AsyncTestCase
         $configurator = new RouteConfigurator();
         $configurator->get('/hello', function () {
             return 'Hello, World!';
-        }, new PlainTextTransformer());
+        }, new HtmlTransformer());
 
         $builder = new RouterBuilder($configurator);
         $router = $builder->getRouter();
@@ -62,7 +62,7 @@ class RouterBuilderTest extends AsyncTestCase
                     return 'Hello, World!';
                 });
             });
-        }, new PlainTextTransformer());
+        }, new HtmlTransformer());
 
         $builder = new RouterBuilder($configurator);
         $router = $builder->getRouter();

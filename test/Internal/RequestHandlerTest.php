@@ -9,7 +9,7 @@ use Amp\Http\Server\Router;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Internal\RequestHandler;
-use Empress\JsonTransformer;
+use Empress\Transformer\JsonTransformer;
 use League\Uri\Http;
 
 class RequestHandlerTest extends AsyncTestCase
@@ -28,7 +28,7 @@ class RequestHandlerTest extends AsyncTestCase
 
         $handler = new RequestHandler($closure);
 
-        /** @var \Amp\Http\Server\Response $response */
+        /** @var Response $response */
         $response = yield $handler->handleRequest($request);
 
         $this->assertEquals('Hello, World!', yield $response->getBody()->read());
@@ -49,7 +49,7 @@ class RequestHandlerTest extends AsyncTestCase
 
         $handler = new RequestHandler($closure, new JsonTransformer());
 
-        /** @var \Amp\Http\Server\Response $response */
+        /** @var Response $response */
         $response = yield $handler->handleRequest($request);
 
         $this->assertEquals(\json_encode(['status' => 'ok']), yield $response->getBody()->read());
@@ -57,8 +57,8 @@ class RequestHandlerTest extends AsyncTestCase
 
     public function testHandlerWithRequestParams()
     {
-        $closure = function (array $params) {
-            $name = $params['name'];
+        $closure = function ($request) {
+            $name = $request->getParam('name');
             return new Response(Status::OK, [], "Hello, $name");
         };
 
@@ -72,7 +72,7 @@ class RequestHandlerTest extends AsyncTestCase
 
         $handler = new RequestHandler($closure);
 
-        /** @var \Amp\Http\Server\Response $response */
+        /** @var Response $response */
         $response = yield $handler->handleRequest($request);
 
         $this->assertEquals('Hello, Jakob', yield $response->getBody()->read());

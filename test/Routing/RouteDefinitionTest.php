@@ -2,8 +2,8 @@
 
 namespace Empress\Test\Routing;
 
-use Empress\ResponseTransformerInterface;
 use Empress\Routing\RouteDefinition;
+use Empress\Transformer\ResponseTransformerInterface;
 use PHPUnit\Framework\TestCase;
 
 class RouteDefinitionTest extends TestCase
