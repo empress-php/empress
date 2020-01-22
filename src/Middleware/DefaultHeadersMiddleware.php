@@ -5,6 +5,7 @@ namespace Empress\Middleware;
 use Amp\Http\Server\Middleware;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler;
+use Amp\Http\Server\Response;
 use Amp\Promise;
 
 use function Amp\call;
@@ -19,6 +20,8 @@ class DefaultHeadersMiddleware implements Middleware
     private $headers;
 
     /**
+     * DefaultHeadersMiddleware constructor.
+     *
      * @param array $headers Default headers to be used with every response
      */
     public function __construct(array $headers)
@@ -31,7 +34,7 @@ class DefaultHeadersMiddleware implements Middleware
     {
         return call(function () use ($request, $requestHandler) {
 
-            /** @var \Amp\Http\Server\Response $response */
+            /** @var Response $response */
             $response = yield $requestHandler->handleRequest($request);
             $response->setHeaders($this->headers);
 

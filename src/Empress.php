@@ -2,32 +2,37 @@
 
 namespace Empress;
 
+use Amp\Http\Server\Router;
 use Amp\Http\Server\Server;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
+use Closure;
+use Empress\Configuration\ApplicationConfigurator;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
 use Empress\Routing\RouterBuilder;
+use Exception;
+use Throwable;
 use function Amp\call;
 use function Amp\Http\Server\Middleware\stack;
 
 class Empress
 {
-    /** @var \Amp\Http\Server\Server */
+    /** @var Server */
     private $server;
 
-    /** @var \Empress\AbstractApplication */
+    /** @var AbstractApplication */
     private $application;
 
-    /** @var \Empress\ApplicationConfigurator */
+    /** @var ApplicationConfigurator */
     private $applicationConfigurator;
 
-    /** @var \Amp\Http\Server\Router */
+    /** @var Router */
     private $router;
 
     /**
-     * @param \Empress\AbstractApplication $application
+     * @param AbstractApplication $application
      * @param int $port
      */
     public function __construct(AbstractApplication $application, int $port = 1337)
@@ -41,14 +46,14 @@ class Empress
      * Initializes routes and configures the environment for the application
      * and then runs it on http-server.
      *
-     * @return \Amp\Promise
+     * @return Promise
      */
     public function boot(): Promise
     {
         $this->initializeApplication();
         $this->initializeServer();
 
-        $closure = \Closure::fromCallable([$this->server, 'start']);
+        $closure = Closure::fromCallable([$this->server, 'start']);
         return $this->handleMultiReasonException($closure, StartupException::class);
     }
 
@@ -56,11 +61,11 @@ class Empress
      * Stops the server. As the application implements the ServerObserver interface
      * this will also call the onStop() method on the application instance.
      *
-     * @return \Amp\Promise
+     * @return Promise
      */
     public function shutDown(): Promise
     {
-        $closure = \Closure::fromCallable([$this->server, 'stop']);
+        $closure = Closure::fromCallable([$this->server, 'stop']);
         return $this->handleMultiReasonException($closure, ShutdownException::class);
     }
 
@@ -83,6 +88,9 @@ class Empress
             $this->router->setFallback($handler);
         }
 
+        // TODO: TLS
+        // TODO: Session
+
         $sockets = [
             Socket\listen('0.0.0.0:' . $this->port),
             Socket\listen('[::]:' . $this->port),
@@ -101,7 +109,7 @@ class Empress
         $this->server->attach($this->application);
     }
 
-    private function handleMultiReasonException(\Closure $closure, string $exceptionClass = \Exception::class): Promise
+    private function handleMultiReasonException(Closure $closure, string $exceptionClass = Exception::class): Promise
     {
         return call(function () use ($closure, $exceptionClass) {
             try {
@@ -114,7 +122,7 @@ class Empress
                     throw new $exceptionClass($reason->getMessage(), $reason->getCode(), $reason);
                 }
 
-                $messages = \array_map(function (\Throwable $reason) {
+                $messages = \array_map(function (Throwable $reason) {
                     return $reason->getMessage();
                 }, $reasons);
 

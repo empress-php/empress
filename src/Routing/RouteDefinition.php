@@ -2,12 +2,12 @@
 
 namespace Empress\Routing;
 
-use Empress\ResponseTransformerInterface;
+use Empress\Transformer\ResponseTransformerInterface;
 
 /**
  * Defines a single route.
  */
-class RouteDefinition implements TransformableDefinitionInterface
+class RouteDefinition
 {
 
     /** @var string */
@@ -19,7 +19,7 @@ class RouteDefinition implements TransformableDefinitionInterface
     /** @var mixed */
     private $handler;
 
-    /** @var \Empress\ResponseTransformerInterface */
+    /** @var ResponseTransformerInterface */
     private $reponseTransformer;
 
     /**

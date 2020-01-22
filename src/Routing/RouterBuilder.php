@@ -5,7 +5,7 @@ namespace Empress\Routing;
 use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Router;
 use Empress\Internal\RequestHandler as EmpressRequestHandler;
-use Empress\ResponseTransformerInterface;
+use Empress\Transformer\ResponseTransformerInterface;
 
 /**
  * Transforms route definitions into one final router.
@@ -13,10 +13,10 @@ use Empress\ResponseTransformerInterface;
 class RouterBuilder
 {
 
-    /** @var \Amp\Http\Server\Router[] */
+    /** @var Router[] */
     private $routers = [];
 
-    /** @var \Empress\Routing\RouteConfigurator */
+    /** @var RouteConfigurator */
     private $routeConfigurator;
 
     /**
@@ -31,7 +31,7 @@ class RouterBuilder
     /**
      * Gets the assembled router.
      *
-     * @return \Amp\Http\Server\Router
+     * @return Router
      */
     public function getRouter(): Router
     {

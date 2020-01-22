@@ -3,8 +3,8 @@
 namespace Empress\Routing;
 
 use Amp\Http\Status;
-use Empress\ResponseTransformerInterface;
-
+use Closure;
+use Empress\Transformer\ResponseTransformerInterface;
 use function Amp\Http\Server\redirectTo;
 
 /**
@@ -18,13 +18,13 @@ class RouteConfigurator
     /** @var string|null */
     private $currentPrefix;
 
-    /** @var \Empress\ResponseTransformerInterface */
+    /** @var ResponseTransformerInterface */
     private $currentResponseTransformer;
 
 
     /**
      * @param string $prefix
-     * @param \Empress\ResponseTransformerInterface|null $responseTransformer
+     * @param ResponseTransformerInterface|null $responseTransformer
      */
     public function __construct(string $prefix = '', ?ResponseTransformerInterface $responseTransformer = null)
     {
@@ -128,9 +128,9 @@ class RouteConfigurator
      *
      * @param string $targetUri
      * @param int $statusCode
-     * @return \Closure
+     * @return Closure
      */
-    public function redirectTo(string $targetUri, int $statusCode = Status::FOUND): \Closure
+    public function redirectTo(string $targetUri, int $statusCode = Status::FOUND): Closure
     {
         return function () use ($targetUri, $statusCode) {
             return redirectTo($targetUri, $statusCode);
@@ -142,11 +142,11 @@ class RouteConfigurator
      * This allows for grouping routes that logically belong together.
      *
      * @param string $prefix
-     * @param \Closure $closure
-     * @param \Empress\ResponseTransformerInterface|null $responseTransformer
+     * @param Closure $closure
+     * @param ResponseTransformerInterface|null $responseTransformer
      * @return void
      */
-    public function prefix(string $prefix, \Closure $closure, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function prefix(string $prefix, Closure $closure, ?ResponseTransformerInterface $responseTransformer = null): void
     {
         $newSelf = new self($this->currentPrefix . $prefix, $responseTransformer ?? $this->currentResponseTransformer);
         $closure($newSelf);

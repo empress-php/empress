@@ -6,6 +6,7 @@ use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Amp\Success;
+use Empress\Configuration\ApplicationConfigurator;
 use Empress\Routing\RouteConfigurator;
 
 /**
@@ -20,7 +21,7 @@ abstract class AbstractApplication implements ServerObserver
     /**
      * Defines routes for the application.
      *
-     * @return \Empress\Routing\RouteConfigurator
+     * @return RouteConfigurator
      */
     abstract public function configureRoutes(): RouteConfigurator;
 
