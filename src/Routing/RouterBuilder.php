@@ -71,7 +71,7 @@ class RouterBuilder
         }
     }
 
-    private function registerHandler(string $verb, string $uri, $handler, Router $router, ResponseTransformerInterface $reponseTransformer = null): void
+    private function registerHandler(string $verb, string $uri, $handler, Router $router, ResponseTransformerInterface $responseTransformer = null): void
     {
         if ($handler instanceof RequestHandler) {
             $router->addRoute($verb, $uri, $handler);
@@ -79,6 +79,6 @@ class RouterBuilder
             return;
         }
 
-        $router->addRoute($verb, $uri, new EmpressRequestHandler($handler, $reponseTransformer));
+        $router->addRoute($verb, $uri, new EmpressRequestHandler($handler, $responseTransformer));
     }
 }

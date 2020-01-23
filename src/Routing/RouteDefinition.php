@@ -20,7 +20,7 @@ class RouteDefinition
     private $handler;
 
     /** @var ResponseTransformerInterface */
-    private $reponseTransformer;
+    private $responseTransformer;
 
     /**
      * @param string $verb
@@ -67,12 +67,12 @@ class RouteDefinition
     /** @inheritDoc */
     public function getResponseTransformer(): ?ResponseTransformerInterface
     {
-        return $this->reponseTransformer;
+        return $this->responseTransformer;
     }
 
     /** @inheritDoc */
-    public function setResponseTransformer(?ResponseTransformerInterface $reponseTransformer): void
+    public function setResponseTransformer(?ResponseTransformerInterface $responseTransformer): void
     {
-        $this->reponseTransformer = $reponseTransformer;
+        $this->responseTransformer = $responseTransformer;
     }
 }
