@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Empress\Configuration;
 
 use Amp\Http\Server\Options;
