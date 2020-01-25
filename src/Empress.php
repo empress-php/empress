@@ -104,12 +104,15 @@ class Empress
             Socket\listen('[::]:' . $this->port),
         ];
 
+        if (!\is_null($context = $this->applicationConfiguration->getTlsContext())) {
+            $port = $this->applicationConfiguration->getTlsPort();
+            $sockets[] = Socket\listen('0.0.0.0:' . $port, null, $context);
+            $sockets[] = Socket\listen('[::]:' . $port, null, $context);
+        }
+
         $this->server = new Server(
             $sockets,
-            stack(
-                $this->router,
-                ...$middlewares
-            ),
+            stack($this->router, $sessionMiddleware),
             $logger,
             $options
         );
