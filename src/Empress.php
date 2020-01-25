@@ -4,11 +4,12 @@ namespace Empress;
 
 use Amp\Http\Server\Router;
 use Amp\Http\Server\Server;
+use Amp\Http\Server\Session\SessionMiddleware;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
 use Closure;
-use Empress\Configuration\ApplicationConfigurator;
+use Empress\Configuration\ApplicationConfiguration;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
 use Empress\Routing\RouterBuilder;
@@ -25,8 +26,11 @@ class Empress
     /** @var AbstractApplication */
     private $application;
 
-    /** @var ApplicationConfigurator */
-    private $applicationConfigurator;
+    /** @var int */
+    private $port;
+
+    /** @var ApplicationConfiguration */
+    private $applicationConfiguration;
 
     /** @var Router */
     private $router;
@@ -39,7 +43,7 @@ class Empress
     {
         $this->application = $application;
         $this->port = $port;
-        $this->applicationConfigurator = new ApplicationConfigurator;
+        $this->applicationConfiguration = new ApplicationConfiguration;
     }
 
     /**
@@ -50,7 +54,6 @@ class Empress
      */
     public function boot(): Promise
     {
-        $this->initializeApplication();
         $this->initializeServer();
 
         $closure = Closure::fromCallable([$this->server, 'start']);
@@ -73,18 +76,23 @@ class Empress
     {
         $routeConfigurator = $this->application->configureRoutes();
         $routerBuilder = new RouterBuilder($routeConfigurator);
+
+        $this->applicationConfiguration = $this->application->getApplicationConfiguration();
+
         $this->router = $routerBuilder->getRouter();
-        $this->applicationConfigurator = $this->application->configureApplication();
+        $this->router->stack(...$this->applicationConfiguration->getMiddlewares());
     }
 
     private function initializeServer(): void
     {
-        $middlewares = $this->applicationConfigurator->getMiddlewares();
-        $logger = $this->applicationConfigurator->getLogger();
-        $options = $this->applicationConfigurator->getServerOptions();
+        $this->initializeApplication();
+
+        $sessionMiddleware = new SessionMiddleware($this->applicationConfiguration->getSessionStorage());
+        $logger = $this->applicationConfiguration->getLogger();
+        $options = $this->applicationConfiguration->getServerOptions();
 
         // Static content serving
-        if ($handler = $this->applicationConfigurator->getDocumentRootHandler()) {
+        if ($handler = $this->applicationConfiguration->getDocumentRootHandler()) {
             $this->router->setFallback($handler);
         }
 

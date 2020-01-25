@@ -6,7 +6,8 @@ use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Amp\Success;
-use Empress\Configuration\ApplicationConfigurator;
+use Empress\Configuration\ApplicationConfiguration;
+use Empress\Configuration\ImmutableApplicationConfiguration;
 use Empress\Routing\RouteConfigurator;
 
 /**
@@ -28,11 +29,16 @@ abstract class AbstractApplication implements ServerObserver
     /**
      * Configures the application instance before the server starts.
      *
-     * @return ApplicationConfigurator
+     * @return ApplicationConfiguration
      */
-    public function configureApplication(): ApplicationConfigurator
+    abstract protected function configureApplication(): ApplicationConfiguration;
+
+    /**
+     * @return ImmutableApplicationConfiguration
+     */
+    final public function getApplicationConfiguration(): ImmutableApplicationConfiguration
     {
-        return new ApplicationConfigurator;
+        return new ImmutableApplicationConfiguration($this->configureApplication());
     }
 
     /** @inheritDoc */
