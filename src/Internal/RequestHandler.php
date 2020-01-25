@@ -11,8 +11,7 @@ use Empress\Transformer\ResponseTransformerInterface;
 use function Amp\call;
 
 /**
- * Empress-tailored request handler that injects the param array
- * and handles response transformers.
+ * Empress-tailored request handler that handles response transformers.
  */
 final class RequestHandler implements RequestHandlerInterface
 {
@@ -34,8 +33,7 @@ final class RequestHandler implements RequestHandlerInterface
     public function handleRequest(HttpRequest $request): Promise
     {
         $promise = call($this->handler, new Request($request));
-        $promise = $this->responseTransformer->transform($promise);
 
-        return $promise;
+        return $this->responseTransformer->transform($promise);
     }
 }
