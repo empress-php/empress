@@ -96,9 +96,6 @@ class Empress
             $this->router->setFallback($handler);
         }
 
-        // TODO: TLS
-        // TODO: Session
-
         $sockets = [
             Socket\listen('0.0.0.0:' . $this->port),
             Socket\listen('[::]:' . $this->port),
