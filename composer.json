@@ -14,7 +14,7 @@
         "amphp/http-server-static-content": "^1.0",
         "symfony/polyfill-php73": "^1.12",
         "amphp/http-server-session": "^1.0",
-        "reactivex/rxphp": "@dev"
+        "doctrine/annotations": "^1.8"
     },
     "autoload": {
         "psr-4": {
@@ -27,17 +27,10 @@
         }
     },
     "require-dev": {
-        "amphp/artax": "^3.0",
         "psy/psysh": "^0.9.9",
         "phpunit/phpunit": "^8.3",
         "amphp/phpunit-util": "^1.1",
         "amphp/php-cs-fixer-config": "dev-master",
         "php-coveralls/php-coveralls": "^2.2"
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/home/jakobmats/repos/RxPHP"
-        }
-    ]
+    }
 }
