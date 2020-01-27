@@ -27,41 +27,33 @@ class ImmutableApplicationConfigurationTest extends TestCase
 
     public function testGetTlsContext()
     {
-
     }
 
     public function testGetMiddlewares()
     {
-
     }
 
     public function testGetStaticContentPath()
     {
-
     }
 
     public function testGetLogger()
     {
-
     }
 
     public function testGetTlsPort()
     {
-
     }
 
     public function testGetDocumentRootHandler()
     {
-
     }
 
     public function testGetSessionStorage()
     {
-
     }
 
     public function testGetServerOptions()
     {
-
     }
 }

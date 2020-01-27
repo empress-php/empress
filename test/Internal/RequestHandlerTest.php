@@ -5,8 +5,8 @@ namespace Empress\Test\Internal;
 use Amp\Http\Server\Response;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
-use Empress\RequestContext;
 use Empress\Internal\RequestHandler;
+use Empress\RequestContext;
 use Empress\Test\HelperTrait;
 use Empress\Transformer\JsonTransformer;
 
