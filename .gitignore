@@ -3,3 +3,4 @@ build/
 src/app.php
 .php_cs.cache
 .phpunit.result.cache
+/.idea/
