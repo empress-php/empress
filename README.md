@@ -36,7 +36,7 @@ Loop::run(function () {
     yield $empress->boot();
 });
 ```
-## Request params
+## RequestContext params
 Working with request params is very easy. Just substitute the get route from the previous example:
 ```php
 // ...

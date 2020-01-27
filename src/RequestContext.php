@@ -1,24 +1,24 @@
 <?php
 
-namespace Empress\Internal;
+namespace Empress;
 
-use Amp\Http\Server\Request as HttpRequest;
+use Amp\Http\Server\Request;
 use Amp\Http\Server\Router;
 use Amp\Http\Server\Session\Session;
 
-final class Request
+class RequestContext
 {
-    /** @var HttpRequest */
+    /** @var Request */
     private $request;
 
     /** @var array */
     private $params;
 
     /**
-     * Request constructor.
-     * @param HttpRequest $request
+     * RequestContext constructor.
+     * @param Request $request
      */
-    public function __construct(HttpRequest $request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
         $this->params = $request->getAttribute(Router::class);
@@ -50,10 +50,10 @@ final class Request
     }
 
     /**
-     * @inheritDoc
+     * @return Request
      */
-    public function __call(string $name, array $arguments)
+    public function getRequest(): Request
     {
-        return ([$this->request, $name])($arguments);
+        return $this->request;
     }
 }
