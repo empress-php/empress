@@ -2,10 +2,8 @@
 
 namespace Empress\Routing;
 
-use Amp\Http\Status;
 use Closure;
 use Empress\Transformer\ResponseTransformerInterface;
-use function Amp\Http\Server\redirectTo;
 
 /**
  * Configures application routes.
@@ -20,7 +18,6 @@ class RouteConfigurator
 
     /** @var ResponseTransformerInterface */
     private $currentResponseTransformer;
-
 
     /**
      * @param string $prefix
@@ -124,17 +121,19 @@ class RouteConfigurator
     }
 
     /**
-     * Creates a handler returning a Response with a specific redirect header.
+     * Mounts a controller.
      *
-     * @param string $targetUri
-     * @param int $statusCode
-     * @return Closure
+     * @param object $controller
+     * @return $this
+     * @throws \Empress\Exception\RouteException
      */
-    public function redirectTo(string $targetUri, int $statusCode = Status::FOUND): Closure
+    public function mount(object $controller): self
     {
-        return function () use ($targetUri, $statusCode) {
-            return redirectTo($targetUri, $statusCode);
-        };
+        $mounter = new ControllerMounter($controller);
+
+        $this->routes = \array_merge($this->routes, $mounter->getRoutes());
+
+        return $this;
     }
 
     /**
