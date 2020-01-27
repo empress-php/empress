@@ -19,6 +19,9 @@ use Empress\Routing\RouteConfigurator;
 abstract class AbstractApplication implements ServerObserver
 {
 
+    /** @var ImmutableApplicationConfiguration */
+    private $applicationConfiguration;
+
     /**
      * Defines routes for the application.
      *
@@ -38,7 +41,11 @@ abstract class AbstractApplication implements ServerObserver
      */
     final public function getApplicationConfiguration(): ImmutableApplicationConfiguration
     {
-        return new ImmutableApplicationConfiguration($this->configureApplication());
+        if (\is_null($this->applicationConfiguration)) {
+            $this->applicationConfiguration = new ImmutableApplicationConfiguration($this->configureApplication());
+        }
+
+        return $this->applicationConfiguration;
     }
 
     /** @inheritDoc */
