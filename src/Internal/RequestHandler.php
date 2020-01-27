@@ -2,9 +2,10 @@
 
 namespace Empress\Internal;
 
-use Amp\Http\Server\Request as HttpRequest;
+use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler as RequestHandlerInterface;
 use Amp\Promise;
+use Empress\RequestContext;
 use Empress\Transformer\DefaultTransformer;
 use Empress\Transformer\ResponseTransformerInterface;
 
@@ -30,9 +31,9 @@ final class RequestHandler implements RequestHandlerInterface
     /**
      * @inheritdoc
      */
-    public function handleRequest(HttpRequest $request): Promise
+    public function handleRequest(Request $request): Promise
     {
-        $promise = call($this->handler, new Request($request));
+        $promise = call($this->handler, new RequestContext($request));
 
         return $this->responseTransformer->transform($promise);
     }

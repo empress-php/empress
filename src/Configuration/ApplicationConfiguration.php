@@ -117,7 +117,7 @@ class ApplicationConfiguration implements ApplicationConfigurationInterface
         return $this->tlsContext;
     }
 
-    public function getTlsPort(): int
+    public function getTlsPort(): ?int
     {
         return $this->tlsPort;
     }
