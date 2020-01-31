@@ -6,7 +6,7 @@ use Amp\Http\Server\Response;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Internal\RequestHandler;
-use Empress\RequestContext;
+use Empress\Request;
 use Empress\Test\HelperTrait;
 use Empress\Transformer\JsonTransformer;
 
@@ -49,7 +49,7 @@ class RequestHandlerTest extends AsyncTestCase
     {
         $closure = function ($request) {
 
-            /** @var RequestContext $request */
+            /** @var Request $request */
             $name = $request->getParam('name');
             return new Response(Status::OK, [], "Hello, $name");
         };

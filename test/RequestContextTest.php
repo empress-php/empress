@@ -5,7 +5,7 @@ namespace Empress\Test;
 use Amp\Http\Server\Session\Session;
 use Amp\Http\Server\Session\Storage;
 use Amp\PHPUnit\AsyncTestCase;
-use Empress\RequestContext;
+use Empress\Request;
 
 class RequestContextTest extends AsyncTestCase
 {
@@ -19,7 +19,7 @@ class RequestContextTest extends AsyncTestCase
         ];
 
         $httpRequest = $this->createMockRequest('GET', '/', $params);
-        $context = new RequestContext($httpRequest);
+        $context = new Request($httpRequest);
 
         $this->assertEquals($params, $context->getParams());
     }
@@ -32,7 +32,7 @@ class RequestContextTest extends AsyncTestCase
         ];
 
         $httpRequest = $this->createMockRequest('GET', '/', $params);
-        $context = new RequestContext($httpRequest);
+        $context = new Request($httpRequest);
 
         $this->assertEquals(1, $context->getParam('id'));
         $this->assertEquals(20, $context->getParam('weight'));
@@ -46,7 +46,7 @@ class RequestContextTest extends AsyncTestCase
         $httpRequest = $this->createMockRequest('GET', '/');
         $httpRequest->setAttribute(Session::class, $session);
 
-        $context = new RequestContext($httpRequest);
+        $context = new Request($httpRequest);
 
         $this->assertEquals($session, $context->getSession());
     }
@@ -56,7 +56,7 @@ class RequestContextTest extends AsyncTestCase
         $httpRequest = $this->createMockRequest('GET', '/');
         $client = $httpRequest->getClient();
 
-        $context = new RequestContext($httpRequest);
+        $context = new Request($httpRequest);
 
         $this->assertEquals($client, $context->getRequest()->getClient());
     }

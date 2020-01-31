@@ -1,24 +1,29 @@
 <?php
 
-namespace Empress;
+namespace Empress\Internal;
 
-use Amp\Http\Server\Request;
+use Amp\Http\Server\Request as HttpRequest;
 use Amp\Http\Server\Router;
 use Amp\Http\Server\Session\Session;
+use Amp\Promise;
+use function Amp\call;
 
-class RequestContext
+class Request
 {
-    /** @var Request */
+    /** @var HttpRequest */
     private $request;
 
     /** @var array */
     private $params;
 
+    /** @var array */
+    private $postParams = [];
+
     /**
-     * RequestContext constructor.
-     * @param Request $request
+     * Request constructor.
+     * @param HttpRequest $request
      */
-    public function __construct(Request $request)
+    public function __construct(HttpRequest $request)
     {
         $this->request = $request;
         $this->params = $request->getAttribute(Router::class);
@@ -30,6 +35,19 @@ class RequestContext
     public function getParams()
     {
         return $this->params;
+    }
+
+    /**
+     * @return Promise<array>
+     */
+    public function getParsedBody(): Promise
+    {
+        return call(function () {
+           $body = $this->request->getBody()->read();
+           parse_str(yield $body, $params);
+
+           return $params;
+        });
     }
 
     /**
@@ -49,11 +67,8 @@ class RequestContext
         return $this->request->getAttribute(Session::class);
     }
 
-    /**
-     * @return Request
-     */
-    public function getRequest(): Request
+    public function __call($name, $arguments)
     {
-        return $this->request;
+        return ([$this->request, $name])($arguments);
     }
 }
