@@ -7,14 +7,12 @@
         "amphp/http-server": "^1.1",
         "monolog/monolog": "^1.24",
         "amphp/log": "^1.0",
-        "amphp/http-server-router": "^1.0",
-        "psr/container": "^1.0",
-        "amphp/file": "^0.3.5",
         "amphp/http-server-form-parser": "^1.1",
         "amphp/http-server-static-content": "^1.0",
         "symfony/polyfill-php73": "^1.12",
         "amphp/http-server-session": "^1.0",
-        "doctrine/annotations": "^1.8"
+        "amphp/http-server-router": "^1.0",
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {

@@ -5,10 +5,9 @@ namespace Empress\Test\Internal;
 use Amp\Http\Server\Response;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
+use Empress\Context;
 use Empress\Internal\RequestHandler;
-use Empress\Request;
 use Empress\Test\HelperTrait;
-use Empress\Transformer\JsonTransformer;
 
 class RequestHandlerTest extends AsyncTestCase
 {
@@ -16,8 +15,8 @@ class RequestHandlerTest extends AsyncTestCase
 
     public function testPlainResponse()
     {
-        $closure = function () {
-            return new Response(Status::OK, [], 'Hello, World!');
+        $closure = function (Context $ctx) {
+            $ctx->respond('Hello, World!');
         };
 
         $request = $this->createMockRequest('GET', '/');
@@ -30,28 +29,11 @@ class RequestHandlerTest extends AsyncTestCase
         $this->assertEquals(Status::OK, $response->getStatus());
     }
 
-    public function testResponseWithTransformer()
-    {
-        $closure = function () {
-            return ['status' => 'ok'];
-        };
-
-        $request = $this->createMockRequest('GET', '/');
-        $handler = new RequestHandler($closure, new JsonTransformer());
-
-        /** @var Response $response */
-        $response = yield $handler->handleRequest($request);
-
-        $this->assertEquals(\json_encode(['status' => 'ok']), yield $response->getBody()->read());
-    }
-
     public function testHandlerWithRequestParams()
     {
-        $closure = function ($request) {
-
-            /** @var Request $request */
-            $name = $request->getParam('name');
-            return new Response(Status::OK, [], "Hello, $name");
+        $closure = function (Context $ctx) {
+            $name = $ctx['name'];
+            $ctx->respond("Hello, $name");
         };
 
         $request = $this->createMockRequest('GET', '/', [

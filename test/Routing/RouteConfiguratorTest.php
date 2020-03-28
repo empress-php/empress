@@ -2,84 +2,144 @@
 
 namespace Empress\Test\Routing;
 
+use Amp\Http\Server\Options;
+use Amp\Http\Server\RequestHandler;
+use Amp\Http\Server\Server;
+use Amp\PHPUnit\AsyncTestCase;
+use Amp\Promise;
 use Empress\Routing\RouteConfigurator;
-use PHPUnit\Framework\TestCase;
+use Empress\Test\HelperTrait;
+use Psr\Log\LoggerInterface;
+use function Amp\call;
+use function Amp\Socket\listen;
 
-class RouteConfiguratorTest extends TestCase
+class RouteConfiguratorTest extends AsyncTestCase
 {
-    public function testNoRoutes()
-    {
-        $configurator = new RouteConfigurator();
+    use HelperTrait;
 
-        $this->assertEmpty($configurator->getRoutes());
+    /**
+     * @var RouteConfigurator
+     */
+    private $r;
+
+    public function setUp(): void
+    {
+        $this->r = new RouteConfigurator();
+
+        parent::setUp();
     }
 
-    public function testNoPrefixSet()
+    public function testBefore()
     {
-        $configurator = new RouteConfigurator();
-        $configurator->get('', '');
-        $routes = $configurator->getRoutes();
+        $this->r->get('/', function () {});
 
-        $this->assertArrayNotHasKey('prefix', $routes);
+        $flag = '';
+        $this->r->before(function () use (&$flag) { $flag .= '1'; });
+        $this->r->before(function () use (&$flag) { $flag .= '2'; });
+        $this->r->before(function () use (&$flag) { $flag .= '3'; });
+
+        $request = $this->createMockRequest('GET', '/');
+
+        yield $this->doRequest($request);
+
+        $this->assertEquals('123', $flag);
     }
 
-    public function testPrefixNotSetWhenNoRoutesPresent()
+    public function testAfter()
     {
-        $configurator = new RouteConfigurator();
-        $configurator->prefix('/prefix', function ($c) {
+        $this->r->get('/', function () {});
+
+        $flag = '';
+        $this->r->after(function () use (&$flag) { $flag .= '1'; });
+        $this->r->after(function () use (&$flag) { $flag .= '2'; });
+        $this->r->after(function () use (&$flag) { $flag .= '3'; });
+
+        $request = $this->createMockRequest('GET', '/');
+
+        yield $this->doRequest($request);
+
+        $this->assertEquals('321', $flag);
+    }
+
+    /** @dataProvider httpMethodProvider */
+    public function testHttpMethods(string $method)
+    {
+        $flag = false;
+        $handler = function () use (&$flag) { $flag = true; };
+
+        switch ($method) {
+            case 'GET':
+                $this->r->get('/', $handler);
+            break;
+
+            case 'POST':
+                $this->r->post('/', $handler);
+            break;
+
+            case 'PUT':
+                $this->r->put('/', $handler);
+            break;
+
+            case 'DELETE':
+                $this->r->delete('/', $handler);
+            break;
+
+            case 'PATCH':
+                $this->r->patch('/', $handler);
+            break;
+
+            case 'HEAD':
+                $this->r->head('/', $handler);
+            break;
+
+            case 'OPTIONS':
+                $this->r->options('/', $handler);
+            break;
+
+        }
+
+        $request = $this->createMockRequest($method, '/');;
+
+        yield $this->doRequest($request);
+
+        $this->assertTrue($flag);
+    }
+
+    public function testGroup()
+    {
+        $flag = false;
+
+        $this->r->group('/prefix', function (RouteConfigurator $r) use (&$flag) {
+            $r->get('/router', function () use (&$flag) { $flag = true; });
         });
-        $routes = $configurator->getRoutes();
 
-        $this->assertArrayNotHasKey('/prefix', $routes);
+        $request = $this->createMockRequest('GET', '/prefix/router');;
+
+        yield $this->doRequest($request);
+
+        $this->assertTrue($flag);
     }
 
-    public function testPrefixSet()
+    public function httpMethodProvider(): array
     {
-        $configurator = new RouteConfigurator();
-        $configurator->prefix('/prefix', function ($c) {
-            $c->get('', '');
-        });
-        $routes = $configurator->getRoutes();
-
-        $this->assertArrayHasKey('/prefix', $routes);
+        return [
+            ['GET'],
+            ['POST'],
+            ['PUT'],
+            ['DELETE'],
+            ['PATCH'],
+            ['HEAD'],
+            ['OPTIONS'],
+        ];
     }
 
-    public function testPrefixesAreStacked()
+    private function doRequest($request): Promise
     {
-        $configurator = new RouteConfigurator();
-        $configurator->prefix('/prefix1', function ($c) {
-            $c->prefix('/prefix2', function ($c) {
-                $c->get('', '');
-            });
+        $router = $this->r->getRouter();
+        $router->onStart($this->createMockServer());
+
+        return call(function () use ($request, $router) {
+            yield $router->handleRequest($request);
         });
-        $routes = $configurator->getRoutes();
-
-        $this->assertArrayHasKey('/prefix1/prefix2', $routes);
-    }
-
-    public function testPrefixesDoNotLeak()
-    {
-        $configurator = new RouteConfigurator();
-        $configurator->prefix('/prefix1', function ($c) {
-            $c->get('', '');
-
-            $c->prefix('/prefix2', function ($c) {
-                $c->get('', '');
-            });
-        });
-        $routes = $configurator->getRoutes();
-
-        $this->assertCount(1, $routes['/prefix1']);
-        $this->assertCount(1, $routes['/prefix1/prefix2']);
-    }
-
-    public function testClosureArgumentIsNotSelf()
-    {
-        $configurator = new RouteConfigurator();
-        $configurator->prefix('/prefix1', function ($c) use (&$configurator) {
-            $this->assertNotSame($configurator, $c);
-        });
-
-        $configurator->getRoutes();
     }
 }

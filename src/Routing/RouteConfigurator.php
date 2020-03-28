@@ -2,171 +2,186 @@
 
 namespace Empress\Routing;
 
+use Amp\Http\Server\Router as HttpRouter;
+use Empress\Internal\RequestHandler;
 use Closure;
-use Empress\Transformer\ResponseTransformerInterface;
+use Empress\Middleware\AfterMiddleware;
+use Empress\Middleware\BeforeMiddleware;
 
-/**
- * Configures application routes.
- */
 class RouteConfigurator
 {
-    /** @var array */
-    private $routes = [];
 
-    /** @var string|null */
-    private $currentPrefix;
-
-    /** @var ResponseTransformerInterface */
-    private $currentResponseTransformer;
+    /** @var HttpRouter */
+    private $router;
 
     /**
-     * @param string $prefix
-     * @param ResponseTransformerInterface|null $responseTransformer
+     * @var array
      */
-    public function __construct(string $prefix = '', ?ResponseTransformerInterface $responseTransformer = null)
+    private $filters;
+
+    /**
+     * RouteConfigurator constructor.
+     */
+    public function __construct()
     {
-        $this->currentPrefix = $prefix;
-        $this->currentResponseTransformer = $responseTransformer;
+        $this->router = new HttpRouter();
     }
 
     /**
-     * Defines a GET route.
-     *
-     * @param mixed ...$args
-     * @return self
-     */
-    public function get(...$args): self
-    {
-        $this->route('GET', ...$args);
-
-        return $this;
-    }
-
-    /**
-     * Defines a POST route.
-     *
-     * @param mixed ...$args
-     * @return self
-     */
-    public function post(...$args): self
-    {
-        $this->route('POST', ...$args);
-
-        return $this;
-    }
-
-    /**
-     * Defines a PUT route.
-     *
-     * @param mixed ...$args
-     * @return self
-     */
-    public function put(...$args): self
-    {
-        $this->route('PUT', ...$args);
-
-        return $this;
-    }
-
-    /**
-     * Defines a PATCH route.
-     *
-     * @param mixed ...$args
-     * @return self
-     */
-    public function patch(...$args): self
-    {
-        $this->route('PATCH', ...$args);
-
-        return $this;
-    }
-
-    /**
-     * Defines a HEAD route.
-     *
-     * @param mixed ...$args
-     * @return self
-     */
-    public function head(...$args): self
-    {
-        $this->route('HEAD', ...$args);
-
-        return $this;
-    }
-
-    /**
-     * Defines an OPTION route.
-     *
-     * @param mixed ...$args
-     * @return self
-     */
-    public function options(...$args): self
-    {
-        $this->route('OPTIONS', ...$args);
-
-        return $this;
-    }
-
-    /**
-     * Defines a DELETE route.
-     *
-     * @param mixed ...$args
-     * @return self
-     */
-    public function delete(...$args): self
-    {
-        $this->route('DELETE', ...$args);
-
-        return $this;
-    }
-
-    /**
-     * Mounts a controller.
-     *
-     * @param object $controller
+     * Registers a before filter
+     * @param callable $callable
      * @return $this
-     * @throws \Empress\Exception\RouteException
      */
-    public function mount(object $controller): self
+    public function before(callable $callable): self
     {
-        $mounter = new ControllerMounter($controller);
+        $beforeMiddleware = new BeforeMiddleware($callable);
 
-        $this->routes = \array_merge($this->routes, $mounter->getRoutes());
+        $this->filters[] = $beforeMiddleware;
 
         return $this;
     }
 
     /**
-     * Routes can be prefixed with one or more prefixes.
-     * This allows for grouping routes that logically belong together.
+     * Registers an after filter
+     * @param callable $callable
+     * @return $this
+     */
+    public function after(callable $callable): self
+    {
+        $afterMiddleware = new AfterMiddleware($callable);
+
+        $this->filters[] = $afterMiddleware;
+
+        return $this;
+    }
+
+    /**
+     * Groups routes under one prefix
      *
      * @param string $prefix
      * @param Closure $closure
-     * @param ResponseTransformerInterface|null $responseTransformer
-     * @return void
+     * @return RouteConfigurator
      */
-    public function prefix(string $prefix, Closure $closure, ?ResponseTransformerInterface $responseTransformer = null): void
+    public function group(string $prefix, Closure $closure): self
     {
-        $newSelf = new self($this->currentPrefix . $prefix, $responseTransformer ?? $this->currentResponseTransformer);
-        $closure($newSelf);
-        $this->routes = \array_merge($this->routes, $newSelf->getRoutes());
+        $router = new self;
+        $router->getRouter()->prefix($prefix);
+        $closure($router);
+        $this->router->merge($router->getRouter());
+
+        return $this;
     }
 
     /**
-     * Gets all defined routes.
+     * Gets the underlying router instance
      *
-     * @return array
+     * @return HttpRouter
      */
-    public function getRoutes(): array
+    public function getRouter(): HttpRouter
     {
-        return $this->routes;
+
+        if (!empty($this->filters)) {
+            $this->router->stack(...$this->filters);
+        }
+
+        return $this->router;
     }
 
-    private function route(string $verb, string $uri, $handler, ?ResponseTransformerInterface $responseTransformer = null)
+    /**
+     * Adds a GET route
+     *
+     * @param string $route
+     * @param callable $handler
+     * @return RouteConfigurator
+     */
+    public function get(string $route, callable $handler): self
     {
-        $definition = new RouteDefinition($verb, $uri, $handler);
-        $definition->setResponseTransformer($this->currentResponseTransformer ?? $responseTransformer);
+        $this->router->addRoute('GET', $route, new RequestHandler($handler));
 
-        $this->routes[$this->currentPrefix][] = $definition;
+        return $this;
+    }
+
+    /**
+     * Adds a POST route
+     *
+     * @param string $route
+     * @param callable $handler
+     * @return RouteConfigurator
+     */
+    public function post(string $route, callable $handler): self
+    {
+        $this->router->addRoute('POST', $route, new RequestHandler($handler));
+
+        return $this;
+    }
+
+    /**
+     * Adds a PUT route
+     *
+     * @param string $route
+     * @param callable $handler
+     * @return RouteConfigurator
+     */
+    public function put(string $route, callable $handler): self
+    {
+        $this->router->addRoute('PUT', $route, new RequestHandler($handler));
+
+        return $this;
+    }
+
+    /**
+     * Adds a DELETE route
+     *
+     * @param string $route
+     * @param callable $handler
+     * @return RouteConfigurator
+     */
+    public function delete(string $route, callable $handler): self
+    {
+        $this->router->addRoute('DELETE', $route, new RequestHandler($handler));
+
+        return $this;
+    }
+
+    /**
+     * Adds a PATCH route
+     *
+     * @param string $route
+     * @param callable $handler
+     * @return RouteConfigurator
+     */
+    public function patch(string $route, callable $handler): self
+    {
+        $this->router->addRoute('PATCH', $route, new RequestHandler($handler));
+
+        return $this;
+    }
+
+    /**
+     * Adds a HEAD route
+     *
+     * @param string $route
+     * @param callable $handler
+     * @return RouteConfigurator
+     */
+    public function head(string $route, callable $handler): self
+    {
+        $this->router->addRoute('HEAD', $route, new RequestHandler($handler));
+
+        return $this;
+    }
+
+    /**
+     * Adds an OPTIONS route
+     *
+     * @param string $route
+     * @param callable $handler
+     * @return RouteConfigurator
+     */
+    public function options(string $route, callable $handler): self
+    {
+        $this->router->addRoute('OPTIONS', $route, new RequestHandler($handler));
+
+        return $this;
     }
 }

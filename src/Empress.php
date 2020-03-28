@@ -12,7 +12,7 @@ use Closure;
 use Empress\Configuration\ApplicationConfiguration;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
-use Empress\Routing\RouterBuilder;
+use Empress\Routing\RouteConfigurator;
 use Exception;
 use Throwable;
 use function Amp\call;
@@ -36,14 +36,19 @@ class Empress
     private $router;
 
     /**
-     * @param AbstractApplication $application
-     * @param int $port
+     * @var RouteConfigurator
      */
-    public function __construct(AbstractApplication $application, int $port = 1337)
+    private $routeConfigurator;
+
+    /**
+     * Empress constructor.
+     * @param AbstractApplication $application
+     */
+    public function __construct(AbstractApplication $application)
     {
         $this->application = $application;
-        $this->port = $port;
-        $this->applicationConfiguration = new ApplicationConfiguration;
+        $this->applicationConfiguration = new ApplicationConfiguration();
+        $this->routeConfigurator = new RouteConfigurator();
     }
 
     /**
@@ -51,6 +56,7 @@ class Empress
      * and then runs it on http-server.
      *
      * @return Promise
+     * @throws Socket\SocketException
      */
     public function boot(): Promise
     {
@@ -72,17 +78,9 @@ class Empress
         return $this->handleMultiReasonException($closure, ShutdownException::class);
     }
 
-    private function initializeApplication()
-    {
-        $routeConfigurator = $this->application->configureRoutes();
-        $routerBuilder = new RouterBuilder($routeConfigurator);
-
-        $this->applicationConfiguration = $this->application->getApplicationConfiguration();
-
-        $this->router = $routerBuilder->getRouter();
-        $this->router->stack(...$this->applicationConfiguration->getMiddlewares());
-    }
-
+    /**
+     * @throws Socket\SocketException
+     */
     private function initializeServer(): void
     {
         $this->initializeApplication();
@@ -90,6 +88,7 @@ class Empress
         $sessionMiddleware = new SessionMiddleware($this->applicationConfiguration->getSessionStorage());
         $logger = $this->applicationConfiguration->getLogger();
         $options = $this->applicationConfiguration->getServerOptions();
+        $port = $this->applicationConfiguration->getPort();
 
         // Static content serving
         if ($handler = $this->applicationConfiguration->getDocumentRootHandler()) {
@@ -97,14 +96,14 @@ class Empress
         }
 
         $sockets = [
-            Socket\listen('0.0.0.0:' . $this->port),
-            Socket\listen('[::]:' . $this->port),
+            Socket\listen('0.0.0.0:' . $port),
+            Socket\listen('[::]:' . $port),
         ];
 
         if (!\is_null($context = $this->applicationConfiguration->getTlsContext())) {
-            $port = $this->applicationConfiguration->getTlsPort();
-            $sockets[] = Socket\listen('0.0.0.0:' . $port, null, $context);
-            $sockets[] = Socket\listen('[::]:' . $port, null, $context);
+            $tlsPort = $this->applicationConfiguration->getTlsPort();
+            $sockets[] = Socket\listen('0.0.0.0:' . $tlsPort, null, $context);
+            $sockets[] = Socket\listen('[::]:' . $tlsPort, null, $context);
         }
 
         $this->server = new Server(
@@ -117,6 +116,20 @@ class Empress
         $this->server->attach($this->application);
     }
 
+    private function initializeApplication()
+    {
+        $this->application->configureApplication($this->applicationConfiguration);
+        $this->application->configureRoutes($this->routeConfigurator);
+
+        $this->router = $this->routeConfigurator->getRouter();
+        $this->router->stack(...$this->applicationConfiguration->getMiddlewares());
+    }
+
+    /**
+     * @param Closure $closure
+     * @param string $exceptionClass
+     * @return Promise
+     */
     private function handleMultiReasonException(Closure $closure, string $exceptionClass = Exception::class): Promise
     {
         return call(function () use ($closure, $exceptionClass) {

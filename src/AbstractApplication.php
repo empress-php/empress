@@ -7,7 +7,6 @@ use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Amp\Success;
 use Empress\Configuration\ApplicationConfiguration;
-use Empress\Configuration\ImmutableApplicationConfiguration;
 use Empress\Routing\RouteConfigurator;
 
 /**
@@ -19,34 +18,21 @@ use Empress\Routing\RouteConfigurator;
 abstract class AbstractApplication implements ServerObserver
 {
 
-    /** @var ImmutableApplicationConfiguration */
-    private $applicationConfiguration;
-
     /**
      * Defines routes for the application.
      *
-     * @return RouteConfigurator
+     * @param RouteConfigurator $routeConfigurator
+     * @return void
      */
-    abstract public function configureRoutes(): RouteConfigurator;
+    abstract public function configureRoutes(RouteConfigurator $routeConfigurator): void;
 
     /**
      * Configures the application instance before the server starts.
      *
-     * @return ApplicationConfiguration
+     * @param ApplicationConfiguration $applicationConfiguration
+     * @return void
      */
-    abstract protected function configureApplication(): ApplicationConfiguration;
-
-    /**
-     * @return ImmutableApplicationConfiguration
-     */
-    final public function getApplicationConfiguration(): ImmutableApplicationConfiguration
-    {
-        if (\is_null($this->applicationConfiguration)) {
-            $this->applicationConfiguration = new ImmutableApplicationConfiguration($this->configureApplication());
-        }
-
-        return $this->applicationConfiguration;
-    }
+    abstract public function configureApplication(ApplicationConfiguration $applicationConfiguration): void;
 
     /** @inheritDoc */
     public function onStart(Server $server): Promise

@@ -42,6 +42,9 @@ class ApplicationConfiguration implements ApplicationConfigurationInterface
     /** @var int|null */
     private $tlsPort;
 
+    /** @var int */
+    private $port = 1337;
+
     public function __construct()
     {
         $this->options = new Options;
@@ -123,6 +126,14 @@ class ApplicationConfiguration implements ApplicationConfigurationInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function getPort(): int
+    {
+        return $this->port;
+    }
+
+    /**
      * @param Middleware $middleware
      * @return self
      */
@@ -189,6 +200,17 @@ class ApplicationConfiguration implements ApplicationConfigurationInterface
         $this->tlsContext = (new ServerTlsContext())->withDefaultCertificate($cert);
 
         $this->tlsPort = $port;
+
+        return $this;
+    }
+
+    /**
+     * @param int $port
+     * @return $this
+     */
+    public function withPort(int $port): self
+    {
+        $this->port = $port;
 
         return $this;
     }

@@ -49,4 +49,9 @@ interface ApplicationConfigurationInterface
      * @return int|null
      */
     public function getTlsPort(): ?int;
+
+    /**
+     * @return int
+     */
+    public function getPort(): int;
 }
