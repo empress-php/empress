@@ -19,7 +19,7 @@ use function Amp\ByteStream\getStdout;
  * Defines the application environment that will be used by http-server.
  * Logging, server options and middlewares are all registered using this class.
  */
-class ApplicationConfiguration implements ApplicationConfigurationInterface
+class ApplicationConfiguration
 {
     /** @var Middleware[] */
     private $middlewares = [];

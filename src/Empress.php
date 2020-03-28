@@ -35,6 +35,9 @@ class Empress
     /** @var Router */
     private $router;
 
+    /** @var bool */
+    private $booted;
+
     /**
      * @var RouteConfigurator
      */
@@ -49,6 +52,7 @@ class Empress
         $this->application = $application;
         $this->applicationConfiguration = new ApplicationConfiguration();
         $this->routeConfigurator = new RouteConfigurator();
+        $this->booted = false;
     }
 
     /**

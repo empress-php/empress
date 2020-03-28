@@ -83,4 +83,13 @@ class ApplicationConfigurationTest extends TestCase
 
         $this->assertSame($options, $this->configuration->getServerOptions());
     }
+
+    public function testWithPort()
+    {
+        $this->assertNotNull($this->configuration->getPort());
+
+        $this->configuration->withPort(1234);
+
+        $this->assertEquals(1234, $this->configuration->getPort());
+    }
 }
