@@ -2,7 +2,6 @@
 
 namespace Empress;
 
-
 use Amp\Http\Cookie\CookieAttributes;
 use Amp\Http\Cookie\InvalidCookieException;
 use Amp\Http\Cookie\RequestCookie;
@@ -11,7 +10,6 @@ use Amp\Http\Server\FormParser\BufferingParser;
 use Amp\Http\Server\FormParser\Form;
 use Amp\Http\Server\FormParser\StreamingParser;
 use Amp\Http\Server\Request;
-use Amp\Http\Server\RequestBody;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Router;
 use Amp\Http\Server\Session\Session;
@@ -85,7 +83,7 @@ class Context implements ArrayAccess
         $this->streamingParser = new StreamingParser();
 
         $this->queryString = $req->getUri()->getQuery();
-        parse_str($this->queryString, $parsed);
+        \parse_str($this->queryString, $parsed);
         $this->queryArray = $parsed;
 
         $this->params = $req->getAttribute(Router::class);
@@ -125,7 +123,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Returns streamed request
+     * Returns streamed request.
      *
      * @return Promise<string>
      */
@@ -135,7 +133,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Returns buffered request body
+     * Returns buffered request body.
      *
      * @return Promise<string>
      */
@@ -163,7 +161,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets request query as string
+     * Gets request query as string.
      *
      * @return string
      */
@@ -173,7 +171,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets request query as array
+     * Gets request query as array.
      *
      * @return array
      */
@@ -183,7 +181,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets session associated with this request
+     * Gets session associated with this request.
      *
      * @return Session
      */
@@ -193,7 +191,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets a request attribute
+     * Gets a request attribute.
      *
      * @param string $name
      * @return mixed
@@ -204,7 +202,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Checks for a request attribute
+     * Checks for a request attribute.
      *
      * @param string $name
      * @return bool
@@ -215,7 +213,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets a request cookie
+     * Gets a request cookie.
      *
      * @param string $name
      * @return RequestCookie
@@ -226,7 +224,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets all request cookies
+     * Gets all request cookies.
      *
      * @return RequestCookie[]
      */
@@ -236,7 +234,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Sets a response cookie
+     * Sets a response cookie.
      *
      * @param string $name
      * @param string $value
@@ -260,7 +258,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets client port
+     * Gets client port.
      *
      * @return int|null
      */
@@ -270,7 +268,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets client host
+     * Gets client host.
      *
      * @return string
      */
@@ -280,7 +278,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets request method
+     * Gets request method.
      *
      * @return string
      */
@@ -290,7 +288,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets the user agent string
+     * Gets the user agent string.
      *
      * @return string|null
      */
@@ -300,7 +298,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Sets up a redirect
+     * Sets up a redirect.
      *
      * @param string $uri
      * @param int $status
@@ -314,7 +312,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Sets response status
+     * Sets response status.
      *
      * @param int $status
      * @param string|null $reason
@@ -328,7 +326,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Sets response content type
+     * Sets response content type.
      *
      * @param string $contentType
      * @return $this
@@ -355,7 +353,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Sends a string or stream response
+     * Sends a string or stream response.
      *
      * @param $stringOrStream
      * @return $this
@@ -368,7 +366,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Sends a HTML response
+     * Sends a HTML response.
      *
      * @param $stringOrStream
      * @return $this
@@ -383,7 +381,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Sends a JSON response
+     * Sends a JSON response.
      *
      * @param array $data
      * @return $this
@@ -394,12 +392,12 @@ class Context implements ArrayAccess
         $this->contentType('application/json');
 
         if (\PHP_VERSION >= 70300) {
-            $result = json_encode($data, \JSON_THROW_ON_ERROR);
+            $result = \json_encode($data, \JSON_THROW_ON_ERROR);
         } else {
-            $result = json_encode($data);
+            $result = \json_encode($data);
 
-            if (($lastError = json_last_error()) !== JSON_ERROR_NONE) {
-                throw new JsonException(json_last_error_msg(), $lastError);
+            if (($lastError = \json_last_error()) !== JSON_ERROR_NONE) {
+                throw new JsonException(\json_last_error_msg(), $lastError);
             }
         }
 

@@ -43,5 +43,4 @@ trait HelperTrait
             $options
         );
     }
-
 }

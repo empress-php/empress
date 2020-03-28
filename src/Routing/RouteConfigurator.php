@@ -3,8 +3,8 @@
 namespace Empress\Routing;
 
 use Amp\Http\Server\Router as HttpRouter;
-use Empress\Internal\RequestHandler;
 use Closure;
+use Empress\Internal\RequestHandler;
 use Empress\Middleware\AfterMiddleware;
 use Empress\Middleware\BeforeMiddleware;
 
@@ -28,7 +28,7 @@ class RouteConfigurator
     }
 
     /**
-     * Registers a before filter
+     * Registers a before filter.
      * @param callable $callable
      * @return $this
      */
@@ -42,7 +42,7 @@ class RouteConfigurator
     }
 
     /**
-     * Registers an after filter
+     * Registers an after filter.
      * @param callable $callable
      * @return $this
      */
@@ -56,7 +56,7 @@ class RouteConfigurator
     }
 
     /**
-     * Groups routes under one prefix
+     * Groups routes under one prefix.
      *
      * @param string $prefix
      * @param Closure $closure
@@ -73,13 +73,12 @@ class RouteConfigurator
     }
 
     /**
-     * Gets the underlying router instance
+     * Gets the underlying router instance.
      *
      * @return HttpRouter
      */
     public function getRouter(): HttpRouter
     {
-
         if (!empty($this->filters)) {
             $this->router->stack(...$this->filters);
         }
@@ -88,7 +87,7 @@ class RouteConfigurator
     }
 
     /**
-     * Adds a GET route
+     * Adds a GET route.
      *
      * @param string $route
      * @param callable $handler
@@ -102,7 +101,7 @@ class RouteConfigurator
     }
 
     /**
-     * Adds a POST route
+     * Adds a POST route.
      *
      * @param string $route
      * @param callable $handler
@@ -116,7 +115,7 @@ class RouteConfigurator
     }
 
     /**
-     * Adds a PUT route
+     * Adds a PUT route.
      *
      * @param string $route
      * @param callable $handler
@@ -130,7 +129,7 @@ class RouteConfigurator
     }
 
     /**
-     * Adds a DELETE route
+     * Adds a DELETE route.
      *
      * @param string $route
      * @param callable $handler
@@ -144,7 +143,7 @@ class RouteConfigurator
     }
 
     /**
-     * Adds a PATCH route
+     * Adds a PATCH route.
      *
      * @param string $route
      * @param callable $handler
@@ -158,7 +157,7 @@ class RouteConfigurator
     }
 
     /**
-     * Adds a HEAD route
+     * Adds a HEAD route.
      *
      * @param string $route
      * @param callable $handler
@@ -172,7 +171,7 @@ class RouteConfigurator
     }
 
     /**
-     * Adds an OPTIONS route
+     * Adds an OPTIONS route.
      *
      * @param string $route
      * @param callable $handler

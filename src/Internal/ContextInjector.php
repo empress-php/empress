@@ -11,7 +11,7 @@ use Throwable;
 use function Amp\call;
 
 /**
- * Class ContextInjector
+ * Class ContextInjector.
  *
  * Used for injecting the context object into handlers.
  * The context is injected in such a way that alleviates the need for manually returning a response object from a request handler.
@@ -62,7 +62,7 @@ class ContextInjector
         $deferred = new Deferred();
 
         call($this->handler, $context)->onResolve(function (?Throwable $t) use ($deferred) {
-            if (!is_null($t)) {
+            if (!\is_null($t)) {
                 $deferred->fail($t);
 
                 return;

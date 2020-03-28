@@ -1,17 +1,12 @@
 <?php
 
-
 namespace Empress\Middleware;
 
-use Amp\Deferred;
 use Amp\Http\Server\Middleware;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler;
 use Amp\Promise;
-use Amp\Success;
-use Empress\Context;
 use Empress\Internal\ContextInjector;
-use Throwable;
 use function Amp\call;
 
 class AfterMiddleware implements Middleware

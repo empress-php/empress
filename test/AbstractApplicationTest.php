@@ -43,5 +43,4 @@ class AbstractApplicationTest extends AsyncTestCase
         $server = $this->createMockServer();
         $this->assertInstanceOf(Success::class, $this->app->onStop($server));
     }
-
 }

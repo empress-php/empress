@@ -2,15 +2,11 @@
 
 namespace Empress\Internal;
 
-use Amp\Deferred;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler as RequestHandlerInterface;
 use Amp\Http\Server\Response;
 use Amp\Promise;
-use Empress\Context;
 
-use Throwable;
-use function Amp\call;
 
 /**
  * Empress-tailored request handler that handles response transformers.

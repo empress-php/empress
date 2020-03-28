@@ -2,16 +2,11 @@
 
 namespace Empress\Test\Routing;
 
-use Amp\Http\Server\Options;
-use Amp\Http\Server\RequestHandler;
-use Amp\Http\Server\Server;
 use Amp\PHPUnit\AsyncTestCase;
 use Amp\Promise;
 use Empress\Routing\RouteConfigurator;
 use Empress\Test\HelperTrait;
-use Psr\Log\LoggerInterface;
 use function Amp\call;
-use function Amp\Socket\listen;
 
 class RouteConfiguratorTest extends AsyncTestCase
 {
@@ -98,7 +93,8 @@ class RouteConfiguratorTest extends AsyncTestCase
 
         }
 
-        $request = $this->createMockRequest($method, '/');;
+        $request = $this->createMockRequest($method, '/');
+        ;
 
         yield $this->doRequest($request);
 
@@ -113,7 +109,8 @@ class RouteConfiguratorTest extends AsyncTestCase
             $r->get('/router', function () use (&$flag) { $flag = true; });
         });
 
-        $request = $this->createMockRequest('GET', '/prefix/router');;
+        $request = $this->createMockRequest('GET', '/prefix/router');
+        ;
 
         yield $this->doRequest($request);
 

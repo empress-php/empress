@@ -6,7 +6,6 @@ use Amp\Http\Cookie\RequestCookie;
 use Amp\Http\Cookie\ResponseCookie;
 use Amp\Http\Server\FormParser\Form;
 use Amp\Http\Server\FormParser\StreamedField;
-use Amp\Http\Server\Request;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Session\Session;
 use Amp\Http\Status;
@@ -277,7 +276,7 @@ class ContextTest extends AsyncTestCase
     public function testJson()
     {
         $data = ['status' => 'ok'];
-        $encoded = json_encode($data);
+        $encoded = \json_encode($data);
 
         $this->ctx->json($data);
 
