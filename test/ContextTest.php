@@ -11,6 +11,7 @@ use Amp\Http\Server\Session\Session;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
+use Empress\Exception\HaltException;
 use JsonException;
 use LogicException;
 use const INF;
@@ -292,6 +293,34 @@ class ContextTest extends AsyncTestCase
         $this->expectException(JsonException::class);
 
         $this->ctx->json([INF]);
+    }
+
+    public function testHalt()
+    {
+        $this->expectException(HaltException::class);
+
+        $this->ctx->halt();
+    }
+
+    public function testHaltWithStatus()
+    {
+        try {
+            $this->ctx->halt(Status::METHOD_NOT_ALLOWED);
+        } catch (HaltException $e) {
+            $response = $e->toResponse();
+            $this->assertEquals(Status::METHOD_NOT_ALLOWED, $response->getStatus());
+            $this->assertEmpty(yield $response->getBody()->read());
+        }
+    }
+
+    public function testHaltWithCustomBody()
+    {
+        try {
+            $this->ctx->halt(Status::OK, 'Go away');
+        } catch (HaltException $e) {
+            $response = $e->toResponse();
+            $this->assertEquals('Go away', yield $response->getBody()->read());
+        }
     }
 
 

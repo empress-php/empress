@@ -7,10 +7,12 @@ use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler;
 use Amp\Promise;
 use Empress\Internal\ContextInjector;
+use Empress\Internal\HaltAwareTrait;
 use function Amp\call;
 
 class BeforeMiddleware implements Middleware
 {
+    use HaltAwareTrait;
 
     /**
      * @var callable
@@ -30,9 +32,10 @@ class BeforeMiddleware implements Middleware
     {
         return call(function () use ($request, $requestHandler) {
             $injector = new ContextInjector($this->handler, $request);
-            yield $injector->inject();
 
-            return $requestHandler->handleRequest($request);
+            return yield $this->resolveInjectionResult($injector, function () use ($request, $requestHandler) {
+                return $requestHandler->handleRequest($request);
+            });
         });
     }
 }

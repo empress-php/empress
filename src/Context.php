@@ -17,6 +17,7 @@ use Amp\Http\Status;
 use Amp\Iterator;
 use Amp\Promise;
 use ArrayAccess;
+use Empress\Exception\HaltException;
 use JsonException;
 use LogicException;
 use function Amp\Http\Server\redirectTo;
@@ -404,6 +405,11 @@ class Context implements ArrayAccess
         $this->respond($result);
 
         return $this;
+    }
+
+    public function halt(int $status = Status::OK, $stringOrStream = null, array $headers = [])
+    {
+        throw new HaltException($status, $headers, $stringOrStream);
     }
 
     /**

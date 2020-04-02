@@ -2,10 +2,17 @@
 
 namespace Empress\Test\Routing;
 
+use Amp\Http\Server\Response;
+use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Amp\Promise;
+use Empress\Context;
+use Empress\Exception\RouteException;
 use Empress\Routing\RouteConfigurator;
+use Empress\Test\DummyController;
 use Empress\Test\HelperTrait;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Container\ContainerInterface;
 use function Amp\call;
 
 class RouteConfiguratorTest extends AsyncTestCase
@@ -17,9 +24,17 @@ class RouteConfiguratorTest extends AsyncTestCase
      */
     private $r;
 
+    /**
+     * @var MockObject
+     */
+    private $container;
+
     public function setUp(): void
     {
         $this->r = new RouteConfigurator();
+
+        $this->container = $this->getMockBuilder(ContainerInterface::class)->getMock();
+        $this->container->expects($this->any())->method('get')->will($this->returnValue(new DummyController()));
 
         parent::setUp();
     }
@@ -117,6 +132,117 @@ class RouteConfiguratorTest extends AsyncTestCase
         $this->assertTrue($flag);
     }
 
+    public function testBeforeBreaksResponseChain()
+    {
+        $flag = '';
+
+        $this->r->before(function (Context $ctx) {
+            $ctx->halt();
+        });
+
+        $this->r->get('/', function (Context $ctx) use (&$flag) {
+            $flag .= '1';
+        });
+
+        $request = $this->createMockRequest('GET', '/');
+
+        yield $this->doRequest($request);
+
+        $this->assertEquals('', $flag);
+    }
+
+    public function testBeforeBreaksFilterChain()
+    {
+        $this->r->before(function (Context $ctx) {
+            $ctx->halt();
+        });
+
+        $this->r->get('/', function (Context $ctx) use (&$flag) {
+            $flag .= '1';
+        });
+
+        $this->r->after(function () use (&$flag) {
+            $flag .= '2';
+        });
+
+        $request = $this->createMockRequest('GET', '/');
+
+        yield $this->doRequest($request);
+
+        $this->assertEquals('', $flag);
+    }
+
+    public function testBeforeBreaksInnerFilterChainOnly()
+    {
+        $flag = '';
+
+        $this->r->group('/group', function (RouteConfigurator $r) {
+            $r->before(function (Context $ctx) {
+                $ctx->halt();
+            });
+
+            $r->get('/', function (Context $ctx) use (&$flag) {
+                $flag .= '1';
+            });
+
+            $r->after(function () use (&$flag) {
+                $flag .= '2';
+            });
+        });
+
+        $this->r->after(function () use (&$flag) {
+            $flag .= '3';
+        });
+
+        $request = $this->createMockRequest('GET', '/group/');
+
+        yield $this->doRequest($request);
+
+        $this->assertEquals('3', $flag);
+    }
+
+    public function testContainerHandler()
+    {
+        $this->container->expects($this->once())->method('has')->will($this->returnValue(true));
+
+        $this->r->useContainer($this->container);
+        $this->r->get('/', 'DummyController@dummy');
+
+        $request = $this->createMockRequest('GET', '/');
+
+        /** @var Response $response */
+        $response = yield $this->doRequest($request);
+
+        $this->assertEquals(Status::UNAUTHORIZED, $response->getStatus());
+    }
+
+    public function testContainerHandlerAbsent()
+    {
+        $this->expectException(RouteException::class);
+
+        $this->r->useContainer($this->container);
+        $this->r->get('/', 'DummyController@dummyzzz');
+    }
+
+    public function testContainerHandlerNotCallable()
+    {
+        $this->expectException(RouteException::class);
+
+        $this->r->useContainer($this->container);
+        $this->r->get('/', 'someDummyHandler');
+    }
+
+    public function testContainerControllerAbsent()
+    {
+        $this->expectException(RouteException::class);
+
+        $container = $this->getMockBuilder(ContainerInterface::class)->getMock();
+        $container->expects($this->once())->method('has')->will($this->returnValue(false));
+
+        $this->r->useContainer($container);
+        $this->r->get('/', 'AnotherDummyController@dummy');
+    }
+
     public function httpMethodProvider(): array
     {
         return [
@@ -136,7 +262,7 @@ class RouteConfiguratorTest extends AsyncTestCase
         $router->onStart($this->createMockServer());
 
         return call(function () use ($request, $router) {
-            yield $router->handleRequest($request);
+            return yield $router->handleRequest($request);
         });
     }
 }
