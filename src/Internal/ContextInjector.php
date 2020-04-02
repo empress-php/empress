@@ -54,7 +54,7 @@ class ContextInjector
      * Injects the context object into the handler.
      * It runs the handler and returns a promise that will eventually resolve to a response.
      *
-     * @return Promise<Promise>
+     * @return Promise<Response>
      */
     public function inject(): Promise
     {
