@@ -5,41 +5,18 @@
 # Work in progress ⚡
 
 # Empress
-Empress is a flexible microframework for creating async web applications, based on Amp concurrency framework.
-Its name is a portmanteau of Express and Amp as Empress's simplicity was first inspired by Express.js. Ultimately it's also the name
-of one of the cards from Major Arcana, a part of the tarot deck.
+Empress is a flexible microframework for creating async web applications. It's based on the Amp concurrency framework.
+Its name is a portmanteau of Express and Amp as Empress's simplicity was first inspired by Express.js. Later, many useful ideas were incorporated from [Spark](http://sparkjava.com/) and [Javalin](https://javalin.io/) Ultimately it's also the name of one of the cards from Major Arcana, a part of the tarot deck.
 
-# Examples
-## Hello, Empress!
-A minimal working Hello World example.
+The main focus is on simplicity. Notable features include:
+- [x] Before & after filters
+- [x] Easy access to request and response objects
+- [x] Support for injectable controllers via PSR-11
+- [x] Easy response handling with methods like respond(), json() and html()
+- [x] Access to request params using array notation: `$ctx['param']`
+- [x] Builtin support for session middleware
 
-```php
-require_once __DIR__ . '/../vendor/autoload.php';
-
-use Amp\Loop;
-use Empress\Empress;
-use Empress\AbstractApplication;
-use Empress\Routing\RouteConfigurator;
-
-Loop::run(function () {
-    $empress = new Empress(new class extends AbstractApplication {
-        public function configureRoutes(): RouteConfigurator
-        {
-            $r = new RouteConfigurator();
-
-            $r->get('/', fn ($params, $request) => "Hello, Empress!");
-
-            return $r;
-        }
-    });
-
-    yield $empress->boot();
-});
-```
-## RequestContext params
-Working with request params is very easy. Just substitute the get route from the previous example:
-```php
-// ...
-$r->get('/{name}', fn ($params, $request) => "Hello, ${params['name']}");
-// ...
-```
+Roadmap
+- [ ] Filter chain
+- [ ] Status and exception mapping
+- [ ] Support for templates
