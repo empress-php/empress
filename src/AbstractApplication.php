@@ -15,24 +15,21 @@ use Empress\Routing\RouteConfigurator;
  * lifecycle methods - onStart() and onStop() that can be used
  * when the application is booted and shut down respectively.
  */
-abstract class AbstractApplication implements ServerObserver
+abstract class AbstractApplication implements ApplicationInterface
 {
 
     /**
-     * Defines routes for the application.
-     *
-     * @param RouteConfigurator $routeConfigurator
-     * @return void
+     * @inheritDoc
      */
-    abstract public function configureRoutes(RouteConfigurator $routeConfigurator): void;
+    abstract public function configureRoutes(RouteConfigurator $routes): void;
+
 
     /**
-     * Configures the application instance before the server starts.
-     *
-     * @param ApplicationConfiguration $applicationConfiguration
-     * @return void
+     * @inheritDoc
      */
-    abstract public function configureApplication(ApplicationConfiguration $applicationConfiguration): void;
+    public function configureApplication(ApplicationConfiguration $configuration)
+    {
+    }
 
     /** @inheritDoc */
     public function onStart(Server $server): Promise

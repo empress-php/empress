@@ -45,9 +45,9 @@ class Empress
 
     /**
      * Empress constructor.
-     * @param AbstractApplication $application
+     * @param ApplicationInterface $application
      */
-    public function __construct(AbstractApplication $application)
+    public function __construct(ApplicationInterface $application)
     {
         $this->application = $application;
         $this->applicationConfiguration = new ApplicationConfiguration();

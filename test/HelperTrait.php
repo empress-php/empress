@@ -11,7 +11,6 @@ use Amp\Http\Server\Server;
 use Amp\Http\Server\Session\InMemoryStorage;
 use Amp\Http\Server\Session\Session;
 use Empress\AbstractApplication;
-use Empress\Configuration\ApplicationConfiguration;
 use Empress\Routing\RouteConfigurator;
 use League\Uri\Http;
 use Psr\Log\LoggerInterface;
@@ -50,10 +49,6 @@ trait HelperTrait
     private function createApplication()
     {
         return new class extends AbstractApplication {
-            public function configureApplication(ApplicationConfiguration $applicationConfiguration): void
-            {
-            }
-
             public function configureRoutes(RouteConfigurator $routeConfigurator): void
             {
             }
