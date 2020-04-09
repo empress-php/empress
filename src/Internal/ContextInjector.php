@@ -37,17 +37,24 @@ class ContextInjector
     private $response;
 
     /**
+     * @var Throwable
+     */
+    private $exception;
+
+    /**
      * ContextInjector constructor.
      *
      * @param callable $handler
      * @param Request $request
      * @param Response|null $response
+     * @param Throwable|null $exception
      */
-    public function __construct(callable $handler, Request $request, Response $response = null)
+    public function __construct(callable $handler, Request $request, Response $response = null, Throwable $exception = null)
     {
         $this->handler = $handler;
         $this->request = $request;
         $this->response = $response ?? new Response();
+        $this->exception = $exception;
     }
 
     /**
@@ -58,7 +65,7 @@ class ContextInjector
      */
     public function inject(): Promise
     {
-        $context = new Context($this->request, $this->response);
+        $context = new Context($this->request, $this->response, $this->exception);
         $deferred = new Deferred();
 
         call($this->handler, $context)->onResolve(function (?Throwable $t) use ($deferred) {

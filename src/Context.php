@@ -2,6 +2,7 @@
 
 namespace Empress;
 
+use Amp\ByteStream\InputStream;
 use Amp\Http\Cookie\CookieAttributes;
 use Amp\Http\Cookie\InvalidCookieException;
 use Amp\Http\Cookie\RequestCookie;
@@ -9,6 +10,7 @@ use Amp\Http\Cookie\ResponseCookie;
 use Amp\Http\Server\FormParser\BufferingParser;
 use Amp\Http\Server\FormParser\Form;
 use Amp\Http\Server\FormParser\StreamingParser;
+use Amp\Http\Server\MissingAttributeError;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Router;
@@ -18,8 +20,10 @@ use Amp\Iterator;
 use Amp\Promise;
 use ArrayAccess;
 use Empress\Exception\HaltException;
+use Empress\Exception\RequestException;
 use JsonException;
 use LogicException;
+use Throwable;
 use function Amp\Http\Server\redirectTo;
 
 class Context implements ArrayAccess
@@ -66,19 +70,34 @@ class Context implements ArrayAccess
     private $params;
 
     /**
-     * @var Session
+     * @var Session|null
      */
     private $session;
 
     /**
+     * @var Throwable
+     */
+    private $exception;
+
+    /**
+     * @var string|InputStream
+     */
+    private $stringOrStream;
+
+    /**
      * Context constructor.
+     *
      * @param Request $req
      * @param Response $res
+     * @param Throwable|null $exception
+     * @throws RequestException
      */
-    public function __construct(Request $req, Response $res)
+    public function __construct(Request $req, Response $res, Throwable $exception = null)
     {
         $this->req = $req;
         $this->res = $res;
+        $this->exception = $exception;
+        $this->stringOrStream = null;
 
         $this->bufferingParser = new BufferingParser();
         $this->streamingParser = new StreamingParser();
@@ -87,8 +106,9 @@ class Context implements ArrayAccess
         \parse_str($this->queryString, $parsed);
         $this->queryArray = $parsed;
 
-        $this->params = $req->getAttribute(Router::class);
-        $this->session = $req->getAttribute(Session::class);
+        $this->params = $this->getRequestAttribute(Router::class, []);
+        $this->session = $this->getRequestAttribute(Session::class, null);
+        $this->exception = $exception;
     }
 
     /**
@@ -112,7 +132,7 @@ class Context implements ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        throw new LogicException('You cannot set values of an existing request object');
+        throw new LogicException('Cannot set values of an existing request object');
     }
 
     /**
@@ -120,7 +140,7 @@ class Context implements ArrayAccess
      */
     public function offsetUnset($offset)
     {
-        throw new LogicException('You cannot unset values of an existing request object');
+        throw new LogicException('Cannot unset values of an existing request object');
     }
 
     /**
@@ -144,8 +164,8 @@ class Context implements ArrayAccess
     }
 
     /**
-     * @see \Amp\Http\Server\FormParser\StreamingParser::parseForm
      * @return Iterator
+     * @see \Amp\Http\Server\FormParser\StreamingParser::parseForm
      */
     public function streamedForm(): Iterator
     {
@@ -153,8 +173,8 @@ class Context implements ArrayAccess
     }
 
     /**
-     * @see \Amp\Http\Server\FormParser\BufferingParser::parseForm
      * @return Promise<Form>
+     * @see \Amp\Http\Server\FormParser\BufferingParser::parseForm
      */
     public function bufferedForm(): Promise
     {
@@ -184,9 +204,9 @@ class Context implements ArrayAccess
     /**
      * Gets session associated with this request.
      *
-     * @return Session
+     * @return Session|null
      */
-    public function session(): Session
+    public function session(): ?Session
     {
         return $this->session;
     }
@@ -353,6 +373,11 @@ class Context implements ArrayAccess
         return $this;
     }
 
+    public function requestHeader(string $name): ?string
+    {
+        return $this->req->getHeader($name);
+    }
+
     /**
      * Sends a string or stream response.
      *
@@ -361,9 +386,21 @@ class Context implements ArrayAccess
      */
     public function respond($stringOrStream): self
     {
+        $this->stringOrStream = $stringOrStream;
+
         $this->res->setBody($stringOrStream);
 
         return $this;
+    }
+
+    /**
+     * Gets response body to be sent
+     *
+     * @return string|InputStream
+     */
+    public function responseBody()
+    {
+        return $this->stringOrStream;
     }
 
     /**
@@ -393,7 +430,7 @@ class Context implements ArrayAccess
         $this->contentType('application/json');
 
         if (\PHP_VERSION >= 70300) {
-            $result = \json_encode($data, \JSON_THROW_ON_ERROR);
+            $result = \json_encode($data, JSON_THROW_ON_ERROR);
         } else {
             $result = \json_encode($data);
 
@@ -410,6 +447,30 @@ class Context implements ArrayAccess
     public function halt(int $status = Status::OK, $stringOrStream = null, array $headers = [])
     {
         throw new HaltException($status, $headers, $stringOrStream);
+    }
+
+    /**
+     * If used inside an exception mapper it returns the exception caught.
+     * It returns null otherwise.
+     *
+     * @return Throwable|null
+     */
+    public function exception(): ?Throwable
+    {
+        return $this->exception;
+    }
+
+    /**
+     * If used inside an exception mapper it re-throws the caught exception.
+     * It's a noop if no exception was thrown.
+     *
+     * @throws Throwable
+     */
+    public function rethrow(): void
+    {
+        if ($this->exception !== null) {
+            throw $this->exception;
+        }
     }
 
     /**
@@ -430,5 +491,20 @@ class Context implements ArrayAccess
     public function getHttpServerResponse()
     {
         return $this->res;
+    }
+
+    /**
+     * @param string $attributeName
+     * @param $default
+     * @return mixed
+     * @throws RequestException
+     */
+    private function getRequestAttribute(string $attributeName, $default)
+    {
+        try {
+            return $this->req->getAttribute($attributeName);
+        } catch (MissingAttributeError $e) {
+            throw new RequestException(sprintf('Incomplete request data. Attribute %s missing', $attributeName));
+        }
     }
 }
