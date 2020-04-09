@@ -3,11 +3,10 @@
 namespace Empress;
 
 use Amp\Http\Server\Server;
-use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Amp\Success;
 use Empress\Configuration\ApplicationConfiguration;
-use Empress\Routing\RouteConfigurator;
+use Empress\Routing\Routes;
 
 /**
  * Defines an application object that will be run against http-server.
@@ -21,7 +20,7 @@ abstract class AbstractApplication implements ApplicationInterface
     /**
      * @inheritDoc
      */
-    abstract public function configureRoutes(RouteConfigurator $routes): void;
+    abstract public function configureRoutes(Routes $routes): void;
 
 
     /**

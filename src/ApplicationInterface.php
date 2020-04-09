@@ -6,17 +6,18 @@ use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Empress\Configuration\ApplicationConfiguration;
-use Empress\Routing\RouteConfigurator;
+use Empress\Routing\Routes;
 
 interface ApplicationInterface extends ServerObserver
 {
+
     /**
      * Defines routes for the application.
      *
-     * @param RouteConfigurator $routes
+     * @param Routes $routes
      * @return void
      */
-    public function configureRoutes(RouteConfigurator $routes): void;
+    public function configureRoutes(Routes $routes): void;
 
     /**
      * Configures the application instance before the server starts.
@@ -25,14 +26,4 @@ interface ApplicationInterface extends ServerObserver
      * @return void
      */
     public function configureApplication(ApplicationConfiguration $configuration);
-
-    /**
-     * @inheritDoc
-     */
-    public function onStart(Server $server): Promise;
-
-    /**
-     * @inheritDoc
-     */
-    public function onStop(Server $server): Promise;
 }

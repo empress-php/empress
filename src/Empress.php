@@ -12,7 +12,7 @@ use Closure;
 use Empress\Configuration\ApplicationConfiguration;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
-use Empress\Routing\RouteConfigurator;
+use Empress\Routing\Routes;
 use Exception;
 use Throwable;
 use function Amp\call;
@@ -39,7 +39,7 @@ class Empress
     private $booted;
 
     /**
-     * @var RouteConfigurator
+     * @var Routes
      */
     private $routeConfigurator;
 
@@ -51,7 +51,7 @@ class Empress
     {
         $this->application = $application;
         $this->applicationConfiguration = new ApplicationConfiguration();
-        $this->routeConfigurator = new RouteConfigurator();
+        $this->routeConfigurator = new Routes();
         $this->booted = false;
     }
 

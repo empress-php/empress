@@ -2,24 +2,44 @@
 
 namespace Empress\Routing;
 
-use Amp\Http\Server\Router as HttpRouter;
+use Amp\Http\Server\Router;
 use Closure;
 use Empress\Exception\RouteException;
 use Empress\Internal\RequestHandler;
-use Empress\Middleware\AfterMiddleware;
-use Empress\Middleware\BeforeMiddleware;
+use Empress\Middleware\Exception\ExceptionHandler;
+use Empress\Middleware\Exception\ExceptionMappingMiddleware;
+use Empress\Middleware\Filter\AfterMiddleware;
+use Empress\Middleware\Filter\BeforeMiddleware;
+use Empress\Middleware\Filter\FilterHandler;
+use Empress\Middleware\Status\StatusHandler;
+use Empress\Middleware\Status\StatusMappingMiddleware;
 use Psr\Container\ContainerInterface;
 
-class RouteConfigurator
+class Routes
 {
 
-    /** @var HttpRouter */
+    /** @var  Router */
     private $router;
 
     /**
-     * @var array
+     * @var BeforeMiddleware
      */
-    private $filters;
+    private $beforeMiddleware;
+
+    /**
+     * @var BeforeMiddleware
+     */
+    private $afterMiddleware;
+
+    /**
+     * @var StatusMappingMiddleware
+     */
+    private $statusMappingMiddleware;
+
+    /**
+     * @var ExceptionMappingMiddleware
+     */
+    private $exceptionMappingMiddleware;
 
     /**
      * @var ContainerInterface|null
@@ -27,13 +47,24 @@ class RouteConfigurator
     private $container;
 
     /**
-     * RouteConfigurator constructor.
+     * @var StatusMappingMiddleware
+     */
+    private $serverErrorHandler;
+
+    /**
+     * Routes constructor.
      *
      */
     public function __construct()
     {
-        $this->router = new HttpRouter();
+        $this->router = new Router();
+        $this->serverErrorHandler = new StatusMappingMiddleware();
         $this->container = null;
+
+        $this->beforeMiddleware = new BeforeMiddleware();
+        $this->afterMiddleware = new AfterMiddleware();
+        $this->statusMappingMiddleware = new StatusMappingMiddleware();
+        $this->exceptionMappingMiddleware = new ExceptionMappingMiddleware();
     }
 
     /**
@@ -44,9 +75,9 @@ class RouteConfigurator
      */
     public function before(callable $callable): self
     {
-        $beforeMiddleware = new BeforeMiddleware($callable);
+        $beforeFilter = new FilterHandler($callable);
 
-        $this->filters[] = $beforeMiddleware;
+        $this->beforeMiddleware->addHandler($beforeFilter);
 
         return $this;
     }
@@ -59,9 +90,27 @@ class RouteConfigurator
      */
     public function after(callable $callable): self
     {
-        $afterMiddleware = new AfterMiddleware($callable);
+        $afterFilter = new FilterHandler($callable);
 
-        $this->filters[] = $afterMiddleware;
+        $this->afterMiddleware->addHandler($afterFilter);
+
+        return $this;
+    }
+
+    public function exception(string $exceptionClass, callable $callable): self
+    {
+        $exceptionHandler = new ExceptionHandler($exceptionClass, $callable);
+
+        $this->exceptionMappingMiddleware->addHandler($exceptionHandler);
+
+        return $this;
+    }
+
+    public function status(int $status, callable $callable, array $headers = []): self
+    {
+        $statusHandler = new StatusHandler($status, $callable, $headers);
+
+        $this->statusMappingMiddleware->addHandler($statusHandler);
 
         return $this;
     }
@@ -71,7 +120,7 @@ class RouteConfigurator
      *
      * @param string $prefix
      * @param Closure $closure
-     * @return RouteConfigurator
+     * @return Routes
      */
     public function group(string $prefix, Closure $closure): self
     {
@@ -86,13 +135,16 @@ class RouteConfigurator
     /**
      * Gets the underlying router instance.
      *
-     * @return HttpRouter
+     * @return
      */
-    public function getRouter(): HttpRouter
+    public function getRouter(): Router
     {
-        if (!empty($this->filters)) {
-            $this->router->stack(...$this->filters);
-        }
+        $this->router->stack(
+            $this->exceptionMappingMiddleware,
+            $this->beforeMiddleware,
+            $this->afterMiddleware,
+            $this->statusMappingMiddleware
+        );
 
         return $this->router;
     }
@@ -102,7 +154,7 @@ class RouteConfigurator
      *
      * @param string $route
      * @param mixed $handler
-     * @return RouteConfigurator
+     * @return Routes
      * @throws RouteException
      */
     public function get(string $route, $handler): self
@@ -117,7 +169,7 @@ class RouteConfigurator
      *
      * @param string $route
      * @param mixed $handler
-     * @return RouteConfigurator
+     * @return Routes
      * @throws RouteException
      */
     public function post(string $route, $handler): self
@@ -132,7 +184,7 @@ class RouteConfigurator
      *
      * @param string $route
      * @param mixed $handler
-     * @return RouteConfigurator
+     * @return Routes
      * @throws RouteException
      */
     public function put(string $route, $handler): self
@@ -147,7 +199,7 @@ class RouteConfigurator
      *
      * @param string $route
      * @param mixed $handler
-     * @return RouteConfigurator
+     * @return Routes
      * @throws RouteException
      */
     public function delete(string $route, $handler): self
@@ -162,7 +214,7 @@ class RouteConfigurator
      *
      * @param string $route
      * @param mixed $handler
-     * @return RouteConfigurator
+     * @return Routes
      * @throws RouteException
      */
     public function patch(string $route, $handler): self
@@ -177,7 +229,7 @@ class RouteConfigurator
      *
      * @param string $route
      * @param mixed $handler
-     * @return RouteConfigurator
+     * @return Routes
      * @throws RouteException
      */
     public function head(string $route, $handler): self
@@ -192,7 +244,7 @@ class RouteConfigurator
      *
      * @param string $route
      * @param mixed $handler
-     * @return RouteConfigurator
+     * @return Routes
      * @throws RouteException
      */
     public function options(string $route, $handler): self
@@ -246,6 +298,7 @@ class RouteConfigurator
 
             return [$object, $method];
         }
+
         throw new RouteException(\sprintf('Class: %s not found in container', $class));
     }
 }
