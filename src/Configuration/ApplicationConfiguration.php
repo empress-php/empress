@@ -17,34 +17,53 @@ use function Amp\ByteStream\getStdout;
 
 /**
  * Defines the application environment that will be used by http-server.
- * Logging, server options and middlewares are all registered using this class.
+ * Server logging, server options and middlewares are all registered using this class.
  */
 class ApplicationConfiguration
 {
-    /** @var Middleware[] */
+    /**
+     * @var Middleware[]
+     */
     private $middlewares = [];
 
-    /** @var Options */
+    /**
+     * @var Options
+     */
     private $options;
 
-    /** @var LoggerInterface */
+    /**
+     *@var LoggerInterface
+     */
     private $logger;
 
-    /** @var string|null */
+    /**
+     * @var string|null
+     */
     private $staticContentPath;
 
-    /** @var Storage */
+    /**
+     *@var Storage
+     */
     private $sessionStorage;
 
-    /** @var ServerTlsContext */
+    /**
+     * @var ServerTlsContext
+     */
     private $tlsContext;
 
-    /** @var int|null */
+    /**
+     * @var int|null
+     */
     private $tlsPort;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $port = 1337;
 
+    /**
+     * ApplicationConfiguration constructor.
+     */
     public function __construct()
     {
         $this->options = new Options;
@@ -52,7 +71,9 @@ class ApplicationConfiguration
     }
 
     /**
-     * @inheritDoc
+     * Returns all registered middlewares.
+     *
+     * @return array<Middleware>
      */
     public function getMiddlewares(): array
     {
@@ -60,7 +81,9 @@ class ApplicationConfiguration
     }
 
     /**
-     * @inheritDoc
+     * Gets logger used by http-server
+     *
+     * @return LoggerInterface
      */
     public function getLogger(): LoggerInterface
     {
@@ -77,7 +100,9 @@ class ApplicationConfiguration
     }
 
     /**
-     * @inheritDoc
+     * Gets configured server options
+     *
+     * @return Options
      */
     public function getServerOptions(): Options
     {
@@ -85,7 +110,9 @@ class ApplicationConfiguration
     }
 
     /**
-     * @inheritDoc
+     * Gets path that will be used for serving static files.
+     *
+     * @return string|null
      */
     public function getStaticContentPath(): ?string
     {
@@ -93,7 +120,9 @@ class ApplicationConfiguration
     }
 
     /**
-     * @inheritDoc
+     * Gets the fallback static file handler.
+     *
+     * @return DocumentRoot|null
      */
     public function getDocumentRootHandler(): ?DocumentRoot
     {
@@ -105,7 +134,7 @@ class ApplicationConfiguration
     }
 
     /**
-     * @inheritDoc
+     * @return Storage
      */
     public function getSessionStorage(): Storage
     {
@@ -113,20 +142,23 @@ class ApplicationConfiguration
     }
 
     /**
-     * @inheritDoc
+     * @return ServerTlsContext|null
      */
     public function getTlsContext(): ?ServerTlsContext
     {
         return $this->tlsContext;
     }
 
+    /**
+     * @return int|null
+     */
     public function getTlsPort(): ?int
     {
         return $this->tlsPort;
     }
 
     /**
-     * @inheritDoc
+     * @return int
      */
     public function getPort(): int
     {
@@ -134,6 +166,8 @@ class ApplicationConfiguration
     }
 
     /**
+     * Adds a middleware.
+     *
      * @param Middleware $middleware
      * @return self
      */
@@ -145,6 +179,8 @@ class ApplicationConfiguration
     }
 
     /**
+     * Sets the logger used by http-server.
+     *
      * @param LoggerInterface $logger
      * @return self
      */
@@ -156,6 +192,8 @@ class ApplicationConfiguration
     }
 
     /**
+     * Adds http-server options.
+     *
      * @param Options $options
      * @return self
      */
@@ -167,6 +205,8 @@ class ApplicationConfiguration
     }
 
     /**
+     * Sets path that will be used for serving static files.
+     *
      * @param string $path
      * @return self
      */
