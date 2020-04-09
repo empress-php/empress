@@ -21,7 +21,7 @@ class ApplicationConfigurationTest extends TestCase
         $this->configuration = new ApplicationConfiguration();
     }
 
-    public function testWithTls()
+    public function testWithTls(): void
     {
         $this->assertNull($this->configuration->getTlsContext());
         $this->assertNull($this->configuration->getTlsPort());
@@ -32,7 +32,7 @@ class ApplicationConfigurationTest extends TestCase
         $this->assertEquals(1024, $this->configuration->getTlsPort());
     }
 
-    public function testWithStaticContentPath()
+    public function testWithStaticContentPath(): void
     {
         $this->assertNull($this->configuration->getStaticContentPath());
         $this->assertNull($this->configuration->getDocumentRootHandler());
@@ -43,7 +43,7 @@ class ApplicationConfigurationTest extends TestCase
         $this->assertNotNull($this->configuration->getDocumentRootHandler());
     }
 
-    public function testWithMiddleware()
+    public function testWithMiddleware(): void
     {
         $this->assertEmpty($this->configuration->getMiddlewares());
 
@@ -54,7 +54,7 @@ class ApplicationConfigurationTest extends TestCase
         $this->assertContains($middleware, $middlewares);
     }
 
-    public function testWithLogger()
+    public function testWithLogger(): void
     {
         $this->assertNotNull($this->configuration->getLogger());
 
@@ -64,7 +64,7 @@ class ApplicationConfigurationTest extends TestCase
         $this->assertSame($logger, $this->configuration->getLogger());
     }
 
-    public function testWithSessionStorage()
+    public function testWithSessionStorage(): void
     {
         $this->assertNotNull($this->configuration->getSessionStorage());
 
@@ -74,7 +74,7 @@ class ApplicationConfigurationTest extends TestCase
         $this->assertSame($storage, $this->configuration->getSessionStorage());
     }
 
-    public function testWithServerOptions()
+    public function testWithServerOptions(): void
     {
         $this->assertNotNull($this->configuration->getServerOptions());
 
@@ -84,7 +84,7 @@ class ApplicationConfigurationTest extends TestCase
         $this->assertSame($options, $this->configuration->getServerOptions());
     }
 
-    public function testWithPort()
+    public function testWithPort(): void
     {
         $this->assertNotNull($this->configuration->getPort());
 

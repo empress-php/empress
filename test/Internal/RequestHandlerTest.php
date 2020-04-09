@@ -15,12 +15,10 @@ class RequestHandlerTest extends AsyncTestCase
 
     public function testPlainResponse()
     {
-        $closure = function (Context $ctx) {
+        $request = $this->createMockRequest();
+        $handler = new RequestHandler(function (Context $ctx) {
             $ctx->respond('Hello, World!');
-        };
-
-        $request = $this->createMockRequest('GET', '/');
-        $handler = new RequestHandler($closure);
+        });
 
         /** @var Response $response */
         $response = yield $handler->handleRequest($request);
@@ -31,19 +29,17 @@ class RequestHandlerTest extends AsyncTestCase
 
     public function testHandlerWithRequestParams()
     {
-        $closure = function (Context $ctx) {
-            $name = $ctx['name'];
-            $ctx->respond("Hello, $name");
-        };
-
         $request = $this->createMockRequest('GET', '/', [
-            'name' => 'Jakob',
+            'name' => 'World',
         ]);
-        $handler = new RequestHandler($closure);
+        $handler = new RequestHandler(function (Context $ctx) {
+            $name = $ctx['name'];
+            $ctx->respond("Hello, $name!");
+        });
 
         /** @var Response $response */
         $response = yield $handler->handleRequest($request);
 
-        $this->assertEquals('Hello, Jakob', yield $response->getBody()->read());
+        $this->assertEquals('Hello, World!', yield $response->getBody()->read());
     }
 }

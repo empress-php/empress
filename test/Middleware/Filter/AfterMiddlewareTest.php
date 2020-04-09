@@ -1,11 +1,12 @@
 <?php
 
-namespace Empress\Test\Middleware;
+namespace Empress\Test\Middleware\Filter;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Internal\RequestHandler;
-use Empress\Middleware\AfterMiddleware;
+use Empress\Middleware\Filter\AfterMiddleware;
+use Empress\Middleware\Filter\FilterHandler;
 use Empress\Test\HelperTrait;
 
 class AfterMiddlewareTest extends AsyncTestCase
@@ -20,12 +21,14 @@ class AfterMiddlewareTest extends AsyncTestCase
             $flag .= '1';
         });
 
-        $afterHandler = function (Context $ctx) use (&$flag) {
+        $afterHandler = new FilterHandler(function (Context $ctx) use (&$flag) {
             $flag .= '2';
-        };
+        });
 
-        $request = $this->createMockRequest('GET', '/');
-        $middleware = new AfterMiddleware($afterHandler);
+        $middleware = new AfterMiddleware;
+        $middleware->addHandler($afterHandler);
+
+        $request = $this->createMockRequest();
 
         yield $middleware->handleRequest($request, $handler);
 

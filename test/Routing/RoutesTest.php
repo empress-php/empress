@@ -8,19 +8,19 @@ use Amp\PHPUnit\AsyncTestCase;
 use Amp\Promise;
 use Empress\Context;
 use Empress\Exception\RouteException;
-use Empress\Routing\RouteConfigurator;
+use Empress\Routing\Routes;
 use Empress\Test\DummyController;
 use Empress\Test\HelperTrait;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 use function Amp\call;
 
-class RouteConfiguratorTest extends AsyncTestCase
+class RoutesTest extends AsyncTestCase
 {
     use HelperTrait;
 
     /**
-     * @var RouteConfigurator
+     * @var Routes
      */
     private $r;
 
@@ -31,7 +31,7 @@ class RouteConfiguratorTest extends AsyncTestCase
 
     public function setUp(): void
     {
-        $this->r = new RouteConfigurator();
+        $this->r = new Routes();
 
         $this->container = $this->getMockBuilder(ContainerInterface::class)->getMock();
         $this->container->expects($this->any())->method('get')->will($this->returnValue(new DummyController()));
@@ -48,7 +48,7 @@ class RouteConfiguratorTest extends AsyncTestCase
         $this->r->before(function () use (&$flag) { $flag .= '2'; });
         $this->r->before(function () use (&$flag) { $flag .= '3'; });
 
-        $request = $this->createMockRequest('GET', '/');
+        $request = $this->createMockRequest();
 
         yield $this->doRequest($request);
 
@@ -64,12 +64,24 @@ class RouteConfiguratorTest extends AsyncTestCase
         $this->r->after(function () use (&$flag) { $flag .= '2'; });
         $this->r->after(function () use (&$flag) { $flag .= '3'; });
 
-        $request = $this->createMockRequest('GET', '/');
+        $request = $this->createMockRequest();
 
         yield $this->doRequest($request);
 
-        $this->assertEquals('321', $flag);
+        $this->assertEquals('123', $flag);
     }
+
+    public function testException()
+    {
+
+    }
+
+    public function testStatus()
+    {
+
+    }
+
+
 
     /** @dataProvider httpMethodProvider */
     public function testHttpMethods(string $method)
@@ -108,7 +120,7 @@ class RouteConfiguratorTest extends AsyncTestCase
 
         }
 
-        $request = $this->createMockRequest($method, '/');
+        $request = $this->createMockRequest($method);
         ;
 
         yield $this->doRequest($request);
@@ -120,7 +132,7 @@ class RouteConfiguratorTest extends AsyncTestCase
     {
         $flag = false;
 
-        $this->r->group('/prefix', function (RouteConfigurator $r) use (&$flag) {
+        $this->r->group('/prefix', function (Routes $r) use (&$flag) {
             $r->get('/router', function () use (&$flag) { $flag = true; });
         });
 
@@ -144,7 +156,7 @@ class RouteConfiguratorTest extends AsyncTestCase
             $flag .= '1';
         });
 
-        $request = $this->createMockRequest('GET', '/');
+        $request = $this->createMockRequest();
 
         yield $this->doRequest($request);
 
@@ -165,7 +177,7 @@ class RouteConfiguratorTest extends AsyncTestCase
             $flag .= '2';
         });
 
-        $request = $this->createMockRequest('GET', '/');
+        $request = $this->createMockRequest();
 
         yield $this->doRequest($request);
 
@@ -176,7 +188,7 @@ class RouteConfiguratorTest extends AsyncTestCase
     {
         $flag = '';
 
-        $this->r->group('/group', function (RouteConfigurator $r) {
+        $this->r->group('/group', function (Routes $r) {
             $r->before(function (Context $ctx) {
                 $ctx->halt();
             });
@@ -208,7 +220,7 @@ class RouteConfiguratorTest extends AsyncTestCase
         $this->r->useContainer($this->container);
         $this->r->get('/', 'DummyController@dummy');
 
-        $request = $this->createMockRequest('GET', '/');
+        $request = $this->createMockRequest();
 
         /** @var Response $response */
         $response = yield $this->doRequest($request);

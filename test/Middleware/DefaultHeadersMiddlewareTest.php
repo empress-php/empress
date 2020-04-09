@@ -19,7 +19,7 @@ class DefaultHeadersMiddlewareTest extends AsyncTestCase
             'x-Custom-2' => 'some other value',
         ];
 
-        $request = $this->createMockRequest('GET', '/');
+        $request = $this->createMockRequest();
         $handler = new CallableRequestHandler(function () {
             return new Response();
         });

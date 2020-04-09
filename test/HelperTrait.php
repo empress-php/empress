@@ -11,14 +11,14 @@ use Amp\Http\Server\Server;
 use Amp\Http\Server\Session\InMemoryStorage;
 use Amp\Http\Server\Session\Session;
 use Empress\AbstractApplication;
-use Empress\Routing\RouteConfigurator;
+use Empress\Routing\Routes;
 use League\Uri\Http;
 use Psr\Log\LoggerInterface;
 use function Amp\Socket\listen;
 
 trait HelperTrait
 {
-    private function createMockRequest(string $method, string $uri, array $params = [])
+    private function createMockRequest(string $method = 'GET', string $uri = '/', array $params = [], $excludeSession = false)
     {
         $client = $this->getMockBuilder(Client::class)->getMock();
         $client->method('getLocalPort')->willReturn(1234);
@@ -27,8 +27,10 @@ trait HelperTrait
         $request = new Request($client, $method, Http::createFromString($uri));
         $request->setAttribute(Router::class, $params);
 
-        $session = new Session(new InMemoryStorage(), 0);
-        $request->setAttribute(Session::class, $session);
+        if (!$excludeSession) {
+            $session = new Session(new InMemoryStorage(), 0);
+            $request->setAttribute(Session::class, $session);
+        }
 
         return $request;
     }
@@ -49,7 +51,7 @@ trait HelperTrait
     private function createApplication()
     {
         return new class extends AbstractApplication {
-            public function configureRoutes(RouteConfigurator $routeConfigurator): void
+            public function configureRoutes(Routes $routeConfigurator): void
             {
             }
         };

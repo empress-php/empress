@@ -12,6 +12,8 @@ use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Exception\HaltException;
+use Empress\Exception\RequestException;
+use Exception;
 use JsonException;
 use LogicException;
 use const INF;
@@ -256,6 +258,13 @@ class ContextTest extends AsyncTestCase
         $this->assertNull($this->ctx->getHttpServerResponse()->getHeader('Server'));
     }
 
+    public function testRequestHeader()
+    {
+        $this->ctx->getHttpServerRequest()->setHeader('X-Custom', 'foo');
+
+        $this->assertEquals('foo', $this->ctx->requestHeader('X-Custom'));
+    }
+
     public function testRespond()
     {
         $this->ctx->respond('Hello');
@@ -263,6 +272,14 @@ class ContextTest extends AsyncTestCase
 
         $this->assertEquals('Hello', $body);
     }
+
+    public function testResponseBody()
+    {
+        $this->ctx->respond('Foo bar');
+
+        $this->assertEquals('Foo bar', $this->ctx->responseBody());
+    }
+
 
     public function testHtml()
     {
@@ -323,6 +340,14 @@ class ContextTest extends AsyncTestCase
         }
     }
 
+    public function testException()
+    {
+        $request = $this->createMockRequest();
+        $context = new Context($request, new Response(), new Exception('Foo'));
+
+        $this->assertEquals('Foo', $context->exception()->getMessage());
+    }
+
 
     public function testGetHttpServerResponse()
     {
@@ -333,7 +358,16 @@ class ContextTest extends AsyncTestCase
 
     public function testGetHttpServerRequest()
     {
+
         // Always return the same instance
         $this->assertSame($this->ctx->getHttpServerRequest(), $this->ctx->getHttpServerRequest());
+    }
+
+    public function testMissingRequestAttribute()
+    {
+        $this->expectException(RequestException::class);
+
+        $request = $this->createMockRequest('GET', '/', [], true);
+        $context = new Context($request, new Response());
     }
 }

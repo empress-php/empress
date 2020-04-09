@@ -6,7 +6,7 @@ use Amp\PHPUnit\AsyncTestCase;
 use Amp\Success;
 use Empress\AbstractApplication;
 use Empress\Configuration\ApplicationConfiguration;
-use Empress\Routing\RouteConfigurator;
+use Empress\Routing\Routes;
 
 class AbstractApplicationTest extends AsyncTestCase
 {
@@ -19,15 +19,7 @@ class AbstractApplicationTest extends AsyncTestCase
 
     public function setUp(): void
     {
-        $this->app = new class extends AbstractApplication {
-            public function configureApplication(ApplicationConfiguration $applicationConfiguration): void
-            {
-            }
-
-            public function configureRoutes(RouteConfigurator $routeConfigurator): void
-            {
-            }
-        };
+        $this->app = $this->createApplication();
 
         parent::setUp();
     }

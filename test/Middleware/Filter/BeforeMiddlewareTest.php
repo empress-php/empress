@@ -5,7 +5,8 @@ namespace Empress\Test\Middleware;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Internal\RequestHandler;
-use Empress\Middleware\BeforeMiddleware;
+use Empress\Middleware\Filter\BeforeMiddleware;
+use Empress\Middleware\Filter\FilterHandler;
 use Empress\Test\HelperTrait;
 
 class BeforeMiddlewareTest extends AsyncTestCase
@@ -20,12 +21,14 @@ class BeforeMiddlewareTest extends AsyncTestCase
             $flag .= '1';
         });
 
-        $beforeHandler = function (Context $ctx) use (&$flag) {
+        $beforeHandler = new FilterHandler(function (Context $ctx) use (&$flag) {
             $flag .= '2';
-        };
+        });
 
-        $request = $this->createMockRequest('GET', '/');
-        $middleware = new BeforeMiddleware($beforeHandler);
+        $middleware = new BeforeMiddleware();
+        $middleware->addHandler($beforeHandler);
+
+        $request = $this->createMockRequest();
 
         yield $middleware->handleRequest($request, $handler);
 
