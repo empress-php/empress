@@ -7,7 +7,7 @@ use Amp\Loop;
 use Empress\AbstractApplication;
 use Empress\Context;
 use Empress\Empress;
-use Empress\Routing\RouteConfigurator;
+use Empress\Routing\Routes;
 
 class StupidAuthApp extends AbstractApplication
 {
@@ -25,9 +25,9 @@ class StupidAuthApp extends AbstractApplication
         ];
     }
 
-    public function configureRoutes(RouteConfigurator $routes): void
+    public function configureRoutes(Routes $routes): void
     {
-        $routes->group('/auth', function (RouteConfigurator $routes) {
+        $routes->group('/auth', function (Routes $routes) {
             $routes->before(function (Context $ctx) {
                 $query = $ctx->queryArray();
                 $username = $query['username'] ?? null;
