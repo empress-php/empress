@@ -2,16 +2,16 @@
 
 namespace Empress;
 
-use Amp\Http\Server\Router;
 use Amp\Http\Server\Server;
 use Amp\Http\Server\Session\SessionMiddleware;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
 use Closure;
-use Empress\Configuration\ApplicationConfiguration;
+use Empress\Configuration;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
+use Empress\Routing\Router;
 use Empress\Routing\Routes;
 use Exception;
 use Throwable;
@@ -20,38 +20,34 @@ use function Amp\Http\Server\Middleware\stack;
 
 class Empress
 {
-    /** @var Server */
+
+    /**
+     * @var Server
+     */
     private $server;
 
-    /** @var AbstractApplication */
+    /**
+     * @var Application
+     */
     private $application;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $port;
 
-    /** @var ApplicationConfiguration */
-    private $applicationConfiguration;
-
-    /** @var Router */
-    private $router;
-
-    /** @var bool */
+    /**
+     * @var bool
+     */
     private $booted;
 
     /**
-     * @var Routes
-     */
-    private $routeConfigurator;
-
-    /**
      * Empress constructor.
-     * @param ApplicationInterface $application
+     * @param Application $application
      */
-    public function __construct(ApplicationInterface $application)
+    public function __construct(Application $application)
     {
         $this->application = $application;
-        $this->applicationConfiguration = new ApplicationConfiguration();
-        $this->routeConfigurator = new Routes();
         $this->booted = false;
     }
 
@@ -87,16 +83,17 @@ class Empress
      */
     private function initializeServer(): void
     {
-        $this->initializeApplication();
+        $router = $this->application->getRouter();
+        $config = $this->application->config();
 
-        $sessionMiddleware = new SessionMiddleware($this->applicationConfiguration->getSessionStorage());
-        $logger = $this->applicationConfiguration->getLogger();
-        $options = $this->applicationConfiguration->getServerOptions();
-        $port = $this->applicationConfiguration->getPort();
+        $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
+        $logger = $config->getLogger();
+        $options = $config->getServerOptions();
+        $port = $config->getPort();
 
         // Static content serving
-        if ($handler = $this->applicationConfiguration->getDocumentRootHandler()) {
-            $this->router->setFallback($handler);
+        if ($handler = $config->getDocumentRootHandler()) {
+            $router->setFallback($handler);
         }
 
         $sockets = [
@@ -104,29 +101,20 @@ class Empress
             Socket\listen('[::]:' . $port),
         ];
 
-        if (!\is_null($context = $this->applicationConfiguration->getTlsContext())) {
-            $tlsPort = $this->applicationConfiguration->getTlsPort();
+        if (!\is_null($context = $config->getTlsContext())) {
+            $tlsPort = $config->getTlsPort();
             $sockets[] = Socket\listen('0.0.0.0:' . $tlsPort, null, $context);
             $sockets[] = Socket\listen('[::]:' . $tlsPort, null, $context);
         }
 
         $this->server = new Server(
             $sockets,
-            stack($this->router, $sessionMiddleware),
+            stack($router, $sessionMiddleware),
             $logger,
             $options
         );
 
         $this->server->attach($this->application);
-    }
-
-    private function initializeApplication()
-    {
-        $this->application->configureApplication($this->applicationConfiguration);
-        $this->application->configureRoutes($this->routeConfigurator);
-
-        $this->router = $this->routeConfigurator->getRouter();
-        $this->router->stack(...$this->applicationConfiguration->getMiddlewares());
     }
 
     /**

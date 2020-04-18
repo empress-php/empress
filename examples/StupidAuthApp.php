@@ -4,12 +4,12 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Amp\Http\Status;
 use Amp\Loop;
-use Empress\AbstractApplication;
+use Empress\Application;
 use Empress\Context;
 use Empress\Empress;
 use Empress\Routing\Routes;
 
-class StupidAuthApp extends AbstractApplication
+class StupidAuthApp extends Application
 {
 
     /**
@@ -50,14 +50,14 @@ class StupidAuthApp extends AbstractApplication
                 $ctx->respond('Hi there!');
             });
 
-            // Not fired if halt() is called anywhere in the before filter
-            $routes->after(function (Context $ctx) {
-                echo 'After 1' . PHP_EOL;
-            });
-
-            $routes->after(function (Context $ctx) {
-                echo 'After 2' . PHP_EOL;
-            });
+//            // Not fired if halt() is called anywhere in the before filter
+//            $routes->after(function (Context $ctx) {
+//                echo 'After 1' . PHP_EOL;
+//            });
+//
+//            $routes->after(function (Context $ctx) {
+//                echo 'After 2' . PHP_EOL;
+//            });
         });
     }
 }

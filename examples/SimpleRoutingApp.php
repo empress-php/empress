@@ -1,37 +1,44 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
-
-use Amp\Http\Status;
 use Amp\Loop;
-use Empress\AbstractApplication;
+use Empress\Application;
 use Empress\Context;
 use Empress\Empress;
-use Empress\Exception\HaltException;
 use Empress\Routing\Routes;
 
-class SimpleRoutingApp extends AbstractApplication
-{
-    public function configureRoutes(Routes $routes): void
-    {
+require __DIR__ . '/../vendor/autoload.php';
 
-        $routes->get('/', function (Context $ctx) {
-            throw new HaltException(Status::OK, [], 'Naaay');
-            $ctx->halt(Status::OK, 'Helloz');
+Loop::run(function () {
+    $app = new Application();
+    $routes = $app->routes();
+
+    $routes->group('/hello', function (Routes $routes) {
+        $routes->get('/world', function (Context $ctx) {
+            $ctx->respond('Hello');
+
+            throw new Exception('Biyotch');
         });
 
-        $routes->on(HaltException::class, function (Context $ctx) {
-
-            /** @var HaltException $e */
-            $e = $ctx->exception();
-
-            $ctx->respond('Halted: ' . yield $e->toResponse()->getBody()->read());
+        $routes->get('/foo/bar', function (Context $ctx) {
+            $ctx->respond('Foo bar');
         });
-    }
-}
 
+        $routes->beforeAt('/foo/*', function (Context $ctx) {
+            echo "Before /hello/foo/*\n";
+        });
 
+        $routes->afterAt('/world', function (Context $ctx) {
+            echo "After /hell/world\n";
+        });
+    });
 
+    $app->exception(Exception::class, function (Context $ctx) {
+        echo "An exception happened: {$ctx->exception()->getMessage()}";
 
-$empress = new Empress(new SimpleRoutingApp());
-Loop::run([$empress, 'boot']);
+        $ctx->rethrow();
+    });
+
+    $empress = new Empress($app);
+
+    yield $empress->boot();
+});

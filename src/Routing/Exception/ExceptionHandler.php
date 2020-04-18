@@ -1,10 +1,8 @@
 <?php
 
-namespace Empress\Middleware\Exception;
+namespace Empress\Routing\Exception;
 
-use Empress\Middleware\MiddlewareHandlerInterface;
-
-class ExceptionHandler implements MiddlewareHandlerInterface
+class ExceptionHandler
 {
     /**
      * @var string

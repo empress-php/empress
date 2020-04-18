@@ -1,6 +1,6 @@
 <?php
 
-namespace Empress\Configuration;
+namespace Empress;
 
 use Amp\Http\Server\Middleware;
 use Amp\Http\Server\Options;
@@ -19,7 +19,7 @@ use function Amp\ByteStream\getStdout;
  * Defines the application environment that will be used by http-server.
  * Server logging, server options and middlewares are all registered using this class.
  */
-class ApplicationConfiguration
+class Configuration
 {
     /**
      * @var Middleware[]

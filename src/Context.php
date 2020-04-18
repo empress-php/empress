@@ -13,14 +13,14 @@ use Amp\Http\Server\FormParser\StreamingParser;
 use Amp\Http\Server\MissingAttributeError;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\Response;
-use Amp\Http\Server\Router;
 use Amp\Http\Server\Session\Session;
 use Amp\Http\Status;
 use Amp\Iterator;
 use Amp\Promise;
 use ArrayAccess;
 use Empress\Exception\HaltException;
-use Empress\Exception\RequestException;
+use Empress\Routing\Router;
+use Empress\Util\Optional;
 use JsonException;
 use LogicException;
 use Throwable;
@@ -90,7 +90,6 @@ class Context implements ArrayAccess
      * @param Request $req
      * @param Response $res
      * @param Throwable|null $exception
-     * @throws RequestException
      */
     public function __construct(Request $req, Response $res, Throwable $exception = null)
     {
@@ -106,8 +105,11 @@ class Context implements ArrayAccess
         \parse_str($this->queryString, $parsed);
         $this->queryArray = $parsed;
 
-        $this->params = $this->getRequestAttribute(Router::class, []);
-        $this->session = $this->getRequestAttribute(Session::class, null);
+//        $this->params = $this->getRequestAttribute(Router::class, []);
+//        $this->session = $this->getRequestAttribute(Session::class, null);
+
+        $this->params = $this->req->getAttribute(Router::class);
+        $this->session = $this->req->getAttribute(Session::class);
         $this->exception = $exception;
     }
 
@@ -493,18 +495,17 @@ class Context implements ArrayAccess
         return $this->res;
     }
 
-    /**
-     * @param string $attributeName
-     * @param $default
-     * @return mixed
-     * @throws RequestException
-     */
-    private function getRequestAttribute(string $attributeName, $default)
-    {
-        try {
-            return $this->req->getAttribute($attributeName);
-        } catch (MissingAttributeError $e) {
-            throw new RequestException(sprintf('Incomplete request data. Attribute %s missing', $attributeName));
-        }
-    }
+//    /**
+//     * @param string $attributeName
+//     * @param $default
+//     * @return mixed
+//     */
+//    private function getRequestAttribute(string $attributeName, $default)
+//    {
+//        try {
+//            return $this->req->getAttribute($attributeName);
+//        } catch (MissingAttributeError $e) {
+//            throw new RequestException(sprintf('Incomplete request data. Attribute %s missing', $attributeName));
+//        }
+//    }
 }

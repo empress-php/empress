@@ -14,7 +14,7 @@ use function Amp\call;
  * Class ContextInjector.
  *
  * Used for injecting the context object into handlers.
- * The context is injected in such a way that alleviates the need for manually returning a response object from a request handler.
+ * The context is injected in such a way that alleviates the need for manually returning a response from handlers.
  *
  * @package Empress\Internal
  */

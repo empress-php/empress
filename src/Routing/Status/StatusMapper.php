@@ -1,20 +1,15 @@
 <?php
 
-namespace Empress\Middleware\Status;
+namespace Empress\Routing\Status;
 
 use Amp\Http\Server\Request;
-use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Response;
 use Amp\Promise;
 use Empress\Internal\ContextInjector;
-use Empress\Internal\HaltAwareTrait;
-use Empress\Internal\TypeAssertionTrait;
-use Empress\Middleware\AggregateMiddlewareInterface;
 use function Amp\call;
 
-class StatusMappingMiddleware implements AggregateMiddlewareInterface
+class StatusMapper
 {
-    use HaltAwareTrait, TypeAssertionTrait;
 
     /**
      * @var array<StatusHandler>
@@ -24,35 +19,28 @@ class StatusMappingMiddleware implements AggregateMiddlewareInterface
     /**
      * @param StatusHandler $handler
      */
-    public function addHandler($handler): void
+    public function addHandler(StatusHandler $handler): void
     {
-        $this->assertInstanceOf(StatusHandler::class, $handler);
-
         $this->handlers[] = $handler;
     }
 
     /**
      * @inheritDoc
      */
-    public function handleRequest(Request $request, RequestHandler $requestHandler): Promise
+    public function process(Request $request, Response $response): Promise
     {
-        return call(function () use ($request, $requestHandler) {
-
-            /** @var Response $response */
-            $response = yield $requestHandler->handleRequest($request);
+        return call(function () use ($request, $response) {
             $statusCode = $response->getStatus();
             $candidates = [];
 
             /** @var StatusHandler $handler */
             foreach ($this->handlers as $handler) {
                 if ($handler->getStatus() === $statusCode) {
-                    $response = new Response($statusCode);
-
                     if ($handler->hasHeaders()) {
                         if ($handler->satisfiesHeaders($request)) {
                             $injector = new ContextInjector($handler->getCallable(), $request, $response);
 
-                            return yield $this->resolveInjectionResult($injector);
+                            return yield $injector->inject();
                         }
                     } else {
                         $candidates[$statusCode] = $handler;
@@ -66,7 +54,7 @@ class StatusMappingMiddleware implements AggregateMiddlewareInterface
                 $candidate = $candidates[$statusCode];
                 $injector = new ContextInjector($candidate->getCallable(), $request, new Response($statusCode));
 
-                return yield $this->resolveInjectionResult($injector);
+                return yield $injector->inject();
             }
 
             return $response;

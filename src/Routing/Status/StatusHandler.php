@@ -1,15 +1,14 @@
 <?php
 
-namespace Empress\Middleware\Status;
+namespace Empress\Routing\Status;
 
 use Amp\Http\Server\Request;
-use Empress\Middleware\MiddlewareHandlerInterface;
 
 /**
  * Class StatusHandler
  * @package Empress\Internal
  */
-class StatusHandler implements MiddlewareHandlerInterface
+class StatusHandler
 {
 
     /**
