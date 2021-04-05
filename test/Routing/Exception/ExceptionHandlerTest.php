@@ -10,10 +10,10 @@ class ExceptionHandlerTest extends TestCase
 {
     public function testExceptionHandler()
     {
-        $callable = fn () => null;
-        $handler = new ExceptionHandler($callable, Exception::class);
+        $closure = fn () => null;
+        $handler = new ExceptionHandler($closure, Exception::class);
 
         static::assertEquals(Exception::class, $handler->getExceptionClass());
-        static::assertEquals($callable, $handler->getCallable());
+        static::assertEquals($closure, $handler->getCallable());
     }
 }

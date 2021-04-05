@@ -17,31 +17,33 @@ class StatusHandlerTest extends TestCase
             'X-Custom-1' => 'foo',
             'X-Custom-2' => 'bar',
         ];
+
         $statusHandler = new StatusHandler(function () {
         }, Status::OK, $headers);
+
         $request = $this->createMockRequest();
         $request->setHeaders($headers);
 
-        $this->assertTrue($statusHandler->satisfiesHeaders($request));
+        static::assertTrue($statusHandler->satisfiesHeaders($request));
     }
 
     public function testDoesNotSatisfyEmptyHeaderArray()
     {
-        $headers = [
+        $statusHandler = new StatusHandler(fn () => null, Status::OK, [
             'X-Custom-1' => 'foo',
             'X-Custom-2' => 'bar',
-        ];
-        $statusHandler = new StatusHandler(fn () => null, Status::OK, $headers);
+        ]);
+
         $request = $this->createMockRequest();
 
-        $this->assertFalse($statusHandler->satisfiesHeaders($request));
+        static::assertFalse($statusHandler->satisfiesHeaders($request));
     }
 
     public function testGetStatus()
     {
         $handler = new StatusHandler(fn () => null, Status::NOT_FOUND);
 
-        $this->assertEquals(Status::NOT_FOUND, $handler->getStatus());
+        static::assertEquals(Status::NOT_FOUND, $handler->getStatus());
     }
 
     public function testGetHeaders()
@@ -50,7 +52,7 @@ class StatusHandlerTest extends TestCase
             'X-Custom' => 'Foo',
         ]);
 
-        $this->assertEquals([
+        static::assertEquals([
             'X-Custom' => 'Foo',
         ], $handler->getHeaders());
     }
@@ -61,21 +63,21 @@ class StatusHandlerTest extends TestCase
             'X-Custom' => 'Foo',
         ]);
 
-        $this->assertTrue($handler->hasHeaders());
+        static::assertTrue($handler->hasHeaders());
     }
 
     public function testHasNoHeaders()
     {
         $handler = new StatusHandler(function () {}, Status::NOT_FOUND);
 
-        $this->assertFalse($handler->hasHeaders());
+        static::assertFalse($handler->hasHeaders());
     }
 
     public function testGetCallable()
     {
-        $callable = fn() => 1;
-        $handler = new StatusHandler($callable, Status::NOT_FOUND);
+        $closure = fn() => 1;
+        $handler = new StatusHandler($closure, Status::NOT_FOUND);
 
-        $this->assertEquals($callable(), ($handler->getCallable())());
+        static::assertEquals($closure(), ($handler->getCallable())());
     }
 }

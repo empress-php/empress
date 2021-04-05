@@ -17,12 +17,10 @@ class ExceptionMapperTest extends AsyncTestCase
 
     public function testHandleRequest()
     {
-        $exceptionHandler = new ExceptionHandler(function (Context $ctx) {
-            $ctx->response('Foo');
-        }, Exception::class);
-
         $mapper = new ExceptionMapper();
-        $mapper->addHandler($exceptionHandler);
+        $mapper->addHandler(new ExceptionHandler(function (Context $ctx) {
+            $ctx->response('Foo');
+        }, Exception::class));
 
         $request = $this->createMockRequest();
 
@@ -36,10 +34,8 @@ class ExceptionMapperTest extends AsyncTestCase
     {
         $this->expectException(Error::class);
 
-        $exceptionHandler = new ExceptionHandler(Exception::class, fn () => null);
-
         $mapper = new ExceptionMapper();
-        $mapper->addHandler($exceptionHandler);
+        $mapper->addHandler(new ExceptionHandler(Exception::class, fn () => null));
 
         $request = $this->createMockRequest();
 

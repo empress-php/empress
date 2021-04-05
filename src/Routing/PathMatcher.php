@@ -77,7 +77,7 @@ class PathMatcher
         return !empty($this->entries);
     }
 
-    public function getPathParams(HandlerEntry $entry, string $path)
+    public function getPathParams(HandlerEntry $entry, string $path): array
     {
         return array_filter(
             $this->match($entry, $path) ?? [],
@@ -86,7 +86,7 @@ class PathMatcher
         );
     }
 
-    private function match(HandlerEntry $entry, string $toMatch)
+    private function match(HandlerEntry $entry, string $toMatch): ?array
     {
 
         /** @var PathParser $parser */

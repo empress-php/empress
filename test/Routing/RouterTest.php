@@ -5,6 +5,7 @@ namespace Empress\Test\Routing;
 use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Server;
+use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Amp\Socket\Server as SocketServer;
@@ -16,6 +17,7 @@ use Empress\Routing\HandlerType;
 use Empress\Routing\Path;
 use Empress\Routing\PathMatcher;
 use Empress\Routing\Router;
+use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
 use Empress\Test\HelperTrait;
 use Error;
@@ -163,6 +165,7 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+
         $matcher = new PathMatcher();
         $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->halt(Status::NOT_FOUND, 'Not found :(');
@@ -182,34 +185,98 @@ class RouterTest extends AsyncTestCase
 
     public function testWithStatusMapper()
     {
+        $exceptionMapper = new ExceptionMapper();
 
+        $statusMapper = new StatusMapper();
+        $statusMapper->addHandler(new StatusHandler(
+            fn (Context $ctx) => $ctx->response('Internal server error'),
+            Status::INTERNAL_SERVER_ERROR
+        ));
+
+        $matcher = new PathMatcher();
+        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
+            $ctx->status(Status::INTERNAL_SERVER_ERROR);
+        }));
+
+        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        yield $router->onStart($this->getMockServer());
+
+        $request = $this->createMockRequest();
+
+        /** @var Response $response */
+        $response = yield $router->handleRequest($request);
+
+        static::assertEquals(Status::INTERNAL_SERVER_ERROR, $response->getStatus());
+        static::assertEquals('Internal server error', yield $response->getBody()->read());
     }
 
     public function testWithBefore()
     {
+        $exceptionMapper = new ExceptionMapper();
+        $statusMapper = new StatusMapper();
 
+        $matcher = new PathMatcher();
+        $matcher->addEntry(new HandlerEntry(HandlerType::BEFORE, new Path('/'), function (Context $ctx) {
+            $ctx->status(Status::BAD_REQUEST);
+        }));
+        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
+            $ctx->response('Hello');
+        }));
+
+        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        yield $router->onStart($this->getMockServer());
+
+        $request = $this->createMockRequest();
+
+        /** @var Response $response */
+        $response = yield $router->handleRequest($request);
+
+        static::assertEquals(Status::BAD_REQUEST, $response->getStatus());
+        static::assertEquals('Hello', yield $response->getBody()->read());
     }
 
     public function testWithAfter()
     {
+        $exceptionMapper = new ExceptionMapper();
+        $statusMapper = new StatusMapper();
 
+        $matcher = new PathMatcher();
+        $matcher->addEntry(new HandlerEntry(HandlerType::AFTER, new Path('/'), function (Context $ctx) {
+            $ctx->status(Status::BAD_REQUEST);
+        }));
+        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
+            $ctx->response('Hello');
+        }));
+
+        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        yield $router->onStart($this->getMockServer());
+
+        $request = $this->createMockRequest();
+
+        /** @var Response $response */
+        $response = yield $router->handleRequest($request);
+
+        static::assertEquals(Status::BAD_REQUEST, $response->getStatus());
+        static::assertEquals('Hello', yield $response->getBody()->read());
     }
 
 
-//    public function testSetFallback(): void
-//    {
-//
-//    }
-//
-//    public function testOnStart(): void
-//    {
-//
-//    }
-//
-//    public function testOnStop(): void
-//    {
-//
-//    }
+    public function testCannotSetFallbackWhileRunning()
+    {
+        $this->expectException(Error::class);
+
+        $exceptionMapper = $this->createMock(ExceptionMapper::class);
+        $statusMapper = $this->createMock(StatusMapper::class);
+
+        $matcher = $this->createMock(PathMatcher::class);
+        $matcher->method('hasEntries')->willReturn(true);
+
+        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        yield $router->onStart($this->getMockServer());
+
+        $router->setFallback(new DocumentRoot('/'));
+
+    }
 
     private function getMockServer(): Server
     {

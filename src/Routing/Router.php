@@ -108,9 +108,13 @@ class Router implements RequestHandler, ServerObserver
 
     public function onStop(Server $server): Promise
     {
+        if (isset($this->fallback)) {
+            return $this->fallback->onStop($server);
+        }
+
         $this->running = false;
 
-        return $this->fallback->onStop($server);
+        return new Success();
     }
 
     /**
@@ -130,10 +134,10 @@ class Router implements RequestHandler, ServerObserver
                 foreach ($beforeFilters as $beforeFilter) {
                     $injector = new ContextInjector($beforeFilter->getHandler(), $request);
 
-                    yield $injector->inject();
+                    $response = yield $injector->inject();
                 }
 
-                $injector = new ContextInjector($handlerEntry->getHandler(), $request);
+                $injector = new ContextInjector($handlerEntry->getHandler(), $request, $response ?? null);
                 $response = yield $injector->inject();
 
                 $afterFilters = $this->pathMatcher->findEntries($path, HandlerType::AFTER);

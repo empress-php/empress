@@ -12,7 +12,7 @@ class FilterHandlerTest extends TestCase
         $callable = fn () => null;
         $handler = new FilterHandler($callable, '/foo/bar/*');
 
-        $this->assertEquals($callable, $handler->getCallable());
-        $this->assertEquals('/foo/bar/*', $handler->getPath());
+        static::assertEquals($callable, $handler->getCallable());
+        static::assertEquals('/foo/bar/*', $handler->getPath());
     }
 }
