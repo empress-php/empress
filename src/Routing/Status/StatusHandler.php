@@ -6,7 +6,6 @@ use Amp\Http\Server\Request;
 
 class StatusHandler
 {
-
     private int $status;
 
     /**
