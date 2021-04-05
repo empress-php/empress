@@ -4,17 +4,10 @@ namespace Empress\Routing\Status;
 
 use Amp\Http\Server\Request;
 
-/**
- * Class StatusHandler
- * @package Empress\Internal
- */
 class StatusHandler
 {
 
-    /**
-     * @var int
-     */
-    private $status;
+    private int $status;
 
     /**
      * @var array
@@ -41,7 +34,7 @@ class StatusHandler
 
     public function satisfiesHeaders(Request $request): bool
     {
-        return array_reduce(array_keys($this->headers), function ($acc, $key) use ($request) {
+        return \array_reduce(\array_keys($this->headers), function ($acc, $key) use ($request) {
             return $acc && ($request->getHeader($key) === $this->headers[$key]);
         }, true);
     }
@@ -67,7 +60,7 @@ class StatusHandler
      */
     public function hasHeaders(): bool
     {
-        return count($this->headers) > 0;
+        return \count($this->headers) > 0;
     }
 
     /**

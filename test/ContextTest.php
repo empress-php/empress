@@ -12,14 +12,14 @@ use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Exception\HaltException;
-use Exception;
+use Empress\Test\Helper\MockRequestTrait;
 use JsonException;
 use LogicException;
 use const INF;
 
 class ContextTest extends AsyncTestCase
 {
-    use HelperTrait;
+    use MockRequestTrait;
 
     private Context $ctx;
 
@@ -39,13 +39,13 @@ class ContextTest extends AsyncTestCase
 
     public function testOffsets(): void
     {
-        $this->assertNotNull($this->ctx['param1']);
-        $this->assertNotNull($this->ctx['param2']);
+        static::assertNotNull($this->ctx['param1']);
+        static::assertNotNull($this->ctx['param2']);
 
-        $this->assertEquals('value1', $this->ctx['param1']);
-        $this->assertEquals('value2', $this->ctx['param2']);
+        static::assertEquals('value1', $this->ctx['param1']);
+        static::assertEquals('value2', $this->ctx['param2']);
 
-        $this->assertTrue(isset($this->ctx['param1']));
+        static::assertTrue(isset($this->ctx['param1']));
     }
 
     public function testSettingOffsets(): void
@@ -72,7 +72,7 @@ class ContextTest extends AsyncTestCase
             $contents .= $chunk;
         }
 
-        $this->assertEquals($body, $contents);
+        static::assertEquals($body, $contents);
     }
 
     public function testBufferedBody()
@@ -81,7 +81,7 @@ class ContextTest extends AsyncTestCase
         $this->ctx->getHttpServerRequest()->setBody($body);
         $contents = yield $this->ctx->bufferedBody();
 
-        $this->assertEquals($body, $contents);
+        static::assertEquals($body, $contents);
     }
 
     public function testStreamedForm()
@@ -96,8 +96,8 @@ class ContextTest extends AsyncTestCase
         $field = $form->getCurrent();
         $value = yield $field->read();
 
-        $this->assertEquals('field1', $field->getName());
-        $this->assertEquals('value1', $value);
+        static::assertEquals('field1', $field->getName());
+        static::assertEquals('value1', $value);
     }
 
     public function testBufferedForm()
@@ -109,21 +109,21 @@ class ContextTest extends AsyncTestCase
         $form = yield $this->ctx->bufferedForm();
         $value = $form->getValue('field1');
 
-        $this->assertEquals('value1', $value);
+        static::assertEquals('value1', $value);
     }
 
     public function testQueryString()
     {
         $queryString = $this->ctx->queryString();
 
-        $this->assertEquals('a=b&c=d', $queryString);
+        static::assertEquals('a=b&c=d', $queryString);
     }
 
     public function testQueryArray()
     {
         $queryArray = $this->ctx->queryArray();
 
-        $this->assertEquals([
+        static::assertEquals([
             'a' => 'b',
             'c' => 'd'
         ], $queryArray);
@@ -131,10 +131,10 @@ class ContextTest extends AsyncTestCase
 
     public function testSession()
     {
-        $this->assertInstanceOf(Session::class, $this->ctx->session());
+        static::assertInstanceOf(Session::class, $this->ctx->session());
 
         // Always return the same instance
-        $this->assertSame($this->ctx->session(), $this->ctx->session());
+        static::assertSame($this->ctx->session(), $this->ctx->session());
     }
 
     public function testAttr()
@@ -142,21 +142,21 @@ class ContextTest extends AsyncTestCase
         $this->ctx->getHttpServerRequest()->setAttribute('attr', 'value');
         $value = $this->ctx->attr('attr');
 
-        $this->assertEquals('value', $value);
+        static::assertEquals('value', $value);
     }
 
     public function testHasAttr()
     {
         $this->ctx->getHttpServerRequest()->setAttribute('attr', 'value');
 
-        $this->assertTrue($this->ctx->hasAttr('attr'));
+        static::assertTrue($this->ctx->hasAttr('attr'));
     }
 
     public function testCookie()
     {
         $this->ctx->getHttpServerRequest()->setCookie(new RequestCookie('cookie'));
 
-        $this->assertInstanceOf(RequestCookie::class, $this->ctx->cookie('cookie'));
+        static::assertInstanceOf(RequestCookie::class, $this->ctx->cookie('cookie'));
     }
 
     public function testCookies()
@@ -170,7 +170,7 @@ class ContextTest extends AsyncTestCase
         $cookies = $this->ctx->cookies();
 
         foreach ($cookies as $cookieName => $cookie) {
-            $this->assertInstanceOf(RequestCookie::class, $this->ctx->cookie($cookieName));
+            static::assertInstanceOf(RequestCookie::class, $this->ctx->cookie($cookieName));
         }
     }
 
@@ -179,8 +179,8 @@ class ContextTest extends AsyncTestCase
         $this->ctx->responseCookie('response_cookie', 'value');
         $cookie = $this->ctx->getHttpServerResponse()->getCookie('response_cookie');
 
-        $this->assertInstanceOf(ResponseCookie::class, $cookie);
-        $this->assertEquals('value', $cookie->getValue());
+        static::assertInstanceOf(ResponseCookie::class, $cookie);
+        static::assertEquals('value', $cookie->getValue());
     }
 
     public function testRemoveCookie()
@@ -189,29 +189,29 @@ class ContextTest extends AsyncTestCase
         $this->ctx->removeCookie('response_cookie');
         $cookie = $this->ctx->getHttpServerResponse()->getCookie('response_cookie');
 
-        $this->assertNull($cookie);
+        static::assertNull($cookie);
     }
 
     public function testPort()
     {
-        $this->assertEquals(1234, $this->ctx->port());
+        static::assertEquals(1234, $this->ctx->port());
     }
 
     public function testHost()
     {
-        $this->assertEquals('example.com', $this->ctx->host());
+        static::assertEquals('example.com', $this->ctx->host());
     }
 
     public function testMethod()
     {
-        $this->assertEquals('GET', $this->ctx->method());
+        static::assertEquals('GET', $this->ctx->method());
     }
 
     public function testUserAgent()
     {
         $this->ctx->getHttpServerRequest()->setHeader('User-Agent', 'Empress Client');
 
-        $this->assertEquals('Empress Client', $this->ctx->userAgent());
+        static::assertEquals('Empress Client', $this->ctx->userAgent());
     }
 
     public function testRedirect()
@@ -219,15 +219,15 @@ class ContextTest extends AsyncTestCase
         $this->ctx->redirect('/redirect', Status::MOVED_PERMANENTLY);
         $res = $this->ctx->getHttpServerResponse();
 
-        $this->assertEquals('/redirect', $res->getHeader('location'));
-        $this->assertEquals(Status::MOVED_PERMANENTLY, $res->getStatus());
+        static::assertEquals('/redirect', $res->getHeader('location'));
+        static::assertEquals(Status::MOVED_PERMANENTLY, $res->getStatus());
     }
 
     public function testStatus()
     {
         $this->ctx->status(Status::METHOD_NOT_ALLOWED);
 
-        $this->assertEquals(Status::METHOD_NOT_ALLOWED, $this->ctx->getHttpServerResponse()->getStatus());
+        static::assertEquals(Status::METHOD_NOT_ALLOWED, $this->ctx->getHttpServerResponse()->getStatus());
     }
 
     public function testContentType()
@@ -235,14 +235,14 @@ class ContextTest extends AsyncTestCase
         $this->ctx->contentType('application/json');
         $contentType = $this->ctx->getHttpServerResponse()->getHeader('Content-Type');
 
-        $this->assertEquals('application/json', $contentType);
+        static::assertEquals('application/json', $contentType);
     }
 
     public function testHeader()
     {
         $this->ctx->header('Server', 'amphp/http-server');
 
-        $this->assertEquals('amphp/http-server', $this->ctx->getHttpServerResponse()->getHeader('Server'));
+        static::assertEquals('amphp/http-server', $this->ctx->getHttpServerResponse()->getHeader('Server'));
     }
 
     public function testRemoveHeader()
@@ -250,14 +250,14 @@ class ContextTest extends AsyncTestCase
         $this->ctx->header('Server', 'amphp/http-server');
         $this->ctx->removeHeader('Server');
 
-        $this->assertNull($this->ctx->getHttpServerResponse()->getHeader('Server'));
+        static::assertNull($this->ctx->getHttpServerResponse()->getHeader('Server'));
     }
 
     public function testRequestHeader()
     {
         $this->ctx->getHttpServerRequest()->setHeader('X-Custom', 'foo');
 
-        $this->assertEquals('foo', $this->ctx->requestHeader('X-Custom'));
+        static::assertEquals('foo', $this->ctx->requestHeader('X-Custom'));
     }
 
     public function testRespond()
@@ -265,14 +265,14 @@ class ContextTest extends AsyncTestCase
         $this->ctx->response('Hello');
         $body = yield $this->ctx->getHttpServerResponse()->getBody()->read();
 
-        $this->assertEquals('Hello', $body);
+        static::assertEquals('Hello', $body);
     }
 
     public function testResponseBody()
     {
         $this->ctx->response('Foo bar');
 
-        $this->assertEquals('Foo bar', $this->ctx->responseBody());
+        static::assertEquals('Foo bar', $this->ctx->responseBody());
     }
 
 
@@ -282,8 +282,8 @@ class ContextTest extends AsyncTestCase
         $res = $this->ctx->getHttpServerResponse();
         $body = yield $res->getBody()->read();
 
-        $this->assertEquals('<h1>Empress</h1>', $body);
-        $this->assertEquals('text/html', $res->getHeader('Content-Type'));
+        static::assertEquals('<h1>Empress</h1>', $body);
+        static::assertEquals('text/html', $res->getHeader('Content-Type'));
     }
 
     public function testJson()
@@ -296,8 +296,8 @@ class ContextTest extends AsyncTestCase
         $body = yield $this->ctx->getHttpServerResponse()->getBody()->read();
         $contentType = $this->ctx->getHttpServerResponse()->getHeader('Content-Type');
 
-        $this->assertEquals($body, $encoded);
-        $this->assertEquals('application/json', $contentType);
+        static::assertEquals($body, $encoded);
+        static::assertEquals('application/json', $contentType);
     }
 
     public function testJsonFailure()
@@ -320,8 +320,8 @@ class ContextTest extends AsyncTestCase
             $this->ctx->halt(Status::METHOD_NOT_ALLOWED);
         } catch (HaltException $e) {
             $response = $e->toResponse();
-            $this->assertEquals(Status::METHOD_NOT_ALLOWED, $response->getStatus());
-            $this->assertEmpty(yield $response->getBody()->read());
+            static::assertEquals(Status::METHOD_NOT_ALLOWED, $response->getStatus());
+            static::assertEmpty(yield $response->getBody()->read());
         }
     }
 
@@ -331,16 +331,8 @@ class ContextTest extends AsyncTestCase
             $this->ctx->halt(Status::OK, 'Go away');
         } catch (HaltException $e) {
             $response = $e->toResponse();
-            $this->assertEquals('Go away', yield $response->getBody()->read());
+            static::assertEquals('Go away', yield $response->getBody()->read());
         }
-    }
-
-    public function testException()
-    {
-        $request = $this->createMockRequest();
-        $context = new Context($request, new Response(), new Exception('Foo'));
-
-        $this->assertEquals('Foo', $context->exception()->getMessage());
     }
 
 
@@ -348,13 +340,13 @@ class ContextTest extends AsyncTestCase
     {
 
         // Always return the same instance
-        $this->assertSame($this->ctx->getHttpServerResponse(), $this->ctx->getHttpServerResponse());
+        static::assertSame($this->ctx->getHttpServerResponse(), $this->ctx->getHttpServerResponse());
     }
 
     public function testGetHttpServerRequest()
     {
 
         // Always return the same instance
-        $this->assertSame($this->ctx->getHttpServerRequest(), $this->ctx->getHttpServerRequest());
+        static::assertSame($this->ctx->getHttpServerRequest(), $this->ctx->getHttpServerRequest());
     }
 }

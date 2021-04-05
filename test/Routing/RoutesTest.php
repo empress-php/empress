@@ -139,6 +139,6 @@ class RoutesTest extends TestCase
     {
         $entries = $this->matcher->getEntries();
 
-        return reset($entries);
+        return \reset($entries);
     }
 }

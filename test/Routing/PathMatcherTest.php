@@ -53,7 +53,7 @@ class PathMatcherTest extends TestCase
         $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/foo'), $closure));
 
         $entries = $matcher->findEntries('/foo');
-        $entry = reset($entries);
+        $entry = \reset($entries);
 
         static::assertEquals(HandlerType::POST, $entry->getType());
         static::assertEquals(new Path('*'), $entry->getPath());

@@ -23,62 +23,24 @@ use JsonException;
 use LogicException;
 use Throwable;
 use function Amp\Http\Server\redirectTo;
-use function json_encode;
-use function json_last_error;
-use function json_last_error_msg;
 
 class Context implements ArrayAccess
 {
+    private Request $req;
 
-    /**
-     * @var Request
-     */
-    private $req;
+    private Response $res;
 
-    /**
-     * @var Response
-     */
-    private $res;
+    private BufferingParser $bufferingParser;
 
-    /**
-     * @var Promise<Form>
-     */
-    private $parsedRequestBody;
+    private StreamingParser $streamingParser;
 
-    /**
-     * @var BufferingParser
-     */
-    private $bufferingParser;
+    private string $queryString;
 
-    /**
-     * @var StreamingParser
-     */
-    private $streamingParser;
+    private array $queryArray;
 
-    /**
-     * @var string
-     */
-    private $queryString;
+    private array $params;
 
-    /**
-     * @var array
-     */
-    private $queryArray;
-
-    /**
-     * @var array
-     */
-    private $params;
-
-    /**
-     * @var Session|null
-     */
-    private $session;
-
-    /**
-     * @var Throwable
-     */
-    private $exception;
+    private ?Session $session;
 
     /**
      * @var string|InputStream
@@ -88,27 +50,24 @@ class Context implements ArrayAccess
     /**
      * Context constructor.
      *
-     * @param Request $req
-     * @param Response $res
+     * @param Request $request
+     * @param Response|null $response
      * @param Throwable|null $exception
      */
-    public function __construct(Request $req, Response $res, Throwable $exception = null)
+    public function __construct(Request $request, ?Response $response = null)
     {
-        $this->req = $req;
-        $this->res = $res;
-        $this->exception = $exception;
-        $this->stringOrStream = null;
+        $this->req = $request;
+        $this->res = $response ?? new Response();
 
         $this->bufferingParser = new BufferingParser();
         $this->streamingParser = new StreamingParser();
 
-        $this->queryString = $req->getUri()->getQuery();
+        $this->queryString = $this->req->getUri()->getQuery();
         \parse_str($this->queryString, $parsed);
         $this->queryArray = $parsed;
 
         $this->params = $this->req->getAttribute(Router::class);
         $this->session = $this->req->getAttribute(Session::class);
-        $this->exception = $exception;
     }
 
     /**
@@ -394,7 +353,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets response body to be sent
+     * Gets response body to be sent.
      *
      * @return string|InputStream
      */
@@ -428,12 +387,12 @@ class Context implements ArrayAccess
         $this->contentType('application/json');
 
         if (\PHP_VERSION >= 70300) {
-            $result = json_encode($data, JSON_THROW_ON_ERROR);
+            $result = \json_encode($data, JSON_THROW_ON_ERROR);
         } else {
-            $result = json_encode($data);
+            $result = \json_encode($data);
 
-            if (($lastError = json_last_error()) !== JSON_ERROR_NONE) {
-                throw new JsonException(json_last_error_msg(), $lastError);
+            if (($lastError = \json_last_error()) !== JSON_ERROR_NONE) {
+                throw new JsonException(\json_last_error_msg(), $lastError);
             }
         }
 
@@ -443,30 +402,6 @@ class Context implements ArrayAccess
     public function halt(int $status = Status::OK, $stringOrStream = null, array $headers = [])
     {
         throw new HaltException($status, $headers, $stringOrStream);
-    }
-
-    /**
-     * If used inside an exception mapper it returns the exception caught.
-     * It returns null otherwise.
-     *
-     * @return Throwable|null
-     */
-    public function exception(): ?Throwable
-    {
-        return $this->exception;
-    }
-
-    /**
-     * If used inside an exception mapper it re-throws the caught exception.
-     * It's a noop if no exception was thrown.
-     *
-     * @throws Throwable
-     */
-    public function rethrow(): void
-    {
-        if ($this->exception !== null) {
-            throw $this->exception;
-        }
     }
 
     /**

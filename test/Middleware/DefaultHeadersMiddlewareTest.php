@@ -6,11 +6,11 @@ use Amp\Http\Server\RequestHandler\CallableRequestHandler;
 use Amp\Http\Server\Response;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Middleware\DefaultHeadersMiddleware;
-use Empress\Test\HelperTrait;
+use Empress\Test\Helper\MockRequestTrait;
 
 class DefaultHeadersMiddlewareTest extends AsyncTestCase
 {
-    use HelperTrait;
+    use MockRequestTrait;
 
     public function testHandleRequest()
     {
@@ -29,8 +29,8 @@ class DefaultHeadersMiddlewareTest extends AsyncTestCase
         $response = yield $middleware->handleRequest($request, $handler);
 
         foreach ($headers as $name => $value) {
-            $this->assertNotContains($name, $response->getHeaders());
-            $this->assertEquals($value, $response->getHeader($name));
+            static::assertNotContains($name, $response->getHeaders());
+            static::assertEquals($value, $response->getHeader($name));
         }
     }
 }

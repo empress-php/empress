@@ -31,7 +31,7 @@ class PathMatcher
         $existingHandler = $this->entries[$index] ?? null;
 
         if (HandlerType::isHttpMethod($type) && $existingHandler !== null && $existingHandler->getType() === $type) {
-            throw new InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(\sprintf(
                 '%s handler for path: %s already present.',
                 HandlerType::toString($type),
                 $pathString
@@ -64,7 +64,7 @@ class PathMatcher
             return [];
         }
 
-        return array_filter($this->entries, function (HandlerEntry $entry) use ($path, $type) {
+        return \array_filter($this->entries, function (HandlerEntry $entry) use ($path, $type) {
             return !empty($this->match($entry, $path)) && ($type !== null ? $entry->getType() === $type : true);
         });
     }
@@ -79,7 +79,7 @@ class PathMatcher
 
     public function getPathParams(HandlerEntry $entry, string $path): array
     {
-        return array_filter(
+        return \array_filter(
             $this->match($entry, $path) ?? [],
             'is_string',
             ARRAY_FILTER_USE_KEY

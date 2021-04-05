@@ -1,22 +1,15 @@
 <?php
 
-namespace Empress\Test;
+namespace Empress\Test\Helper;
 
 use Amp\Http\Server\Driver\Client;
-use Amp\Http\Server\Options;
 use Amp\Http\Server\Request;
-use Amp\Http\Server\RequestHandler;
-use Amp\Http\Server\Server;
 use Amp\Http\Server\Session\InMemoryStorage;
 use Amp\Http\Server\Session\Session;
-use Empress\Application;
 use Empress\Routing\Router;
-use Empress\Routing\Routes;
 use League\Uri\Http;
-use Psr\Log\LoggerInterface;
-use function Amp\Socket\listen;
 
-trait HelperTrait
+trait MockRequestTrait
 {
     private function createMockRequest(string $method = 'GET', string $uri = '/', array $params = [], $includeSession = true)
     {
@@ -33,14 +26,5 @@ trait HelperTrait
         }
 
         return $request;
-    }
-
-    private function createApplication()
-    {
-        return new class extends Application {
-            public function configureRoutes(Routes $routeConfigurator): void
-            {
-            }
-        };
     }
 }

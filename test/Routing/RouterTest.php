@@ -19,14 +19,14 @@ use Empress\Routing\PathMatcher;
 use Empress\Routing\Router;
 use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
-use Empress\Test\HelperTrait;
+use Empress\Test\Helper\MockRequestTrait;
 use Error;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
 class RouterTest extends AsyncTestCase
 {
-    use HelperTrait;
+    use MockRequestTrait;
 
     public function testServerAlreadyRunning()
     {
@@ -83,7 +83,7 @@ class RouterTest extends AsyncTestCase
         $statusMapper = new StatusMapper();
 
         $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), fn() => null));
+        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
 
         $router = new Router($exceptionMapper, $statusMapper, $matcher);
         yield $router->onStart($this->getMockServer());
@@ -102,7 +102,7 @@ class RouterTest extends AsyncTestCase
         $statusMapper = new StatusMapper();
 
         $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), fn() => null));
+        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
 
         $router = new Router($exceptionMapper, $statusMapper, $matcher);
         yield $router->onStart($this->getMockServer());
@@ -275,7 +275,6 @@ class RouterTest extends AsyncTestCase
         yield $router->onStart($this->getMockServer());
 
         $router->setFallback(new DocumentRoot('/'));
-
     }
 
     private function getMockServer(): Server

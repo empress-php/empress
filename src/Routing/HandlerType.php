@@ -18,7 +18,7 @@ abstract class HandlerType
 
     public static function fromString(string $str): int
     {
-        switch (strtoupper($str)) {
+        switch (\strtoupper($str)) {
             case 'BEFORE': return self::BEFORE;
             case 'AFTER': return self::AFTER;
             case 'GET': return self::GET;
@@ -29,7 +29,7 @@ abstract class HandlerType
             case 'HEAD': return self::HEAD;
             case 'OPTIONS': return self::OPTIONS;
             default:
-                throw new InvalidArgumentException(sprintf('Unknown handler type: %s.', $str));
+                throw new InvalidArgumentException(\sprintf('Unknown handler type: %s.', $str));
         }
     }
 

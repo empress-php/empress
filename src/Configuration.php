@@ -60,7 +60,7 @@ class Configuration
     }
 
     /**
-     * Gets logger used by http-server
+     * Gets logger used by http-server.
      *
      * @return LoggerInterface
      */
@@ -79,7 +79,7 @@ class Configuration
     }
 
     /**
-     * Gets configured server options
+     * Gets configured server options.
      *
      * @return Options
      */

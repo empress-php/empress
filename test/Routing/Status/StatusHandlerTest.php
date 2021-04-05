@@ -4,12 +4,12 @@ namespace Empress\Test\Routing\Status;
 
 use Amp\Http\Status;
 use Empress\Routing\Status\StatusHandler;
-use Empress\Test\HelperTrait;
+use Empress\Test\Helper\MockRequestTrait;
 use PHPUnit\Framework\TestCase;
 
 class StatusHandlerTest extends TestCase
 {
-    use HelperTrait;
+    use MockRequestTrait;
 
     public function testSatisfiesHeaders()
     {
@@ -75,7 +75,7 @@ class StatusHandlerTest extends TestCase
 
     public function testGetCallable()
     {
-        $closure = fn() => 1;
+        $closure = fn () => 1;
         $handler = new StatusHandler($closure, Status::NOT_FOUND);
 
         static::assertEquals($closure(), ($handler->getCallable())());

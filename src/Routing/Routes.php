@@ -179,7 +179,7 @@ class Routes
 
     private function addEntry(int $handlerType, string $route, callable $handler): void
     {
-        if (HandlerType::isFilter($handlerType) && strpos($route, ':') !== false) {
+        if (HandlerType::isFilter($handlerType) && \strpos($route, ':') !== false) {
             throw new InvalidArgumentException('No named parameters allowed for filters');
         }
 
@@ -190,6 +190,6 @@ class Routes
 
     private function prefixRoute(string $route): string
     {
-        return rtrim($this->prefix, '/') . '/' . ltrim($route, '/');
+        return \rtrim($this->prefix, '/') . '/' . \ltrim($route, '/');
     }
 }

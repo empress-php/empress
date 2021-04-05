@@ -26,7 +26,7 @@ class PathParser
     public function match(string $toMatch): ?array
     {
         if (($matches = $this->cache->get($toMatch)) === null) {
-            $result = preg_match($this->regex, $toMatch, $matches);
+            $result = \preg_match($this->regex, $toMatch, $matches);
             if ($result !== 1) {
                 $this->cache->put($toMatch, null);
 
@@ -35,7 +35,7 @@ class PathParser
 
             // If there is more than one match, the first array element will be the whole string matched.
             // With one match that's ok. Otherwise, only matched groups are important.
-            $matches = count($matches) === 1 ? $matches : array_slice($matches, 1);
+            $matches = \count($matches) === 1 ? $matches : \array_slice($matches, 1);
             $this->cache->put($toMatch, $matches);
         }
 
@@ -46,18 +46,18 @@ class PathParser
     {
         $segments = $path->toSegments();
 
-        return '#^/' . rtrim(implode('/', array_map(function (string $segment): string {
+        return '#^/' . \rtrim(\implode('/', \array_map(function (string $segment): string {
             if ($segment === '*') {
                 return '([^/]+)';
             }
 
             if ($segment[0] === ':') {
-                $paramName = preg_quote(substr($segment, 1), '/');
+                $paramName = \preg_quote(\substr($segment, 1), '/');
 
                 return '(?<' . $paramName . '>[^/]+)';
             }
 
-            return '(' . preg_quote($segment, '/') . ')';
+            return '(' . \preg_quote($segment, '/') . ')';
         }, $segments)), '/') . '$#';
     }
 }

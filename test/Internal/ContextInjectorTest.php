@@ -7,51 +7,50 @@ use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Internal\ContextInjector;
-use Empress\Test\HelperTrait;
+use Empress\Test\Helper\MockRequestTrait;
 use Exception;
 
 class ContextInjectorTest extends AsyncTestCase
 {
-    use HelperTrait;
+    use MockRequestTrait;
 
     public function testInjectorWithNewResponse()
     {
         $request = $this->createMockRequest();
-        $injector = new ContextInjector(fn () => null, $request);
-        $response = yield $injector->inject();
+        $context = new Context($request);
+        $injector = new ContextInjector($context);
 
-        static::assertInstanceOf(Response::class, $response);
+        yield $injector->inject(fn () => null);
+
+        static::assertInstanceOf(Response::class, $injector->getResponse());
     }
 
     public function testInjectorWithExistingResponse()
     {
-        $closure = function (Context $ctx) {
+        $request = $this->createMockRequest();
+        $context = new Context($request);
+        $injector = new ContextInjector($context);
+
+        yield $injector->inject(function (Context $ctx) {
             $ctx
                 ->status(Status::NOT_FOUND)
                 ->response('Hello');
-        };
+        });
 
-        $request = $this->createMockRequest();
-        $injector = new ContextInjector($closure, $request);
-
-        /** @var Response $response */
-        $response = yield $injector->inject();
-
-        static::assertEquals(Status::NOT_FOUND, $response->getStatus());
-        static::assertEquals('Hello', yield $response->getBody()->read());
+        static::assertEquals(Status::NOT_FOUND, $injector->getResponse()->getStatus());
+        static::assertEquals('Hello', yield $injector->getResponse()->getBody()->read());
     }
 
     public function testInjectorWithException()
     {
         $this->expectException(Exception::class);
 
-        $closure = function () {
-            throw new Exception();
-        };
-
         $request = $this->createMockRequest();
-        $injector = new ContextInjector($closure, $request);
+        $context = new Context($request);
+        $injector = new ContextInjector($context);
 
-        yield $injector->inject();
+        yield $injector->inject(function () {
+            throw new Exception();
+        });
     }
 }

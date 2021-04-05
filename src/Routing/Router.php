@@ -13,6 +13,7 @@ use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Http\Status;
 use Amp\Promise;
 use Amp\Success;
+use Empress\Context;
 use Empress\Exception\HaltException;
 use Empress\Internal\ContextInjector;
 use Empress\Routing\Exception\ExceptionMapper;
@@ -48,7 +49,7 @@ class Router implements RequestHandler, ServerObserver
     public function handleRequest(Request $request): Promise
     {
         $method = $request->getMethod();
-        $path = rawurldecode($request->getUri()->getPath());
+        $path = \rawurldecode($request->getUri()->getPath());
         $entries = $this->pathMatcher->findEntries($path);
 
         if (empty($entries)) {
@@ -59,12 +60,12 @@ class Router implements RequestHandler, ServerObserver
             return $this->handleNotFound($request);
         }
 
-        $entries = array_filter($entries, function (HandlerEntry $entry) use ($method) {
+        $entries = \array_filter($entries, function (HandlerEntry $entry) use ($method) {
             return $entry->getType() === HandlerType::fromString($method);
         });
 
         /** @var HandlerEntry|bool $handlerEntry */
-        $handlerEntry = reset($entries);
+        $handlerEntry = \reset($entries);
 
         if ($handlerEntry === false) {
             return $this->handleMethodNotAllowed($request);
@@ -126,34 +127,36 @@ class Router implements RequestHandler, ServerObserver
     private function dispatch(Request $request, HandlerEntry $handlerEntry, string $path): Promise
     {
         return call(function () use ($request, $handlerEntry, $path) {
-            try {
-                $request->setAttribute(Router::class, $this->pathMatcher->getPathParams($handlerEntry, $path));
+            $request->setAttribute(Router::class, $this->pathMatcher->getPathParams($handlerEntry, $path));
 
+            $context = new Context($request, new Response());
+            $injector = new ContextInjector($context);
+
+            try {
                 $beforeFilters = $this->pathMatcher->findEntries($path, HandlerType::BEFORE);
 
                 foreach ($beforeFilters as $beforeFilter) {
-                    $injector = new ContextInjector($beforeFilter->getHandler(), $request);
-
-                    $response = yield $injector->inject();
+                    yield $injector->inject($beforeFilter->getHandler());
                 }
 
-                $injector = new ContextInjector($handlerEntry->getHandler(), $request, $response ?? null);
-                $response = yield $injector->inject();
+                yield $injector->inject($handlerEntry->getHandler());
 
                 $afterFilters = $this->pathMatcher->findEntries($path, HandlerType::AFTER);
 
                 foreach ($afterFilters as $afterFilter) {
-                    $injector = new ContextInjector($afterFilter->getHandler(), $request, $response);
-
-                    $response = yield $injector->inject();
+                    yield $injector->inject($afterFilter->getHandler());
                 }
 
-                return yield $this->statusMapper->process($request, $response);
+                yield $this->statusMapper->process($injector);
             } catch (HaltException $e) {
                 return $e->toResponse();
             } catch (Throwable $e) {
-                return yield $this->exceptionMapper->process($e, $request);
+                $injector->setThrowable($e);
+
+                yield $this->exceptionMapper->process($injector);
             }
+
+            return $injector->getResponse();
         });
     }
 

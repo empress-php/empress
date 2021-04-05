@@ -2,7 +2,6 @@
 
 namespace Empress\Internal;
 
-use Amp\Deferred;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\Response;
 use Amp\Promise;
@@ -21,40 +20,19 @@ use function Amp\call;
  */
 class ContextInjector
 {
+    private Context $context;
 
-    /**
-     * @var callable
-     */
-    private $handler;
-
-    /**
-     * @var Request
-     */
-    private $request;
-
-    /**
-     * @var Response
-     */
-    private $response;
-
-    /**
-     * @var Throwable
-     */
-    private $exception;
+    private ?Throwable $exception;
 
     /**
      * ContextInjector constructor.
      *
-     * @param callable $handler
-     * @param Request $request
-     * @param Response|null $response
+     * @param Context $context
      * @param Throwable|null $exception
      */
-    public function __construct(callable $handler, Request $request, Response $response = null, Throwable $exception = null)
+    public function __construct(Context $context, ?Throwable $exception = null)
     {
-        $this->handler = $handler;
-        $this->request = $request;
-        $this->response = $response ?? new Response();
+        $this->context = $context;
         $this->exception = $exception;
     }
 
@@ -62,23 +40,31 @@ class ContextInjector
      * Injects the context object into the handler.
      * It runs the handler and returns a promise that will eventually resolve to a response.
      *
+     * @param callable $handler
      * @return Promise<Response>
      */
-    public function inject(): Promise
+    public function inject(callable $handler): Promise
     {
-        $context = new Context($this->request, $this->response, $this->exception);
-        $deferred = new Deferred();
+        return call($handler, $this->context, $this->exception);
+    }
 
-        call($this->handler, $context)->onResolve(function (?Throwable $t) use ($deferred) {
-            if (!\is_null($t)) {
-                $deferred->fail($t);
+    public function getRequest(): Request
+    {
+        return $this->context->getHttpServerRequest();
+    }
 
-                return;
-            }
+    public function getResponse(): Response
+    {
+        return $this->context->getHttpServerResponse();
+    }
 
-            $deferred->resolve($this->response);
-        });
+    public function getThrowable(): ?Throwable
+    {
+        return $this->exception;
+    }
 
-        return $deferred->promise();
+    public function setThrowable(Throwable $exception): void
+    {
+        $this->exception = $exception;
     }
 }

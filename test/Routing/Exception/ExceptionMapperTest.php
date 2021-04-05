@@ -2,18 +2,18 @@
 
 namespace Empress\Test\Routing\Exception;
 
-use Amp\Http\Server\Response;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
+use Empress\Internal\ContextInjector;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
-use Empress\Test\HelperTrait;
+use Empress\Test\Helper\MockRequestTrait;
 use Error;
 use Exception;
 
 class ExceptionMapperTest extends AsyncTestCase
 {
-    use HelperTrait;
+    use MockRequestTrait;
 
     public function testHandleRequest()
     {
@@ -24,10 +24,13 @@ class ExceptionMapperTest extends AsyncTestCase
 
         $request = $this->createMockRequest();
 
-        /** @var Response $response */
-        $response = yield $mapper->process(new Exception(), $request);
+        $context = new Context($request);
+        $injector = new ContextInjector($context);
+        $injector->setThrowable(new Exception());
 
-        static::assertEquals('Foo', yield $response->getBody()->read());
+        yield $mapper->process($injector);
+
+        static::assertEquals('Foo', yield $injector->getResponse()->getBody()->read());
     }
 
     public function testHandleUncaughtException()
@@ -39,6 +42,10 @@ class ExceptionMapperTest extends AsyncTestCase
 
         $request = $this->createMockRequest();
 
-        yield $mapper->process(new Error(), $request);
+        $context = new Context($request);
+        $injector = new ContextInjector($context);
+        $injector->setThrowable(new Error());
+
+        yield $mapper->process($injector);
     }
 }

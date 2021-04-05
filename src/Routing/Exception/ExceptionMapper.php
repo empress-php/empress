@@ -2,42 +2,41 @@
 
 namespace Empress\Routing\Exception;
 
-use Amp\Http\Server\Request;
-use Amp\Http\Server\Response;
 use Amp\Promise;
+use Amp\Success;
 use Empress\Internal\ContextInjector;
-use Throwable;
+use Empress\Routing\MapperInterface;
 use function Amp\call;
 
-class ExceptionMapper
+class ExceptionMapper implements MapperInterface
 {
 
     /**
-     * @var array<ExceptionHandler>
+     * @var ExceptionHandler[]
      */
-    private $handlers = [];
+    private array $handlers = [];
 
-    /**
-     * @param ExceptionHandler $handler
-     */
     public function addHandler(ExceptionHandler $handler): void
     {
         $this->handlers[] = $handler;
     }
 
-    public function process(Throwable $exception, Request $request, Response $response = null): Promise
+    public function process(ContextInjector $injector): Promise
     {
-        return call(function () use ($exception, $request, $response) {
+        return call(function () use ($injector) {
+            $exception = $injector->getThrowable();
+
+            if ($exception === null) {
+                return new Success();
+            }
+
             if (empty($this->handlers)) {
                 throw $exception;
             }
 
-            /** @var ExceptionHandler $handler */
             foreach ($this->handlers as $handler) {
-                if ($handler->getExceptionClass() === get_class($exception)) {
-                    $injector = new ContextInjector($handler->getCallable(), $request, $response, $exception);
-
-                    return yield $injector->inject();
+                if ($handler->getExceptionClass() === \get_class($exception)) {
+                    return yield $injector->inject($handler->getCallable());
                 }
             }
 
