@@ -46,7 +46,7 @@ abstract class HandlerType
             case self::BEFORE: return 'BEFORE';
             case self::AFTER: return 'AFTER';
             default:
-                throw new InvalidArgumentException('Unknown handler type.');
+                throw new InvalidArgumentException('Unknown handler type: %d.', $type);
         }
     }
 

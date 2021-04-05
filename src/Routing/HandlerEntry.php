@@ -11,7 +11,7 @@ class HandlerEntry
     private $type;
 
     /**
-     * @var string
+     * @var Path
      */
     private $path;
 
@@ -24,10 +24,10 @@ class HandlerEntry
      * HandlerEntry constructor.
      *
      * @param int $type
-     * @param string $path
+     * @param Path $path
      * @param callable $handler
      */
-    public function __construct(int $type, string $path, callable $handler)
+    public function __construct(int $type, Path $path, callable $handler)
     {
         $this->type = $type;
         $this->path = $path;
@@ -40,14 +40,14 @@ class HandlerEntry
     }
 
     /**
-     * @return string
+     * @return Path
      */
-    public function getPath(): string
+    public function getPath(): Path
     {
         return $this->path;
     }
 
-    public function setPath(string $path): void
+    public function setPath(Path $path): void
     {
         $this->path = $path;
     }

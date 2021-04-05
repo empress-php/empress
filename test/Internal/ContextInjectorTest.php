@@ -17,10 +17,10 @@ class ContextInjectorTest extends AsyncTestCase
     public function testInjectorWithNewResponse()
     {
         $request = $this->createMockRequest();
-        $injector = new ContextInjector(function () {}, $request);
+        $injector = new ContextInjector(fn () => null, $request);
         $response = yield $injector->inject();
 
-        $this->assertInstanceOf(Response::class, $response);
+        static::assertInstanceOf(Response::class, $response);
     }
 
     public function testInjectorWithExistingResponse()
@@ -28,7 +28,7 @@ class ContextInjectorTest extends AsyncTestCase
         $closure = function (Context $ctx) {
             $ctx
                 ->status(Status::NOT_FOUND)
-                ->respond('Hello');
+                ->response('Hello');
         };
 
         $request = $this->createMockRequest();
@@ -37,8 +37,8 @@ class ContextInjectorTest extends AsyncTestCase
         /** @var Response $response */
         $response = yield $injector->inject();
 
-        $this->assertEquals(Status::NOT_FOUND, $response->getStatus());
-        $this->assertEquals('Hello', yield $response->getBody()->read());
+        static::assertEquals(Status::NOT_FOUND, $response->getStatus());
+        static::assertEquals('Hello', yield $response->getBody()->read());
     }
 
     public function testInjectorWithException()

@@ -28,15 +28,15 @@ class StatusHandler
 
     /**
      * StatusHandler constructor.
-     * @param int $status
      * @param callable $callable
+     * @param int $status
      * @param array $headers
      */
-    public function __construct(int $status, callable $callable, array $headers = [])
+    public function __construct(callable $callable, int $status, array $headers = [])
     {
+        $this->callable = $callable;
         $this->status = $status;
         $this->headers = $headers;
-        $this->callable = $callable;
     }
 
     public function satisfiesHeaders(Request $request): bool

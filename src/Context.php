@@ -10,7 +10,6 @@ use Amp\Http\Cookie\ResponseCookie;
 use Amp\Http\Server\FormParser\BufferingParser;
 use Amp\Http\Server\FormParser\Form;
 use Amp\Http\Server\FormParser\StreamingParser;
-use Amp\Http\Server\MissingAttributeError;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Session\Session;
@@ -20,11 +19,13 @@ use Amp\Promise;
 use ArrayAccess;
 use Empress\Exception\HaltException;
 use Empress\Routing\Router;
-use Empress\Util\Optional;
 use JsonException;
 use LogicException;
 use Throwable;
 use function Amp\Http\Server\redirectTo;
+use function json_encode;
+use function json_last_error;
+use function json_last_error_msg;
 
 class Context implements ArrayAccess
 {
@@ -104,9 +105,6 @@ class Context implements ArrayAccess
         $this->queryString = $req->getUri()->getQuery();
         \parse_str($this->queryString, $parsed);
         $this->queryArray = $parsed;
-
-//        $this->params = $this->getRequestAttribute(Router::class, []);
-//        $this->session = $this->getRequestAttribute(Session::class, null);
 
         $this->params = $this->req->getAttribute(Router::class);
         $this->session = $this->req->getAttribute(Session::class);
@@ -386,7 +384,7 @@ class Context implements ArrayAccess
      * @param $stringOrStream
      * @return $this
      */
-    public function respond($stringOrStream): self
+    public function response($stringOrStream): self
     {
         $this->stringOrStream = $stringOrStream;
 
@@ -406,18 +404,16 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Sends a HTML response.
+     * Sends an HTML response.
      *
      * @param $stringOrStream
      * @return $this
      */
     public function html($stringOrStream): self
     {
-        $this
+        return $this
             ->contentType('text/html')
-            ->respond($stringOrStream);
-
-        return $this;
+            ->response($stringOrStream);
     }
 
     /**
@@ -432,18 +428,16 @@ class Context implements ArrayAccess
         $this->contentType('application/json');
 
         if (\PHP_VERSION >= 70300) {
-            $result = \json_encode($data, JSON_THROW_ON_ERROR);
+            $result = json_encode($data, JSON_THROW_ON_ERROR);
         } else {
-            $result = \json_encode($data);
+            $result = json_encode($data);
 
-            if (($lastError = \json_last_error()) !== JSON_ERROR_NONE) {
-                throw new JsonException(\json_last_error_msg(), $lastError);
+            if (($lastError = json_last_error()) !== JSON_ERROR_NONE) {
+                throw new JsonException(json_last_error_msg(), $lastError);
             }
         }
 
-        $this->respond($result);
-
-        return $this;
+        return $this->response($result);
     }
 
     public function halt(int $status = Status::OK, $stringOrStream = null, array $headers = [])
@@ -480,7 +474,7 @@ class Context implements ArrayAccess
      *
      * @return Request
      */
-    public function getHttpServerRequest()
+    public function getHttpServerRequest(): Request
     {
         return $this->req;
     }
@@ -490,22 +484,8 @@ class Context implements ArrayAccess
      *
      * @return Response
      */
-    public function getHttpServerResponse()
+    public function getHttpServerResponse(): Response
     {
         return $this->res;
     }
-
-//    /**
-//     * @param string $attributeName
-//     * @param $default
-//     * @return mixed
-//     */
-//    private function getRequestAttribute(string $attributeName, $default)
-//    {
-//        try {
-//            return $this->req->getAttribute($attributeName);
-//        } catch (MissingAttributeError $e) {
-//            throw new RequestException(sprintf('Incomplete request data. Attribute %s missing', $attributeName));
-//        }
-//    }
 }

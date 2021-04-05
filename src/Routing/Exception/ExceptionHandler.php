@@ -4,6 +4,7 @@ namespace Empress\Routing\Exception;
 
 class ExceptionHandler
 {
+
     /**
      * @var string
      */
@@ -17,10 +18,10 @@ class ExceptionHandler
 
     /**
      * ExceptionMappingMiddlewareHandler constructor.
-     * @param string $exceptionClass
      * @param callable $callable
+     * @param string $exceptionClass
      */
-    public function __construct(string $exceptionClass, callable $callable)
+    public function __construct(callable $callable, string $exceptionClass)
     {
         $this->exceptionClass = $exceptionClass;
         $this->callable = $callable;

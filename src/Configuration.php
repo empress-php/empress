@@ -24,42 +24,21 @@ class Configuration
     /**
      * @var Middleware[]
      */
-    private $middlewares = [];
+    private array $middlewares = [];
 
-    /**
-     * @var Options
-     */
-    private $options;
+    private Options $options;
 
-    /**
-     *@var LoggerInterface
-     */
-    private $logger;
+    private LoggerInterface $logger;
 
-    /**
-     * @var string|null
-     */
-    private $staticContentPath;
+    private ?string $staticContentPath = null;
 
-    /**
-     *@var Storage
-     */
-    private $sessionStorage;
+    private Storage $sessionStorage;
 
-    /**
-     * @var ServerTlsContext
-     */
-    private $tlsContext;
+    private ?ServerTlsContext $tlsContext = null;
 
-    /**
-     * @var int|null
-     */
-    private $tlsPort;
+    private ?int $tlsPort = null;
 
-    /**
-     * @var int
-     */
-    private $port = 1337;
+    private int $port = 1337;
 
     /**
      * ApplicationConfiguration constructor.
@@ -73,7 +52,7 @@ class Configuration
     /**
      * Returns all registered middlewares.
      *
-     * @return array<Middleware>
+     * @return Middleware[]
      */
     public function getMiddlewares(): array
     {
@@ -231,7 +210,7 @@ class Configuration
     /**
      * @param string $certFileName
      * @param int $port
-     * @param string $keyFileName
+     * @param string|null $keyFileName
      * @return $this
      */
     public function withTls(string $certFileName, int $port, ?string $keyFileName = null): self

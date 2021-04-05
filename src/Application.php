@@ -7,10 +7,12 @@ use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Amp\Success;
 use Empress\Routing\Exception\ExceptionHandler;
-use Empress\Routing\RootGroup;
+use Empress\Routing\Exception\ExceptionMapper;
+use Empress\Routing\PathMatcher;
 use Empress\Routing\Router;
 use Empress\Routing\Routes;
 use Empress\Routing\Status\StatusHandler;
+use Empress\Routing\Status\StatusMapper;
 
 /**
  * Defines an application object that will be run against http-server.
@@ -20,75 +22,58 @@ use Empress\Routing\Status\StatusHandler;
  */
 class Application implements ServerObserver
 {
+    protected Configuration $config;
 
-    /**
-     * @var Routes
-     */
-    protected $routes;
+    private ExceptionMapper $exceptionMapper;
 
-    /**
-     * @var Configuration
-     */
-    protected $config;
+    private StatusMapper $statusMapper;
 
-    /**
-     * @var Router
-     */
-    private $router;
+    private Routes $routes;
 
-    /**
-     * @var RootGroup
-     */
-    private $rootGroup;
-
-    public function __construct()
+    public function __construct(Configuration $config = null)
     {
-        $this->rootGroup = new RootGroup();
-        $this->routes = new Routes($this->rootGroup);
+        $this->config = $config ?? new Configuration();
 
-        $this->config = new Configuration();
-        $this->router = new Router();
-    }
-
-    /**
-     * @return Routes
-     */
-    public function routes(): Routes
-    {
-        return $this->routes;
-    }
-
-    /**
-     * @return Configuration
-     */
-    public function config(): Configuration
-    {
-        return $this->config;
+        $this->exceptionMapper = new ExceptionMapper();
+        $this->statusMapper = new StatusMapper();
+        $this->routes = new Routes(new PathMatcher());
     }
 
     public function exception(string $exceptionClass, callable $callable): self
     {
-        $exceptionHandler = new ExceptionHandler($exceptionClass, $callable);
+        $exceptionHandler = new ExceptionHandler($callable, $exceptionClass);
 
-        $this->router->addExceptionHandler($exceptionHandler);
+        $this->exceptionMapper->addHandler($exceptionHandler);
 
         return $this;
     }
 
     public function status(int $status, callable $callable, array $headers = []): self
     {
-        $statusHandler = new StatusHandler($status, $callable, $headers);
+        $statusHandler = new StatusHandler($callable, $status, $headers);
 
-        $this->router->addStatusHandler($statusHandler);
+        $this->statusMapper->addHandler($statusHandler);
 
         return $this;
     }
 
+    public function routes(): Routes
+    {
+        return $this->routes;
+    }
+
     public function getRouter(): Router
     {
-        $this->router->addEntries($this->rootGroup);
+        return new Router(
+            $this->exceptionMapper,
+            $this->statusMapper,
+            $this->routes->getPathMatcher()
+        );
+    }
 
-        return $this->router;
+    public function getConfiguration(): Configuration
+    {
+        return $this->config;
     }
 
     /**

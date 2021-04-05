@@ -8,11 +8,8 @@ use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
 use Closure;
-use Empress\Configuration;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
-use Empress\Routing\Router;
-use Empress\Routing\Routes;
 use Exception;
 use Throwable;
 use function Amp\call;
@@ -30,11 +27,6 @@ class Empress
      * @var Application
      */
     private $application;
-
-    /**
-     * @var int
-     */
-    private $port;
 
     /**
      * @var bool
@@ -63,6 +55,7 @@ class Empress
         $this->initializeServer();
 
         $closure = Closure::fromCallable([$this->server, 'start']);
+
         return $this->handleMultiReasonException($closure, StartupException::class);
     }
 
@@ -75,6 +68,7 @@ class Empress
     public function shutDown(): Promise
     {
         $closure = Closure::fromCallable([$this->server, 'stop']);
+
         return $this->handleMultiReasonException($closure, ShutdownException::class);
     }
 
@@ -84,7 +78,7 @@ class Empress
     private function initializeServer(): void
     {
         $router = $this->application->getRouter();
-        $config = $this->application->config();
+        $config = $this->application->getConfiguration();
 
         $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
         $logger = $config->getLogger();

@@ -3,23 +3,17 @@
 namespace Empress\Routing;
 
 use Closure;
+use InvalidArgumentException;
 
 class Routes
 {
+    private string $prefix = '';
 
-    /**
-     * @var HandlerGroup
-     */
-    private $group;
+    private PathMatcher $pathMatcher;
 
-    /**
-     * Routes constructor.
-     *
-     * @param HandlerGroup $group
-     */
-    public function __construct(HandlerGroup $group)
+    public function __construct(PathMatcher $pathMatcher)
     {
-        $this->group = $group;
+        $this->pathMatcher = $pathMatcher;
     }
 
     /**
@@ -30,14 +24,16 @@ class Routes
      */
     public function before(callable $callable): self
     {
-        $this->group->addBeforeFilter($callable);
+        $this->addEntry(HandlerType::BEFORE, '/*', $callable);
 
         return $this;
     }
 
-    public function beforeAt(string $path, callable $callable)
+    public function beforeAt(string $path, callable $callable): self
     {
-        $this->group->addBeforeFilter($callable, $path);
+        $this->addEntry(HandlerType::BEFORE, $path, $callable);
+
+        return $this;
     }
 
     /**
@@ -48,28 +44,32 @@ class Routes
      */
     public function after(callable $callable): self
     {
-        $this->group->addAfterFilter($callable);
+        $this->addEntry(HandlerType::AFTER, '/*', $callable);
 
         return $this;
     }
 
-    public function afterAt(string $path, callable $callable)
+    public function afterAt(string $path, callable $callable): self
     {
-        $this->group->addAfterFilter($callable, $path);
+        $this->addEntry(HandlerType::AFTER, $path, $callable);
+
+        return $this;
     }
 
     /**
      * Groups routes under one prefix.
      *
      * @param string $prefix
-     * @param Closure $closure
+     * @param Closure $closure,
      * @return Routes
      */
     public function group(string $prefix, Closure $closure): self
     {
-        $routes = new self(new HandlerGroup($prefix));
+        $routes = new self(new PathMatcher());
+        $routes->prefix = $prefix;
+
         $closure($routes);
-        $this->group->merge($routes->group);
+        $this->pathMatcher->merge($routes->pathMatcher);
 
         return $routes;
     }
@@ -83,7 +83,7 @@ class Routes
      */
     public function get(string $route, callable $handler): self
     {
-        $this->group->addRoute(HandlerType::GET, $route, $handler);
+        $this->addEntry(HandlerType::GET, $route, $handler);
 
         return $this;
     }
@@ -97,7 +97,7 @@ class Routes
      */
     public function post(string $route, callable $handler): self
     {
-        $this->group->addRoute(HandlerType::POST, $route, $handler);
+        $this->addEntry(HandlerType::POST, $route, $handler);
 
         return $this;
     }
@@ -111,7 +111,7 @@ class Routes
      */
     public function put(string $route, callable $handler): self
     {
-        $this->group->addRoute(HandlerType::PUT, $route, $handler);
+        $this->addEntry(HandlerType::PUT, $route, $handler);
 
         return $this;
     }
@@ -125,7 +125,7 @@ class Routes
      */
     public function delete(string $route, callable $handler): self
     {
-        $this->group->addRoute(HandlerType::DELETE, $route, $handler);
+        $this->addEntry(HandlerType::DELETE, $route, $handler);
 
         return $this;
     }
@@ -139,7 +139,7 @@ class Routes
      */
     public function patch(string $route, callable $handler): self
     {
-        $this->group->addRoute(HandlerType::PATCH, $route, $handler);
+        $this->addEntry(HandlerType::PATCH, $route, $handler);
 
         return $this;
     }
@@ -153,7 +153,7 @@ class Routes
      */
     public function head(string $route, callable $handler): self
     {
-        $this->group->addRoute(HandlerType::HEAD, $route, $handler);
+        $this->addEntry(HandlerType::HEAD, $route, $handler);
 
         return $this;
     }
@@ -167,8 +167,29 @@ class Routes
      */
     public function options(string $route, callable $handler): self
     {
-        $this->group->addRoute(HandlerType::OPTIONS, $route, $handler);
+        $this->addEntry(HandlerType::OPTIONS, $route, $handler);
 
         return $this;
+    }
+
+    public function getPathMatcher(): PathMatcher
+    {
+        return $this->pathMatcher;
+    }
+
+    private function addEntry(int $handlerType, string $route, callable $handler): void
+    {
+        if (HandlerType::isFilter($handlerType) && strpos($route, ':') !== false) {
+            throw new InvalidArgumentException('No named parameters allowed for filters');
+        }
+
+        $entry = new HandlerEntry($handlerType, new Path($this->prefixRoute($route)), $handler);
+
+        $this->pathMatcher->addEntry($entry);
+    }
+
+    private function prefixRoute(string $route): string
+    {
+        return rtrim($this->prefix, '/') . '/' . ltrim($route, '/');
     }
 }

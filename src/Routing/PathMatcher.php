@@ -9,54 +9,63 @@ class PathMatcher
 {
 
     /**
-     * @var array<HandlerEntry>
+     * @var HandlerEntry[]
      */
-    private $entries = [];
+    private array $entries = [];
 
-    /**
-     * @var SplObjectStorage
-     */
-    private $parsers;
+    private SplObjectStorage $parsers;
 
     public function __construct()
     {
         $this->parsers = new SplObjectStorage();
     }
 
-    public function addEntries(HandlerGroup $group)
+    public function addEntry(HandlerEntry $entry): void
     {
+        $type = $entry->getType();
+        $path = $entry->getPath();
+        $pathString = (string) $path;
+        $index = HandlerType::toString($type) . $pathString;
 
-        /** @var HandlerEntry $entry */
-        foreach ($group->getEntries() as $entry) {
-            $type = $entry->getType();
-            $path = $entry->getPath();
+        /** @var HandlerEntry $existingHandler */
+        $existingHandler = $this->entries[$index] ?? null;
 
-            if (HandlerType::isHttpMethod($type) && isset($this->entries[$type][$path])) {
-                throw new InvalidArgumentException(sprintf(
-                    '%s handler for path: %s already present.',
-                    HandlerType::toString($type),
-                    $path
-                ));
-            }
+        if (HandlerType::isHttpMethod($type) && $existingHandler !== null && $existingHandler->getType() === $type) {
+            throw new InvalidArgumentException(sprintf(
+                '%s handler for path: %s already present.',
+                HandlerType::toString($type),
+                $pathString
+            ));
+        }
 
-            $this->entries[$type][$path] = $entry;
-            $this->parsers->attach($entry, new PathParser($path));
+        $this->entries[$index] = $entry;
+        $this->parsers->attach($entry, new PathParser($path));
+    }
+
+    public function merge(PathMatcher $pathMatcher): void
+    {
+        foreach ($pathMatcher->getEntries() as $entry) {
+            $this->addEntry($entry);
         }
     }
 
+    public function getEntries(): array
+    {
+        return $this->entries;
+    }
+
     /**
-     * @param int $type
      * @param string $path
      * @return array<HandlerEntry>
      */
-    public function findEntries(int $type, string $path): array
+    public function findEntries(string $path, ?int $type = null): array
     {
-        if (empty($this->entries[$type])) {
+        if (!$this->hasEntries()) {
             return [];
         }
 
-        return array_filter($this->entries[$type], function (HandlerEntry $entry) use ($path) {
-            return !empty($this->match($entry, $path));
+        return array_filter($this->entries, function (HandlerEntry $entry) use ($path, $type) {
+            return !empty($this->match($entry, $path)) && ($type !== null ? $entry->getType() === $type : true);
         });
     }
 

@@ -12,7 +12,6 @@ use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Exception\HaltException;
-use Empress\Exception\RequestException;
 use Exception;
 use JsonException;
 use LogicException;
@@ -22,11 +21,7 @@ class ContextTest extends AsyncTestCase
 {
     use HelperTrait;
 
-
-    /**
-     * @var Context
-     */
-    private $ctx;
+    private Context $ctx;
 
     public function setUp(): void
     {
@@ -267,7 +262,7 @@ class ContextTest extends AsyncTestCase
 
     public function testRespond()
     {
-        $this->ctx->respond('Hello');
+        $this->ctx->response('Hello');
         $body = yield $this->ctx->getHttpServerResponse()->getBody()->read();
 
         $this->assertEquals('Hello', $body);
@@ -275,7 +270,7 @@ class ContextTest extends AsyncTestCase
 
     public function testResponseBody()
     {
-        $this->ctx->respond('Foo bar');
+        $this->ctx->response('Foo bar');
 
         $this->assertEquals('Foo bar', $this->ctx->responseBody());
     }
@@ -361,13 +356,5 @@ class ContextTest extends AsyncTestCase
 
         // Always return the same instance
         $this->assertSame($this->ctx->getHttpServerRequest(), $this->ctx->getHttpServerRequest());
-    }
-
-    public function testMissingRequestAttribute()
-    {
-        $this->expectException(RequestException::class);
-
-        $request = $this->createMockRequest('GET', '/', [], true);
-        $context = new Context($request, new Response());
     }
 }

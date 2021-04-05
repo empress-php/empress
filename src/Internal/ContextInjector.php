@@ -17,6 +17,7 @@ use function Amp\call;
  * The context is injected in such a way that alleviates the need for manually returning a response from handlers.
  *
  * @package Empress\Internal
+ * @internal
  */
 class ContextInjector
 {

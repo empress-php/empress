@@ -6,6 +6,7 @@ use Amp\Failure;
 use Amp\Http\Server\ErrorHandler;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler;
+use Amp\Http\Server\Response;
 use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Http\Server\StaticContent\DocumentRoot;
@@ -14,9 +15,7 @@ use Amp\Promise;
 use Amp\Success;
 use Empress\Exception\HaltException;
 use Empress\Internal\ContextInjector;
-use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
-use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
 use Error;
 use Throwable;
@@ -24,42 +23,23 @@ use function Amp\call;
 
 class Router implements RequestHandler, ServerObserver
 {
+    private bool $running = false;
 
-    /**
-     * @var bool
-     */
-    private $running = false;
+    private ErrorHandler $errorHandler;
 
-    /**
-     * @var ErrorHandler
-     */
-    private $errorHandler;
+    private ?DocumentRoot $fallback = null;
 
-    /**
-     * @var DocumentRoot|null
-     */
-    private $fallback;
+    private ExceptionMapper $exceptionMapper;
 
-    /**
-     * @var ExceptionMapper
-     */
-    private $exceptionMapper;
+    private StatusMapper $statusMapper;
 
-    /**
-     * @var StatusMapper
-     */
-    private $statusMapper;
+    private PathMatcher $pathMatcher;
 
-    /**
-     * @var PathMatcher
-     */
-    private $pathMatcher;
-
-    public function __construct()
+    public function __construct(ExceptionMapper $exceptionMapper, StatusMapper $statusMapper, PathMatcher $pathMatcher)
     {
-        $this->exceptionMapper = new ExceptionMapper();
-        $this->statusMapper = new StatusMapper();
-        $this->pathMatcher = new PathMatcher();
+        $this->exceptionMapper = $exceptionMapper;
+        $this->statusMapper = $statusMapper;
+        $this->pathMatcher = $pathMatcher;
     }
 
     /**
@@ -69,15 +49,9 @@ class Router implements RequestHandler, ServerObserver
     {
         $method = $request->getMethod();
         $path = rawurldecode($request->getUri()->getPath());
+        $entries = $this->pathMatcher->findEntries($path);
 
-        var_dump($path);
-
-        $entries = $this->pathMatcher->findEntries(HandlerType::fromString($method), $path);
-
-        /** @var HandlerEntry $handlerEntry */
-        $handlerEntry = reset($entries);
-
-        if ($handlerEntry === false) {
+        if (empty($entries)) {
             if ($this->fallback !== null) {
                 return $this->fallback->handleRequest($request);
             }
@@ -85,18 +59,74 @@ class Router implements RequestHandler, ServerObserver
             return $this->handleNotFound($request);
         }
 
-        return $this->handleFound($request, $handlerEntry, $path);
+        $entries = array_filter($entries, function (HandlerEntry $entry) use ($method) {
+            return $entry->getType() === HandlerType::fromString($method);
+        });
+
+        /** @var HandlerEntry|bool $handlerEntry */
+        $handlerEntry = reset($entries);
+
+        if ($handlerEntry === false) {
+            return $this->handleMethodNotAllowed($request);
+        }
+
+        return $this->dispatch($request, $handlerEntry, $path);
     }
 
-    private function handleFound(Request $request, HandlerEntry $handlerEntry, string $path): Promise
+
+    public function setFallback(DocumentRoot $requestHandler): void
+    {
+        if ($this->running) {
+            throw new Error('Cannot add fallback request handler after the server has started');
+        }
+
+        $this->fallback = $requestHandler;
+    }
+
+    public function onStart(Server $server): Promise
+    {
+        if ($this->running) {
+            return new Failure(new Error('Server has already been started'));
+        }
+
+        $this->errorHandler = $server->getErrorHandler();
+
+        if (!$this->pathMatcher->hasEntries()) {
+            return new Failure(new Error(
+                'Router start failure: no routes registered'
+            ));
+        }
+
+        if (isset($this->fallback)) {
+            return $this->fallback->onStart($server);
+        }
+
+        $this->running = true;
+
+        return new Success();
+    }
+
+    public function onStop(Server $server): Promise
+    {
+        $this->running = false;
+
+        return $this->fallback->onStop($server);
+    }
+
+    /**
+     * @param Request $request
+     * @param HandlerEntry $handlerEntry
+     * @param string $path
+     * @return Promise<Response>
+     */
+    private function dispatch(Request $request, HandlerEntry $handlerEntry, string $path): Promise
     {
         return call(function () use ($request, $handlerEntry, $path) {
             try {
                 $request->setAttribute(Router::class, $this->pathMatcher->getPathParams($handlerEntry, $path));
 
-                $beforeFilters = $this->pathMatcher->findEntries(HandlerType::BEFORE, $path);
+                $beforeFilters = $this->pathMatcher->findEntries($path, HandlerType::BEFORE);
 
-                /** @var HandlerEntry $beforeFilter */
                 foreach ($beforeFilters as $beforeFilter) {
                     $injector = new ContextInjector($beforeFilter->getHandler(), $request);
 
@@ -106,9 +136,8 @@ class Router implements RequestHandler, ServerObserver
                 $injector = new ContextInjector($handlerEntry->getHandler(), $request);
                 $response = yield $injector->inject();
 
-                $afterFilters = $this->pathMatcher->findEntries(HandlerType::AFTER, $path);
+                $afterFilters = $this->pathMatcher->findEntries($path, HandlerType::AFTER);
 
-                /** @var HandlerEntry $afterFilter */
                 foreach ($afterFilters as $afterFilter) {
                     $injector = new ContextInjector($afterFilter->getHandler(), $request, $response);
 
@@ -129,72 +158,8 @@ class Router implements RequestHandler, ServerObserver
         return $this->errorHandler->handleError(Status::NOT_FOUND, null, $request);
     }
 
-    public function addExceptionHandler(ExceptionHandler $handler): void
+    private function handleMethodNotAllowed(Request $request): Promise
     {
-        if ($this->running) {
-            throw new Error('Cannot add exception handlers after the server has started');
-        }
-
-        $this->exceptionMapper->addHandler($handler);
-    }
-
-    public function addStatusHandler(StatusHandler $handler): void
-    {
-        if ($this->running) {
-            throw new Error('Cannot add status handlers after the server has started');
-        }
-
-        $this->statusMapper->addHandler($handler);
-    }
-
-    public function addEntries(HandlerGroup $group): void
-    {
-        if ($this->running) {
-            throw new Error('Cannot add routes after the server has started');
-        }
-
-        $this->pathMatcher->addEntries($group);
-    }
-
-
-    public function setFallback(DocumentRoot $requestHandler): void
-    {
-        if ($this->running) {
-            throw new Error('Cannot add fallback request handler after the server has started');
-        }
-
-        $this->fallback = $requestHandler;
-    }
-
-    public function onStart(Server $server): Promise
-    {
-        if ($this->running) {
-            return new Failure(new Error('Router already started'));
-        }
-
-        $this->errorHandler = $server->getErrorHandler();
-
-
-
-        if (!$this->pathMatcher->hasEntries()) {
-            return new Failure(new Error(
-                'Router start failure: no routes registered'
-            ));
-        }
-
-        if (isset($this->fallback)) {
-            return $this->fallback->onStart($server);
-        }
-
-        return new Success();
-    }
-
-    public function onStop(Server $server): Promise
-    {
-        $this->pathMatcher = null;
-        $this->exceptionMapper = null;
-        $this->statusMapper = null;
-
-        return $this->fallback->onStop($server);
+        return $this->errorHandler->handleError(Status::METHOD_NOT_ALLOWED, null, $request);
     }
 }

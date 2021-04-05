@@ -49,8 +49,6 @@ class StatusMapper
             }
 
             if (isset($candidates[$statusCode])) {
-
-                /** @var StatusHandler $candidate */
                 $candidate = $candidates[$statusCode];
                 $injector = new ContextInjector($candidate->getCallable(), $request, new Response($statusCode));
 
