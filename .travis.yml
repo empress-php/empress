@@ -20,7 +20,7 @@ install:
 script:
   - mkdir -p build/logs
   - php vendor/bin/phpunit -c phpunit.xml.dist
-  - vendor/bin/php-cs-fixer fix --config=.php_cs.dist --verbose --diff --dry-run
+  - vendor/bin/psalm --no-cache
 
 after_success:
   - travis_retry php vendor/bin/php-coveralls
