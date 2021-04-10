@@ -4,6 +4,8 @@ namespace Empress;
 
 use Amp\Http\Server\Server;
 use Amp\Http\Server\Session\SessionMiddleware;
+use Amp\Log\ConsoleFormatter;
+use Amp\Log\StreamHandler;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket;
@@ -11,43 +13,28 @@ use Closure;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
 use Exception;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Throwable;
+use function Amp\ByteStream\getStdout;
 use function Amp\call;
 use function Amp\Http\Server\Middleware\stack;
 
 class Empress
 {
+    private Server $server;
 
-    /**
-     * @var Server
-     */
-    private $server;
+    private Application $application;
 
-    /**
-     * @var Application
-     */
-    private $application;
-
-    /**
-     * @var bool
-     */
-    private $booted;
-
-    /**
-     * Empress constructor.
-     * @param Application $application
-     */
     public function __construct(Application $application)
     {
         $this->application = $application;
-        $this->booted = false;
     }
 
     /**
      * Initializes routes and configures the environment for the application
      * and then runs it on http-server.
-     *
-     * @return Promise
+
      * @throws Socket\SocketException
      */
     public function boot(): Promise
@@ -62,8 +49,6 @@ class Empress
     /**
      * Stops the server. As the application implements the ServerObserver interface
      * this will also call the onStop() method on the application instance.
-     *
-     * @return Promise
      */
     public function shutDown(): Promise
     {
@@ -72,16 +57,13 @@ class Empress
         return $this->handleMultiReasonException($closure, ShutdownException::class);
     }
 
-    /**
-     * @throws Socket\SocketException
-     */
     private function initializeServer(): void
     {
         $router = $this->application->getRouter();
         $config = $this->application->getConfiguration();
 
         $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
-        $logger = $config->getLogger();
+        $logger = $this->getLogger();
         $options = $config->getServerOptions();
         $port = $config->getPort();
 
@@ -111,11 +93,6 @@ class Empress
         $this->server->attach($this->application);
     }
 
-    /**
-     * @param Closure $closure
-     * @param string $exceptionClass
-     * @return Promise
-     */
     private function handleMultiReasonException(Closure $closure, string $exceptionClass = Exception::class): Promise
     {
         return call(function () use ($closure, $exceptionClass) {
@@ -126,6 +103,8 @@ class Empress
 
                 if (\count($reasons) === 1) {
                     $reason = \array_shift($reasons);
+
+                    /** @psalm-suppress InvalidThrow */
                     throw new $exceptionClass($reason->getMessage(), $reason->getCode(), $reason);
                 }
 
@@ -133,8 +112,19 @@ class Empress
                     return $reason->getMessage();
                 }, $reasons);
 
+                /** @psalm-suppress InvalidThrow */
                 throw new $exceptionClass(\implode(PHP_EOL, $messages));
             }
         });
+    }
+
+    private function getLogger(): LoggerInterface
+    {
+        $logHandler = new StreamHandler(getStdout());
+        $logHandler->setFormatter(new ConsoleFormatter);
+        $logger = new Logger('Empress');
+        $logger->pushHandler($logHandler);
+
+        return $logger;
     }
 }

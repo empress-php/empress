@@ -21,7 +21,7 @@ trait StubRequestTrait
         $request->setAttribute(Router::NAMED_PARAMS_ATTR_NAME, $params);
 
         if ($includeSession) {
-            $session = new Session(new InMemoryStorage(), 0);
+            $session = new Session(new InMemoryStorage(), null);
             $request->setAttribute(Session::class, $session);
         }
 

@@ -31,6 +31,7 @@
         "phpunit/phpunit": "^8.3",
         "amphp/phpunit-util": "^1.1",
         "amphp/php-cs-fixer-config": "dev-master",
-        "php-coveralls/php-coveralls": "^2.2"
+        "php-coveralls/php-coveralls": "^2.2",
+        "vimeo/psalm": "^4.7"
     }
 }

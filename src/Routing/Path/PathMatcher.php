@@ -23,7 +23,7 @@ class PathMatcher
         $regex = $this->regexBuilder->getRegex();
         \preg_match($regex, $toMatch, $matches);
 
-        return \array_filter($matches, fn ($key) => \is_string($key), ARRAY_FILTER_USE_KEY);
+        return \array_filter($matches, fn (mixed $key) => \is_string($key), ARRAY_FILTER_USE_KEY);
     }
 
     public function extractWildcards(string $toMatch): array
@@ -34,7 +34,7 @@ class PathMatcher
         return \array_values(
             \array_filter(
                 \array_splice($matches, 1),
-                fn ($key) => \is_int($key),
+                fn (mixed $key) => \is_int($key),
                 ARRAY_FILTER_USE_KEY
             )
         );

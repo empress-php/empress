@@ -2,27 +2,18 @@
 
 namespace Empress\Exception;
 
+use Amp\ByteStream\InputStream;
 use Amp\Http\Server\Response;
 use Amp\Http\Status;
 use Error;
 
 class HaltException extends Error
 {
+    private int $status;
 
-    /**
-     * @var int
-     */
-    private $status;
+    private array $headers;
 
-    /**
-     * @var array
-     */
-    private $headers;
-
-    /**
-     * @var mixed|null
-     */
-    private $stringOrStream;
+    private InputStream|string|null $stringOrStream;
 
     /**
      * HaltException constructor.
@@ -30,7 +21,7 @@ class HaltException extends Error
      * @param array $headers
      * @param mixed|null $stringOrStream
      */
-    public function __construct($status = Status::OK, array $headers = [], $stringOrStream = null)
+    public function __construct($status = Status::OK, array $headers = [], InputStream|string|null $stringOrStream = null)
     {
         $this->status = $status;
         $this->headers = $headers;

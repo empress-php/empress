@@ -51,16 +51,6 @@ class ConfigurationTest extends TestCase
         static::assertContains($middleware, $middlewares);
     }
 
-    public function testWithLogger(): void
-    {
-        static::assertNotNull($this->configuration->getLogger());
-
-        $logger = $this->createMock(LoggerInterface::class);
-        $this->configuration->withLogger($logger);
-
-        static::assertSame($logger, $this->configuration->getLogger());
-    }
-
     public function testWithSessionStorage(): void
     {
         static::assertNotNull($this->configuration->getSessionStorage());
