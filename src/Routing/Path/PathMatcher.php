@@ -15,26 +15,26 @@ class PathMatcher
     {
         $regex = $this->regexBuilder->getRegex();
 
-        return preg_match($regex, $toMatch) === 1;
+        return \preg_match($regex, $toMatch) === 1;
     }
 
     public function extractNamedParams(string $toMatch): array
     {
         $regex = $this->regexBuilder->getRegex();
-        preg_match($regex, $toMatch, $matches);
+        \preg_match($regex, $toMatch, $matches);
 
-        return array_filter($matches, fn ($key) => is_string($key), ARRAY_FILTER_USE_KEY);
+        return \array_filter($matches, fn ($key) => \is_string($key), ARRAY_FILTER_USE_KEY);
     }
 
     public function extractWildcards(string $toMatch): array
     {
         $regex = $this->regexBuilder->getRegex();
-        preg_match($regex, $toMatch, $matches);
+        \preg_match($regex, $toMatch, $matches);
 
-        return array_values(
-            array_filter(
-                array_splice($matches, 1),
-                fn ($key) => is_int($key),
+        return \array_values(
+            \array_filter(
+                \array_splice($matches, 1),
+                fn ($key) => \is_int($key),
                 ARRAY_FILTER_USE_KEY
             )
         );

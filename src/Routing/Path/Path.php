@@ -29,6 +29,6 @@ class Path
 
     private function toParts(string $path): array
     {
-        return array_values(array_filter(explode('/', $path)));
+        return \array_values(\array_filter(\explode('/', $path)));
     }
 }

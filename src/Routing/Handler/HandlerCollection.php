@@ -26,7 +26,7 @@ class HandlerCollection implements IteratorAggregate
 
     public function filterByPath(string $path): self
     {
-        $entries = array_filter($this->entries, function (HandlerEntry $entry) use ($path) {
+        $entries = \array_filter($this->entries, function (HandlerEntry $entry) use ($path) {
             $matcher = $entry->getPathMatcher();
 
             return $matcher->matches($path);
@@ -37,26 +37,26 @@ class HandlerCollection implements IteratorAggregate
 
     public function filterByType(int $type): self
     {
-        $entries = array_filter($this->entries, fn (HandlerEntry $entry) => $entry->getType() === $type);
+        $entries = \array_filter($this->entries, fn (HandlerEntry $entry) => $entry->getType() === $type);
 
         return new self($entries);
     }
 
     public function first(): ?HandlerEntry
     {
-        $entry = reset($this->entries);
+        $entry = \reset($this->entries);
 
         return $entry ?: null;
     }
 
     public function count(): int
     {
-        return count($this->entries);
+        return \count($this->entries);
     }
 
     public function merge(HandlerCollection $handlerCollection): HandlerCollection
     {
-        return new self(array_merge($this->entries, $handlerCollection->entries));
+        return new self(\array_merge($this->entries, $handlerCollection->entries));
     }
 
     public function getIterator(): Traversable
