@@ -4,11 +4,8 @@ namespace Empress\Routing\Path;
 
 class PathMatcher
 {
-    private RegexBuilder $regexBuilder;
-
-    public function __construct(RegexBuilder $regexBuilder)
+    public function __construct(private RegexBuilder $regexBuilder)
     {
-        $this->regexBuilder = $regexBuilder;
     }
 
     public function matches(string $toMatch): bool

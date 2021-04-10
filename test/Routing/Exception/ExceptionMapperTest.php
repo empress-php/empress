@@ -10,12 +10,13 @@ use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Test\Helper\StubRequestTrait;
 use Error;
 use Exception;
+use Generator;
 
 class ExceptionMapperTest extends AsyncTestCase
 {
     use StubRequestTrait;
 
-    public function testHandleRequest()
+    public function testHandleRequest(): Generator
     {
         $mapper = new ExceptionMapper();
         $mapper->addHandler(new ExceptionHandler(function (Context $ctx) {
@@ -33,7 +34,7 @@ class ExceptionMapperTest extends AsyncTestCase
         static::assertEquals('Foo', yield $injector->getResponse()->getBody()->read());
     }
 
-    public function testHandleUncaughtException()
+    public function testHandleUncaughtException(): Generator
     {
         $this->expectException(Error::class);
 

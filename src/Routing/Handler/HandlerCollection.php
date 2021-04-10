@@ -8,15 +8,8 @@ use Traversable;
 
 class HandlerCollection implements IteratorAggregate
 {
-
-    /**
-     * @var HandlerEntry[]
-     */
-    private array $entries;
-
-    public function __construct(array $entries = [])
+    public function __construct(private array $entries = [])
     {
-        $this->entries = $entries;
     }
 
     public function add(HandlerEntry $entry): void

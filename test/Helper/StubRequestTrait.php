@@ -11,7 +11,7 @@ use League\Uri\Http;
 
 trait StubRequestTrait
 {
-    private function createStubRequest(string $method = 'GET', string $uri = '/', array $params = [], $includeSession = true)
+    private function createStubRequest(string $method = 'GET', string $uri = '/', array $params = [], $includeSession = true): Request
     {
         $client = $this->getMockBuilder(Client::class)->getMock();
         $client->method('getLocalPort')->willReturn(1234);

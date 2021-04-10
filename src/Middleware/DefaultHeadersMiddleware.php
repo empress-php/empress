@@ -16,20 +16,15 @@ use function Amp\call;
 class DefaultHeadersMiddleware implements Middleware
 {
 
-    /** @var array */
-    private $headers;
-
     /**
      * DefaultHeadersMiddleware constructor.
      *
      * @param array $headers Default headers to be used with every response
      */
-    public function __construct(array $headers)
+    public function __construct(private array $headers)
     {
-        $this->headers = $headers;
     }
 
-    /** @inheritDoc */
     public function handleRequest(Request $request, RequestHandler $requestHandler): Promise
     {
         return call(function () use ($request, $requestHandler) {

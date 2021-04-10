@@ -36,17 +36,12 @@ class Router implements RequestHandler, ServerObserver
 
     private ?DocumentRoot $fallback = null;
 
-    private ExceptionMapper $exceptionMapper;
-
-    private StatusMapper $statusMapper;
-
-    private HandlerCollection $handlerCollection;
-
-    public function __construct(ExceptionMapper $exceptionMapper, StatusMapper $statusMapper, HandlerCollection $handlerCollection)
+    public function __construct(
+        private ExceptionMapper $exceptionMapper,
+        private StatusMapper $statusMapper,
+        private HandlerCollection $handlerCollection
+    )
     {
-        $this->exceptionMapper = $exceptionMapper;
-        $this->statusMapper = $statusMapper;
-        $this->handlerCollection = $handlerCollection;
     }
 
     /**

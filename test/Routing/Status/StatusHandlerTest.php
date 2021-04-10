@@ -11,7 +11,7 @@ class StatusHandlerTest extends TestCase
 {
     use StubRequestTrait;
 
-    public function testSatisfiesHeaders()
+    public function testSatisfiesHeaders(): void
     {
         $headers = [
             'X-Custom-1' => 'foo',
@@ -27,7 +27,7 @@ class StatusHandlerTest extends TestCase
         static::assertTrue($statusHandler->satisfiesHeaders($request));
     }
 
-    public function testDoesNotSatisfyEmptyHeaderArray()
+    public function testDoesNotSatisfyEmptyHeaderArray(): void
     {
         $statusHandler = new StatusHandler(fn () => null, Status::OK, [
             'X-Custom-1' => 'foo',
@@ -39,14 +39,14 @@ class StatusHandlerTest extends TestCase
         static::assertFalse($statusHandler->satisfiesHeaders($request));
     }
 
-    public function testGetStatus()
+    public function testGetStatus(): void
     {
         $handler = new StatusHandler(fn () => null, Status::NOT_FOUND);
 
         static::assertEquals(Status::NOT_FOUND, $handler->getStatus());
     }
 
-    public function testGetHeaders()
+    public function testGetHeaders(): void
     {
         $handler = new StatusHandler(fn () => null, Status::NOT_FOUND, [
             'X-Custom' => 'Foo',
@@ -57,7 +57,7 @@ class StatusHandlerTest extends TestCase
         ], $handler->getHeaders());
     }
 
-    public function testHasHeaders()
+    public function testHasHeaders(): void
     {
         $handler = new StatusHandler(function () {}, Status::NOT_FOUND, [
             'X-Custom' => 'Foo',
@@ -66,14 +66,14 @@ class StatusHandlerTest extends TestCase
         static::assertTrue($handler->hasHeaders());
     }
 
-    public function testHasNoHeaders()
+    public function testHasNoHeaders(): void
     {
         $handler = new StatusHandler(function () {}, Status::NOT_FOUND);
 
         static::assertFalse($handler->hasHeaders());
     }
 
-    public function testGetCallable()
+    public function testGetCallable(): void
     {
         $closure = fn () => 1;
         $handler = new StatusHandler($closure, Status::NOT_FOUND);

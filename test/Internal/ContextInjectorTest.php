@@ -2,30 +2,19 @@
 
 namespace Empress\Test\Internal;
 
-use Amp\Http\Server\Response;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Internal\ContextInjector;
 use Empress\Test\Helper\StubRequestTrait;
 use Exception;
+use Generator;
 
 class ContextInjectorTest extends AsyncTestCase
 {
     use StubRequestTrait;
 
-    public function testInjectorWithNewResponse()
-    {
-        $request = $this->createStubRequest();
-        $context = new Context($request);
-        $injector = new ContextInjector($context);
-
-        yield $injector->inject(fn () => null);
-
-        static::assertInstanceOf(Response::class, $injector->getResponse());
-    }
-
-    public function testInjectorWithExistingResponse()
+    public function testInjectorWithExistingResponse(): Generator
     {
         $request = $this->createStubRequest();
         $context = new Context($request);
@@ -41,7 +30,7 @@ class ContextInjectorTest extends AsyncTestCase
         static::assertEquals('Hello', yield $injector->getResponse()->getBody()->read());
     }
 
-    public function testInjectorWithException()
+    public function testInjectorWithException(): Generator
     {
         $this->expectException(Exception::class);
 
@@ -49,8 +38,6 @@ class ContextInjectorTest extends AsyncTestCase
         $context = new Context($request);
         $injector = new ContextInjector($context);
 
-        yield $injector->inject(function () {
-            throw new Exception();
-        });
+        yield $injector->inject(fn () => throw new Exception());
     }
 }

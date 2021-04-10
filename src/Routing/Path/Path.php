@@ -4,16 +4,14 @@ namespace Empress\Routing\Path;
 
 class Path
 {
-    private string $path;
 
     /**
      * @var string[]
      */
     private array $parts;
 
-    public function __construct(string $path)
+    public function __construct(private string $path)
     {
-        $this->path = $path;
         $this->parts = $this->toParts($path);
     }
 

@@ -8,34 +8,17 @@ use Empress\Routing\Path\RegexBuilder;
 
 class HandlerEntry
 {
+    private int $type;
 
-    /**
-     * @var int
-     */
-    private $type;
-
-    /**
-     * @var Path
-     */
-    private $path;
+    private Path $path;
 
     /**
      * @var callable
      */
     private $handler;
 
-    /**
-     * @var PathMatcher
-     */
-    private $pathMatcher;
+    private PathMatcher $pathMatcher;
 
-    /**
-     * HandlerEntry constructor.
-     *
-     * @param int $type
-     * @param Path $path
-     * @param callable $handler
-     */
     public function __construct(int $type, Path $path, callable $handler)
     {
         $this->type = $type;
@@ -49,9 +32,6 @@ class HandlerEntry
         return $this->type;
     }
 
-    /**
-     * @return Path
-     */
     public function getPath(): Path
     {
         return $this->path;
@@ -62,9 +42,6 @@ class HandlerEntry
         $this->path = $path;
     }
 
-    /**
-     * @return callable
-     */
     public function getHandler(): callable
     {
         return $this->handler;

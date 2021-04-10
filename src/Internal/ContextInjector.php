@@ -20,20 +20,11 @@ use function Amp\call;
  */
 class ContextInjector
 {
-    private Context $context;
-
-    private ?Throwable $exception;
-
-    /**
-     * ContextInjector constructor.
-     *
-     * @param Context $context
-     * @param Throwable|null $exception
-     */
-    public function __construct(Context $context, ?Throwable $exception = null)
+    public function __construct(
+        private Context $context,
+        private ?Throwable $exception = null
+    )
     {
-        $this->context = $context;
-        $this->exception = $exception;
     }
 
     /**

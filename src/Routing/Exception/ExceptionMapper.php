@@ -35,7 +35,7 @@ class ExceptionMapper implements MapperInterface
             }
 
             foreach ($this->handlers as $handler) {
-                if ($handler->getExceptionClass() === \get_class($exception)) {
+                if ($handler->getExceptionClass() === $exception::class) {
                     return yield $injector->inject($handler->getCallable());
                 }
             }

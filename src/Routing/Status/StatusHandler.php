@@ -8,22 +8,13 @@ class StatusHandler
 {
     private int $status;
 
-    /**
-     * @var array
-     */
-    private $headers;
+    private array $headers;
 
     /**
      * @var callable
      */
     private $callable;
 
-    /**
-     * StatusHandler constructor.
-     * @param callable $callable
-     * @param int $status
-     * @param array $headers
-     */
     public function __construct(callable $callable, int $status, array $headers = [])
     {
         $this->callable = $callable;

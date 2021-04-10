@@ -12,18 +12,15 @@ class Routes
 {
     private string $prefix = '';
 
-    private HandlerCollection $handlerCollection;
-
-    public function __construct(HandlerCollection $handlerCollection)
+    public function __construct(private HandlerCollection $handlerCollection)
     {
-        $this->handlerCollection = $handlerCollection;
     }
 
     /**
      * Registers a before filter.
      *
      * @param callable $callable
-     * @return $this
+     * @return Routes
      */
     public function before(callable $callable): self
     {
@@ -32,6 +29,13 @@ class Routes
         return $this;
     }
 
+    /**
+     * Registers a before filter.
+     *
+     * @param string $path
+     * @param callable $callable
+     * @return Routes
+     */
     public function beforeAt(string $path, callable $callable): self
     {
         $this->addEntry(HandlerType::BEFORE, $path, $callable);
@@ -43,7 +47,7 @@ class Routes
      * Registers an after filter.
      *
      * @param callable $callable
-     * @return $this
+     * @return Routes
      */
     public function after(callable $callable): self
     {
@@ -52,6 +56,13 @@ class Routes
         return $this;
     }
 
+    /**
+     * Registers an after filter.
+     *
+     * @param string $path
+     * @param callable $callable
+     * @return Routes
+     */
     public function afterAt(string $path, callable $callable): self
     {
         $this->addEntry(HandlerType::AFTER, $path, $callable);

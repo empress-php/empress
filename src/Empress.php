@@ -17,30 +17,10 @@ use function Amp\Http\Server\Middleware\stack;
 
 class Empress
 {
+    private Server $server;
 
-    /**
-     * @var Server
-     */
-    private $server;
-
-    /**
-     * @var Application
-     */
-    private $application;
-
-    /**
-     * @var bool
-     */
-    private $booted;
-
-    /**
-     * Empress constructor.
-     * @param Application $application
-     */
-    public function __construct(Application $application)
+    public function __construct(private Application $application)
     {
-        $this->application = $application;
-        $this->booted = false;
     }
 
     /**

@@ -21,6 +21,7 @@ use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
 use Empress\Test\Helper\StubRequestTrait;
 use Error;
+use Generator;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
@@ -28,7 +29,7 @@ class RouterTest extends AsyncTestCase
 {
     use StubRequestTrait;
 
-    public function testServerAlreadyRunning()
+    public function testServerAlreadyRunning(): Generator
     {
         $this->expectException(Error::class);
 
@@ -42,7 +43,7 @@ class RouterTest extends AsyncTestCase
         yield $router->onStart($this->getMockServer());
     }
 
-    public function testNoRoutesRegistered()
+    public function testNoRoutesRegistered(): Generator
     {
         $this->expectException(Error::class);
 
@@ -56,7 +57,7 @@ class RouterTest extends AsyncTestCase
         yield $router->onStart($this->getMockServer());
     }
 
-    public function testHandleRequest()
+    public function testHandleRequest(): Generator
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
@@ -77,7 +78,7 @@ class RouterTest extends AsyncTestCase
         static::assertEquals('<h1>Hello World!</h1>', yield $response->getBody()->read());
     }
 
-    public function testHandleNotFound()
+    public function testHandleNotFound(): Generator
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
@@ -96,7 +97,7 @@ class RouterTest extends AsyncTestCase
         static::assertEquals(Status::NOT_FOUND, $response->getStatus());
     }
 
-    public function testHandleMethodNotAllowed()
+    public function testHandleMethodNotAllowed(): Generator
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
@@ -115,7 +116,7 @@ class RouterTest extends AsyncTestCase
         static::assertEquals(Status::METHOD_NOT_ALLOWED, $response->getStatus());
     }
 
-    public function testWithExceptionMapper()
+    public function testWithExceptionMapper(): Generator
     {
         $exceptionMapper = new ExceptionMapper();
         $exceptionMapper->addHandler(new ExceptionHandler(function (Context $ctx) {
@@ -140,7 +141,7 @@ class RouterTest extends AsyncTestCase
         static::assertEquals(Status::BAD_REQUEST, $response->getStatus());
     }
 
-    public function testWithUncaughtException()
+    public function testWithUncaughtException(): Generator
     {
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Inv4lid');
@@ -161,7 +162,7 @@ class RouterTest extends AsyncTestCase
         yield $router->handleRequest($request);
     }
 
-    public function testWithHalt()
+    public function testWithHalt(): Generator
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
@@ -183,7 +184,7 @@ class RouterTest extends AsyncTestCase
         static::assertEquals('Not found :(', yield $response->getBody()->read());
     }
 
-    public function testWithStatusMapper()
+    public function testWithStatusMapper(): Generator
     {
         $exceptionMapper = new ExceptionMapper();
 
@@ -210,7 +211,7 @@ class RouterTest extends AsyncTestCase
         static::assertEquals('Internal server error', yield $response->getBody()->read());
     }
 
-    public function testWithBefore()
+    public function testWithBefore(): Generator
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
@@ -235,7 +236,7 @@ class RouterTest extends AsyncTestCase
         static::assertEquals('Hello', yield $response->getBody()->read());
     }
 
-    public function testWithAfter()
+    public function testWithAfter(): Generator
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
@@ -261,7 +262,7 @@ class RouterTest extends AsyncTestCase
     }
 
 
-    public function testCannotSetFallbackWhileRunning()
+    public function testCannotSetFallbackWhileRunning(): Generator
     {
         $this->expectException(Error::class);
 

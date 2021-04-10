@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class ExceptionHandlerTest extends TestCase
 {
-    public function testExceptionHandler()
+    public function testExceptionHandler(): void
     {
         $closure = fn () => null;
         $handler = new ExceptionHandler($closure, Exception::class);

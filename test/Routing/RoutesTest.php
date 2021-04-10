@@ -14,15 +14,12 @@ class RoutesTest extends TestCase
 {
     private Closure $closure;
 
-    private HandlerCollection $collection;
-
     private Routes $routes;
 
     protected function setUp(): void
     {
         $this->closure = fn () => null;
-        $this->collection = new HandlerCollection();
-        $this->routes = new Routes($this->collection);
+        $this->routes = new Routes(new HandlerCollection());
     }
 
     public function testBefore(): void

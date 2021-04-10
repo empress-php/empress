@@ -23,9 +23,6 @@ class StatusMapper implements MapperInterface
         $this->handlers[] = $handler;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function process(ContextInjector $injector): Promise
     {
         return call(function () use ($injector) {

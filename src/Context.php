@@ -21,14 +21,13 @@ use Empress\Exception\HaltException;
 use Empress\Routing\Router;
 use JsonException;
 use LogicException;
-use Throwable;
 use function Amp\Http\Server\redirectTo;
 
 class Context implements ArrayAccess
 {
-    private Request $req;
+    private Request $request;
 
-    private Response $res;
+    private Response $response;
 
     private BufferingParser $bufferingParser;
 
@@ -42,32 +41,28 @@ class Context implements ArrayAccess
 
     private ?Session $session;
 
-    /**
-     * @var string|InputStream
-     */
-    private $stringOrStream;
+    private InputStream|string $stringOrStream;
 
     /**
      * Context constructor.
      *
      * @param Request $request
      * @param Response|null $response
-     * @param Throwable|null $exception
      */
-    public function __construct(Request $request, ?Response $response = null)
+    public function __construct(Request $request, Response $response = null)
     {
-        $this->req = $request;
-        $this->res = $response ?? new Response();
+        $this->request = $request;
+        $this->response = $response ?? new Response();
 
         $this->bufferingParser = new BufferingParser();
         $this->streamingParser = new StreamingParser();
 
-        $this->queryString = $this->req->getUri()->getQuery();
+        $this->queryString = $this->request->getUri()->getQuery();
         \parse_str($this->queryString, $parsed);
         $this->queryArray = $parsed;
 
-        $this->params = $this->req->getAttribute(Router::NAMED_PARAMS_ATTR_NAME);
-        $this->session = $this->req->getAttribute(Session::class);
+        $this->params = $this->request->getAttribute(Router::NAMED_PARAMS_ATTR_NAME);
+        $this->session = $this->request->getAttribute(Session::class);
     }
 
     /**
@@ -81,7 +76,7 @@ class Context implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->params[$offset];
     }
@@ -89,7 +84,7 @@ class Context implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         throw new LogicException('Cannot set values of an existing request object');
     }
@@ -97,7 +92,7 @@ class Context implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         throw new LogicException('Cannot unset values of an existing request object');
     }
@@ -109,7 +104,7 @@ class Context implements ArrayAccess
      */
     public function streamedBody(): Promise
     {
-        return $this->req->getBody()->read();
+        return $this->request->getBody()->read();
     }
 
     /**
@@ -119,7 +114,7 @@ class Context implements ArrayAccess
      */
     public function bufferedBody(): Promise
     {
-        return $this->req->getBody()->buffer();
+        return $this->request->getBody()->buffer();
     }
 
     /**
@@ -128,7 +123,7 @@ class Context implements ArrayAccess
      */
     public function streamedForm(): Iterator
     {
-        return $this->streamingParser->parseForm($this->req);
+        return $this->streamingParser->parseForm($this->request);
     }
 
     /**
@@ -137,7 +132,7 @@ class Context implements ArrayAccess
      */
     public function bufferedForm(): Promise
     {
-        return $this->bufferingParser->parseForm($this->req);
+        return $this->bufferingParser->parseForm($this->request);
     }
 
     /**
@@ -176,9 +171,9 @@ class Context implements ArrayAccess
      * @param string $name
      * @return mixed
      */
-    public function attr(string $name)
+    public function attr(string $name): mixed
     {
-        return $this->req->getAttribute($name);
+        return $this->request->getAttribute($name);
     }
 
     /**
@@ -189,7 +184,7 @@ class Context implements ArrayAccess
      */
     public function hasAttr(string $name): bool
     {
-        return $this->req->hasAttribute($name);
+        return $this->request->hasAttribute($name);
     }
 
     /**
@@ -200,7 +195,7 @@ class Context implements ArrayAccess
      */
     public function cookie(string $name): RequestCookie
     {
-        return $this->req->getCookie($name);
+        return $this->request->getCookie($name);
     }
 
     /**
@@ -210,7 +205,7 @@ class Context implements ArrayAccess
      */
     public function cookies(): array
     {
-        return $this->req->getCookies();
+        return $this->request->getCookies();
     }
 
     /**
@@ -225,14 +220,14 @@ class Context implements ArrayAccess
     public function responseCookie(string $name, string $value = '', CookieAttributes $attributes = null): self
     {
         $cookie = new ResponseCookie($name, $value, $attributes);
-        $this->res->setCookie($cookie);
+        $this->response->setCookie($cookie);
 
         return $this;
     }
 
     public function removeCookie(string $name)
     {
-        $this->res->removeCookie($name);
+        $this->response->removeCookie($name);
 
         return $this;
     }
@@ -244,7 +239,7 @@ class Context implements ArrayAccess
      */
     public function port(): int
     {
-        return $this->req->getClient()->getLocalPort();
+        return $this->request->getClient()->getLocalPort();
     }
 
     /**
@@ -254,7 +249,7 @@ class Context implements ArrayAccess
      */
     public function host(): string
     {
-        return $this->req->getClient()->getLocalAddress();
+        return $this->request->getClient()->getLocalAddress();
     }
 
     /**
@@ -264,7 +259,7 @@ class Context implements ArrayAccess
      */
     public function method(): string
     {
-        return $this->req->getMethod();
+        return $this->request->getMethod();
     }
 
     /**
@@ -274,7 +269,7 @@ class Context implements ArrayAccess
      */
     public function userAgent(): string
     {
-        return $this->req->getHeader('User-Agent');
+        return $this->request->getHeader('User-Agent');
     }
 
     /**
@@ -286,7 +281,7 @@ class Context implements ArrayAccess
      */
     public function redirect(string $uri, int $status = Status::FOUND): self
     {
-        $this->res = redirectTo($uri, $status);
+        $this->response = redirectTo($uri, $status);
 
         return $this;
     }
@@ -298,9 +293,9 @@ class Context implements ArrayAccess
      * @param string|null $reason
      * @return $this
      */
-    public function status(int $status, string $reason = null): self
+    public function status(int $status, ?string $reason = null): self
     {
-        $this->res->setStatus($status, $reason);
+        $this->response->setStatus($status, $reason);
 
         return $this;
     }
@@ -313,28 +308,28 @@ class Context implements ArrayAccess
      */
     public function contentType(string $contentType): self
     {
-        $this->res->setHeader('Content-Type', $contentType);
+        $this->response->setHeader('Content-Type', $contentType);
 
         return $this;
     }
 
     public function header(string $name, $value): self
     {
-        $this->res->setHeader($name, $value);
+        $this->response->setHeader($name, $value);
 
         return $this;
     }
 
     public function removeHeader(string $name): self
     {
-        $this->res->removeHeader($name);
+        $this->response->removeHeader($name);
 
         return $this;
     }
 
     public function requestHeader(string $name): ?string
     {
-        return $this->req->getHeader($name);
+        return $this->request->getHeader($name);
     }
 
     /**
@@ -347,7 +342,7 @@ class Context implements ArrayAccess
     {
         $this->stringOrStream = $stringOrStream;
 
-        $this->res->setBody($stringOrStream);
+        $this->response->setBody($stringOrStream);
 
         return $this;
     }
@@ -357,7 +352,7 @@ class Context implements ArrayAccess
      *
      * @return string|InputStream
      */
-    public function responseBody()
+    public function responseBody(): InputStream|string
     {
         return $this->stringOrStream;
     }
@@ -386,15 +381,7 @@ class Context implements ArrayAccess
     {
         $this->contentType('application/json');
 
-        if (\PHP_VERSION >= 70300) {
-            $result = \json_encode($data, JSON_THROW_ON_ERROR);
-        } else {
-            $result = \json_encode($data);
-
-            if (($lastError = \json_last_error()) !== JSON_ERROR_NONE) {
-                throw new JsonException(\json_last_error_msg(), $lastError);
-            }
-        }
+        $result = \json_encode($data, JSON_THROW_ON_ERROR);
 
         return $this->response($result);
     }
@@ -411,7 +398,7 @@ class Context implements ArrayAccess
      */
     public function getHttpServerRequest(): Request
     {
-        return $this->req;
+        return $this->request;
     }
 
     /**
@@ -421,6 +408,6 @@ class Context implements ArrayAccess
      */
     public function getHttpServerResponse(): Response
     {
-        return $this->res;
+        return $this->response;
     }
 }
