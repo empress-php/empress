@@ -3,10 +3,10 @@
 namespace Empress\Test\Routing;
 
 use Closure;
-use Empress\Routing\HandlerEntry;
-use Empress\Routing\HandlerType;
-use Empress\Routing\Path;
-use Empress\Routing\PathMatcher;
+use Empress\Routing\Handler\HandlerCollection;
+use Empress\Routing\Handler\HandlerEntry;
+use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Path\Path;
 use Empress\Routing\Routes;
 use PHPUnit\Framework\TestCase;
 
@@ -14,15 +14,15 @@ class RoutesTest extends TestCase
 {
     private Closure $closure;
 
-    private PathMatcher $matcher;
+    private HandlerCollection $collection;
 
     private Routes $routes;
 
     protected function setUp(): void
     {
         $this->closure = fn () => null;
-        $this->matcher = new PathMatcher();
-        $this->routes = new Routes($this->matcher);
+        $this->collection = new HandlerCollection();
+        $this->routes = new Routes($this->collection);
     }
 
     public function testBefore(): void
@@ -135,10 +135,8 @@ class RoutesTest extends TestCase
         static::markTestSkipped();
     }
 
-    private function getEntry(): HandlerEntry
+    private function getEntry(): ?HandlerEntry
     {
-        $entries = $this->matcher->getEntries();
-
-        return \reset($entries);
+        return $this->routes->getHandlerCollection()->first();
     }
 }

@@ -7,13 +7,13 @@ use Empress\Context;
 use Empress\Internal\ContextInjector;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
-use Empress\Test\Helper\MockRequestTrait;
+use Empress\Test\Helper\StubRequestTrait;
 use Error;
 use Exception;
 
 class ExceptionMapperTest extends AsyncTestCase
 {
-    use MockRequestTrait;
+    use StubRequestTrait;
 
     public function testHandleRequest()
     {
@@ -22,7 +22,7 @@ class ExceptionMapperTest extends AsyncTestCase
             $ctx->response('Foo');
         }, Exception::class));
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         $context = new Context($request);
         $injector = new ContextInjector($context);
@@ -40,7 +40,7 @@ class ExceptionMapperTest extends AsyncTestCase
         $mapper = new ExceptionMapper();
         $mapper->addHandler(new ExceptionHandler(Exception::class, fn () => null));
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         $context = new Context($request);
         $injector = new ContextInjector($context);

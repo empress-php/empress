@@ -4,12 +4,12 @@ namespace Empress\Test\Routing\Status;
 
 use Amp\Http\Status;
 use Empress\Routing\Status\StatusHandler;
-use Empress\Test\Helper\MockRequestTrait;
+use Empress\Test\Helper\StubRequestTrait;
 use PHPUnit\Framework\TestCase;
 
 class StatusHandlerTest extends TestCase
 {
-    use MockRequestTrait;
+    use StubRequestTrait;
 
     public function testSatisfiesHeaders()
     {
@@ -21,7 +21,7 @@ class StatusHandlerTest extends TestCase
         $statusHandler = new StatusHandler(function () {
         }, Status::OK, $headers);
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
         $request->setHeaders($headers);
 
         static::assertTrue($statusHandler->satisfiesHeaders($request));
@@ -34,7 +34,7 @@ class StatusHandlerTest extends TestCase
             'X-Custom-2' => 'bar',
         ]);
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         static::assertFalse($statusHandler->satisfiesHeaders($request));
     }

@@ -8,7 +8,7 @@ use Amp\Promise;
 use Amp\Success;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
-use Empress\Routing\PathMatcher;
+use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Router;
 use Empress\Routing\Routes;
 use Empress\Routing\Status\StatusHandler;
@@ -36,7 +36,15 @@ class Application implements ServerObserver
 
         $this->exceptionMapper = new ExceptionMapper();
         $this->statusMapper = new StatusMapper();
-        $this->routes = new Routes(new PathMatcher());
+        $this->routes = new Routes(new HandlerCollection());
+    }
+
+    public static function create(int $port): self
+    {
+        $configuration = (new Configuration())
+            ->withPort($port);
+
+        return new self($configuration);
     }
 
     public function exception(string $exceptionClass, callable $callable): self
@@ -57,9 +65,9 @@ class Application implements ServerObserver
         return $this;
     }
 
-    public function routes(): Routes
+    public function routes(callable $collector): void
     {
-        return $this->routes;
+        $collector($this->routes);
     }
 
     public function getRouter(): Router
@@ -67,7 +75,7 @@ class Application implements ServerObserver
         return new Router(
             $this->exceptionMapper,
             $this->statusMapper,
-            $this->routes->getPathMatcher()
+            $this->routes->getHandlerCollection()
         );
     }
 

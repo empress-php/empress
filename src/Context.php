@@ -66,7 +66,7 @@ class Context implements ArrayAccess
         \parse_str($this->queryString, $parsed);
         $this->queryArray = $parsed;
 
-        $this->params = $this->req->getAttribute(Router::class);
+        $this->params = $this->req->getAttribute(Router::NAMED_PARAMS_ATTR_NAME);
         $this->session = $this->req->getAttribute(Session::class);
     }
 

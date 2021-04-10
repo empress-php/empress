@@ -6,11 +6,11 @@ use Amp\Http\Server\RequestHandler\CallableRequestHandler;
 use Amp\Http\Server\Response;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Middleware\DefaultHeadersMiddleware;
-use Empress\Test\Helper\MockRequestTrait;
+use Empress\Test\Helper\StubRequestTrait;
 
 class DefaultHeadersMiddlewareTest extends AsyncTestCase
 {
-    use MockRequestTrait;
+    use StubRequestTrait;
 
     public function testHandleRequest()
     {
@@ -19,7 +19,7 @@ class DefaultHeadersMiddlewareTest extends AsyncTestCase
             'x-Custom-2' => 'some other value',
         ];
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
         $handler = new CallableRequestHandler(function () {
             return new Response();
         });

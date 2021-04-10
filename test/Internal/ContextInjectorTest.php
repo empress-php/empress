@@ -7,16 +7,16 @@ use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Internal\ContextInjector;
-use Empress\Test\Helper\MockRequestTrait;
+use Empress\Test\Helper\StubRequestTrait;
 use Exception;
 
 class ContextInjectorTest extends AsyncTestCase
 {
-    use MockRequestTrait;
+    use StubRequestTrait;
 
     public function testInjectorWithNewResponse()
     {
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
         $context = new Context($request);
         $injector = new ContextInjector($context);
 
@@ -27,7 +27,7 @@ class ContextInjectorTest extends AsyncTestCase
 
     public function testInjectorWithExistingResponse()
     {
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
         $context = new Context($request);
         $injector = new ContextInjector($context);
 
@@ -45,7 +45,7 @@ class ContextInjectorTest extends AsyncTestCase
     {
         $this->expectException(Exception::class);
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
         $context = new Context($request);
         $injector = new ContextInjector($context);
 

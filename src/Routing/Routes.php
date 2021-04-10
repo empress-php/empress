@@ -3,17 +3,20 @@
 namespace Empress\Routing;
 
 use Closure;
-use InvalidArgumentException;
+use Empress\Routing\Handler\HandlerCollection;
+use Empress\Routing\Handler\HandlerEntry;
+use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Path\Path;
 
 class Routes
 {
     private string $prefix = '';
 
-    private PathMatcher $pathMatcher;
+    private HandlerCollection $handlerCollection;
 
-    public function __construct(PathMatcher $pathMatcher)
+    public function __construct(HandlerCollection $handlerCollection)
     {
-        $this->pathMatcher = $pathMatcher;
+        $this->handlerCollection = $handlerCollection;
     }
 
     /**
@@ -65,11 +68,12 @@ class Routes
      */
     public function group(string $prefix, Closure $closure): self
     {
-        $routes = new self(new PathMatcher());
+        $routes = new self(new HandlerCollection());
         $routes->prefix = $prefix;
 
         $closure($routes);
-        $this->pathMatcher->merge($routes->pathMatcher);
+
+        $this->handlerCollection = $this->handlerCollection->merge($routes->handlerCollection);
 
         return $routes;
     }
@@ -172,20 +176,16 @@ class Routes
         return $this;
     }
 
-    public function getPathMatcher(): PathMatcher
+    public function getHandlerCollection(): HandlerCollection
     {
-        return $this->pathMatcher;
+        return $this->handlerCollection;
     }
 
     private function addEntry(int $handlerType, string $route, callable $handler): void
     {
-        if (HandlerType::isFilter($handlerType) && \strpos($route, ':') !== false) {
-            throw new InvalidArgumentException('No named parameters allowed for filters');
-        }
-
         $entry = new HandlerEntry($handlerType, new Path($this->prefixRoute($route)), $handler);
 
-        $this->pathMatcher->addEntry($entry);
+        $this->handlerCollection->add($entry);
     }
 
     private function prefixRoute(string $route): string

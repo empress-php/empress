@@ -17,6 +17,9 @@ use Empress\Context;
 use Empress\Exception\HaltException;
 use Empress\Internal\ContextInjector;
 use Empress\Routing\Exception\ExceptionMapper;
+use Empress\Routing\Handler\HandlerCollection;
+use Empress\Routing\Handler\HandlerEntry;
+use Empress\Routing\Handler\HandlerType;
 use Empress\Routing\Status\StatusMapper;
 use Error;
 use Throwable;
@@ -24,6 +27,9 @@ use function Amp\call;
 
 class Router implements RequestHandler, ServerObserver
 {
+    public const NAMED_PARAMS_ATTR_NAME = self::class . '_namedParams';
+    public const WILDCARDS_ATTR_NAME = self::class . '_wildcards';
+
     private bool $running = false;
 
     private ErrorHandler $errorHandler;
@@ -34,13 +40,13 @@ class Router implements RequestHandler, ServerObserver
 
     private StatusMapper $statusMapper;
 
-    private PathMatcher $pathMatcher;
+    private HandlerCollection $handlerCollection;
 
-    public function __construct(ExceptionMapper $exceptionMapper, StatusMapper $statusMapper, PathMatcher $pathMatcher)
+    public function __construct(ExceptionMapper $exceptionMapper, StatusMapper $statusMapper, HandlerCollection $handlerCollection)
     {
         $this->exceptionMapper = $exceptionMapper;
         $this->statusMapper = $statusMapper;
-        $this->pathMatcher = $pathMatcher;
+        $this->handlerCollection = $handlerCollection;
     }
 
     /**
@@ -50,9 +56,10 @@ class Router implements RequestHandler, ServerObserver
     {
         $method = $request->getMethod();
         $path = \rawurldecode($request->getUri()->getPath());
-        $entries = $this->pathMatcher->findEntries($path);
 
-        if (empty($entries)) {
+        $entries = $this->handlerCollection->filterByPath($path);
+
+        if ($entries->count() === 0) {
             if ($this->fallback !== null) {
                 return $this->fallback->handleRequest($request);
             }
@@ -60,14 +67,12 @@ class Router implements RequestHandler, ServerObserver
             return $this->handleNotFound($request);
         }
 
-        $entries = \array_filter($entries, function (HandlerEntry $entry) use ($method) {
-            return $entry->getType() === HandlerType::fromString($method);
-        });
+        $handlerType = HandlerType::fromString($method);
+        $entries = $entries->filterByType($handlerType);
 
-        /** @var HandlerEntry|bool $handlerEntry */
-        $handlerEntry = \reset($entries);
+        $handlerEntry = $entries->first();
 
-        if ($handlerEntry === false) {
+        if ($handlerEntry === null) {
             return $this->handleMethodNotAllowed($request);
         }
 
@@ -92,7 +97,7 @@ class Router implements RequestHandler, ServerObserver
 
         $this->errorHandler = $server->getErrorHandler();
 
-        if (!$this->pathMatcher->hasEntries()) {
+        if ($this->handlerCollection->count() === 0) {
             return new Failure(new Error(
                 'Router start failure: no routes registered'
             ));
@@ -127,13 +132,16 @@ class Router implements RequestHandler, ServerObserver
     private function dispatch(Request $request, HandlerEntry $handlerEntry, string $path): Promise
     {
         return call(function () use ($request, $handlerEntry, $path) {
-            $request->setAttribute(Router::class, $this->pathMatcher->getPathParams($handlerEntry, $path));
+            $request->setAttribute(self::NAMED_PARAMS_ATTR_NAME, $handlerEntry->getPathMatcher()->extractNamedParams($path));
+            $request->setAttribute(self::WILDCARDS_ATTR_NAME, $handlerEntry->getPathMatcher()->extractWildcards($path));
 
             $context = new Context($request, new Response());
             $injector = new ContextInjector($context);
 
             try {
-                $beforeFilters = $this->pathMatcher->findEntries($path, HandlerType::BEFORE);
+                $beforeFilters = $this->handlerCollection
+                    ->filterByPath($path)
+                    ->filterByType(HandlerType::BEFORE);
 
                 foreach ($beforeFilters as $beforeFilter) {
                     yield $injector->inject($beforeFilter->getHandler());
@@ -141,7 +149,9 @@ class Router implements RequestHandler, ServerObserver
 
                 yield $injector->inject($handlerEntry->getHandler());
 
-                $afterFilters = $this->pathMatcher->findEntries($path, HandlerType::AFTER);
+                $afterFilters = $this->handlerCollection
+                    ->filterByPath($path)
+                    ->filterByType(HandlerType::AFTER);
 
                 foreach ($afterFilters as $afterFilter) {
                     yield $injector->inject($afterFilter->getHandler());

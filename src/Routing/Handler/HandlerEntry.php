@@ -1,6 +1,10 @@
 <?php
 
-namespace Empress\Routing;
+namespace Empress\Routing\Handler;
+
+use Empress\Routing\Path\Path;
+use Empress\Routing\Path\PathMatcher;
+use Empress\Routing\Path\RegexBuilder;
 
 class HandlerEntry
 {
@@ -21,6 +25,11 @@ class HandlerEntry
     private $handler;
 
     /**
+     * @var PathMatcher
+     */
+    private $pathMatcher;
+
+    /**
      * HandlerEntry constructor.
      *
      * @param int $type
@@ -32,6 +41,7 @@ class HandlerEntry
         $this->type = $type;
         $this->path = $path;
         $this->handler = $handler;
+        $this->pathMatcher = new PathMatcher(new RegexBuilder($path));
     }
 
     public function getType(): int
@@ -58,5 +68,10 @@ class HandlerEntry
     public function getHandler(): callable
     {
         return $this->handler;
+    }
+
+    public function getPathMatcher(): PathMatcher
+    {
+        return $this->pathMatcher;
     }
 }

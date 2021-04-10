@@ -9,33 +9,26 @@ use Empress\Routing\Routes;
 require __DIR__ . '/../vendor/autoload.php';
 
 Loop::run(function () {
-    $app = new Application();
-    $routes = $app->routes();
+    $app = Application::create(9010);
 
-    $routes->group('/hello', function (Routes $routes) {
-        $routes->get('/world', function (Context $ctx) {
-            $ctx->respond('Hello');
+    $app->routes(function (Routes $routes) {
+        $routes->group('/hello', function (Routes $routes) {
+            $routes->get('/world', function (Context $ctx) {
+                $ctx->html('<h1>Hello</h1>');
+            });
 
-            throw new Exception('Biyotch');
+            $routes->get('/foo/bar', function (Context $ctx) {
+                $ctx->response('Foo bar');
+            });
+
+            $routes->beforeAt('/foo/*', function (Context $ctx) {
+                echo "Before /hello/foo/*\n";
+            });
+
+            $routes->afterAt('/world', function (Context $ctx) {
+                echo "After /hello/world\n";
+            });
         });
-
-        $routes->get('/foo/bar', function (Context $ctx) {
-            $ctx->respond('Foo bar');
-        });
-
-        $routes->beforeAt('/foo/*', function (Context $ctx) {
-            echo "Before /hello/foo/*\n";
-        });
-
-        $routes->afterAt('/world', function (Context $ctx) {
-            echo "After /hell/world\n";
-        });
-    });
-
-    $app->exception(Exception::class, function (Context $ctx) {
-        echo "An exception happened: {$ctx->exception()->getMessage()}";
-
-        $ctx->rethrow();
     });
 
     $empress = new Empress($app);

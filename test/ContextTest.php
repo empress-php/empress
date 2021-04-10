@@ -12,14 +12,14 @@ use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Exception\HaltException;
-use Empress\Test\Helper\MockRequestTrait;
+use Empress\Test\Helper\StubRequestTrait;
 use JsonException;
 use LogicException;
 use const INF;
 
 class ContextTest extends AsyncTestCase
 {
-    use MockRequestTrait;
+    use StubRequestTrait;
 
     private Context $ctx;
 
@@ -27,7 +27,7 @@ class ContextTest extends AsyncTestCase
     {
 
         // Set example params
-        $request = $this->createMockRequest('GET', '/?a=b&c=d', [
+        $request = $this->createStubRequest('GET', '/?a=b&c=d', [
             'param1' => 'value1',
             'param2' => 'value2'
         ]);

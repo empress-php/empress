@@ -1,6 +1,6 @@
 <?php
 
-namespace Empress\Routing;
+namespace Empress\Routing\Handler;
 
 use InvalidArgumentException;
 

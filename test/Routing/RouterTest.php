@@ -12,21 +12,21 @@ use Amp\Socket\Server as SocketServer;
 use Empress\Context;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
-use Empress\Routing\HandlerEntry;
-use Empress\Routing\HandlerType;
-use Empress\Routing\Path;
-use Empress\Routing\PathMatcher;
+use Empress\Routing\Handler\HandlerCollection;
+use Empress\Routing\Handler\HandlerEntry;
+use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Path\Path;
 use Empress\Routing\Router;
 use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
-use Empress\Test\Helper\MockRequestTrait;
+use Empress\Test\Helper\StubRequestTrait;
 use Error;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
 class RouterTest extends AsyncTestCase
 {
-    use MockRequestTrait;
+    use StubRequestTrait;
 
     public function testServerAlreadyRunning()
     {
@@ -34,9 +34,9 @@ class RouterTest extends AsyncTestCase
 
         $exceptionMapper = $this->createMock(ExceptionMapper::class);
         $statusMapper = $this->createMock(StatusMapper::class);
-        $matcher = $this->createMock(PathMatcher::class);
+        $collection = $this->createMock(HandlerCollection::class);
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
 
         yield $router->onStart($this->getMockServer());
         yield $router->onStart($this->getMockServer());
@@ -49,10 +49,10 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = $this->createMock(ExceptionMapper::class);
         $statusMapper = $this->createMock(StatusMapper::class);
 
-        $matcher = $this->createMock(PathMatcher::class);
-        $matcher->method('hasEntries')->willReturn(false);
+        $collection = $this->createMock(HandlerCollection::class);
+        $collection->method('count')->willReturn(0);
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
     }
 
@@ -61,15 +61,15 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->html('<h1>Hello World!</h1>');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         /** @var Response $response */
         $response = yield $router->handleRequest($request);
@@ -82,13 +82,13 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest('GET', '/hello');
+        $request = $this->createStubRequest('GET', '/hello');
 
         /** @var Response $response */
         $response = yield $router->handleRequest($request);
@@ -101,13 +101,13 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest('POST');
+        $request = $this->createStubRequest('POST');
 
         /** @var Response $response */
         $response = yield $router->handleRequest($request);
@@ -124,15 +124,15 @@ class RouterTest extends AsyncTestCase
 
         $statusMapper = new StatusMapper();
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function () {
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function () {
             throw new InvalidArgumentException('Inv4lid');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         /** @var Response $response */
         $response = yield $router->handleRequest($request);
@@ -148,15 +148,15 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function () {
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function () {
             throw new InvalidArgumentException('Inv4lid');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         yield $router->handleRequest($request);
     }
@@ -166,15 +166,15 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->halt(Status::NOT_FOUND, 'Not found :(');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         /** @var Response $response */
         $response = yield $router->handleRequest($request);
@@ -193,15 +193,15 @@ class RouterTest extends AsyncTestCase
             Status::INTERNAL_SERVER_ERROR
         ));
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->status(Status::INTERNAL_SERVER_ERROR);
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         /** @var Response $response */
         $response = yield $router->handleRequest($request);
@@ -215,18 +215,18 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::BEFORE, new Path('/'), function (Context $ctx) {
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::BEFORE, new Path('/'), function (Context $ctx) {
             $ctx->status(Status::BAD_REQUEST);
         }));
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->response('Hello');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         /** @var Response $response */
         $response = yield $router->handleRequest($request);
@@ -240,18 +240,18 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
 
-        $matcher = new PathMatcher();
-        $matcher->addEntry(new HandlerEntry(HandlerType::AFTER, new Path('/'), function (Context $ctx) {
+        $collection = new HandlerCollection();
+        $collection->add(new HandlerEntry(HandlerType::AFTER, new Path('/'), function (Context $ctx) {
             $ctx->status(Status::BAD_REQUEST);
         }));
-        $matcher->addEntry(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
+        $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->response('Hello');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
-        $request = $this->createMockRequest();
+        $request = $this->createStubRequest();
 
         /** @var Response $response */
         $response = yield $router->handleRequest($request);
@@ -268,10 +268,10 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = $this->createMock(ExceptionMapper::class);
         $statusMapper = $this->createMock(StatusMapper::class);
 
-        $matcher = $this->createMock(PathMatcher::class);
-        $matcher->method('hasEntries')->willReturn(true);
+        $collection = $this->createMock(HandlerCollection::class);
+        $collection->method('count')->willReturn(1);
 
-        $router = new Router($exceptionMapper, $statusMapper, $matcher);
+        $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getMockServer());
 
         $router->setFallback(new DocumentRoot('/'));
