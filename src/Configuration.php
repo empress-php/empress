@@ -7,13 +7,9 @@ use Amp\Http\Server\Options;
 use Amp\Http\Server\Session\InMemoryStorage;
 use Amp\Http\Server\Session\Storage;
 use Amp\Http\Server\StaticContent\DocumentRoot;
-use Amp\Log\ConsoleFormatter;
-use Amp\Log\StreamHandler;
 use Amp\Socket\Certificate;
 use Amp\Socket\ServerTlsContext;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use function Amp\ByteStream\getStdout;
 
 /**
  * Defines the application environment that will be used by http-server.
@@ -28,8 +24,6 @@ class Configuration
 
     private Options $options;
 
-    private LoggerInterface $logger;
-
     private ?string $staticContentPath = null;
 
     private Storage $sessionStorage;
@@ -40,9 +34,6 @@ class Configuration
 
     private int $port = 1337;
 
-    /**
-     * ApplicationConfiguration constructor.
-     */
     public function __construct()
     {
         $this->options = new Options;
@@ -60,28 +51,7 @@ class Configuration
     }
 
     /**
-     * Gets logger used by http-server.
-     *
-     * @return LoggerInterface
-     */
-    public function getLogger(): LoggerInterface
-    {
-        if (isset($this->logger)) {
-            return $this->logger;
-        }
-
-        $logHandler = new StreamHandler(getStdout());
-        $logHandler->setFormatter(new ConsoleFormatter);
-        $this->logger = new Logger('Empress');
-        $this->logger->pushHandler($logHandler);
-
-        return $this->logger;
-    }
-
-    /**
      * Gets configured server options.
-     *
-     * @return Options
      */
     public function getServerOptions(): Options
     {
@@ -90,8 +60,6 @@ class Configuration
 
     /**
      * Gets path that will be used for serving static files.
-     *
-     * @return string|null
      */
     public function getStaticContentPath(): ?string
     {
@@ -100,45 +68,32 @@ class Configuration
 
     /**
      * Gets the fallback static file handler.
-     *
-     * @return DocumentRoot|null
      */
     public function getDocumentRootHandler(): ?DocumentRoot
     {
-        if ($this->getStaticContentPath()) {
-            return new DocumentRoot($this->getStaticContentPath());
+        if ($this->getStaticContentPath() === null) {
+            return null;
         }
 
-        return null;
+        /** @psalm-suppress PossiblyNullArgument */
+        return new DocumentRoot($this->getStaticContentPath());
     }
 
-    /**
-     * @return Storage
-     */
     public function getSessionStorage(): Storage
     {
         return $this->sessionStorage;
     }
 
-    /**
-     * @return ServerTlsContext|null
-     */
     public function getTlsContext(): ?ServerTlsContext
     {
         return $this->tlsContext;
     }
 
-    /**
-     * @return int|null
-     */
     public function getTlsPort(): ?int
     {
         return $this->tlsPort;
     }
 
-    /**
-     * @return int
-     */
     public function getPort(): int
     {
         return $this->port;
@@ -146,11 +101,8 @@ class Configuration
 
     /**
      * Adds a middleware.
-     *
-     * @param Middleware $middleware
-     * @return self
      */
-    public function withMiddleware(Middleware $middleware): self
+    public function withMiddleware(Middleware $middleware): static
     {
         $this->middlewares[] = $middleware;
 
@@ -158,25 +110,9 @@ class Configuration
     }
 
     /**
-     * Sets the logger used by http-server.
-     *
-     * @param LoggerInterface $logger
-     * @return self
-     */
-    public function withLogger(LoggerInterface $logger): self
-    {
-        $this->logger = $logger;
-
-        return $this;
-    }
-
-    /**
      * Adds http-server options.
-     *
-     * @param Options $options
-     * @return self
      */
-    public function withServerOptions(Options $options): self
+    public function withServerOptions(Options $options): static
     {
         $this->options = $options;
 
@@ -185,35 +121,22 @@ class Configuration
 
     /**
      * Sets path that will be used for serving static files.
-     *
-     * @param string $path
-     * @return self
      */
-    public function withStaticContentPath(string $path): self
+    public function withStaticContentPath(string $path): static
     {
         $this->staticContentPath = $path;
 
         return $this;
     }
 
-    /**
-     * @param Storage $storage
-     * @return $this
-     */
-    public function withSessionStorage(Storage $storage): self
+    public function withSessionStorage(Storage $storage): static
     {
         $this->sessionStorage = $storage;
 
         return $this;
     }
 
-    /**
-     * @param string $certFileName
-     * @param int $port
-     * @param string|null $keyFileName
-     * @return $this
-     */
-    public function withTls(string $certFileName, int $port, ?string $keyFileName = null): self
+    public function withTls(string $certFileName, int $port, ?string $keyFileName = null): static
     {
         $cert = new Certificate($certFileName, $keyFileName);
         $this->tlsContext = (new ServerTlsContext())->withDefaultCertificate($cert);
@@ -223,11 +146,7 @@ class Configuration
         return $this;
     }
 
-    /**
-     * @param int $port
-     * @return $this
-     */
-    public function withPort(int $port): self
+    public function withPort(int $port): static
     {
         $this->port = $port;
 

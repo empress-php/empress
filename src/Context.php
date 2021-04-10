@@ -63,6 +63,8 @@ class Context implements ArrayAccess
 
         $this->params = $this->request->getAttribute(Router::NAMED_PARAMS_ATTR_NAME);
         $this->session = $this->request->getAttribute(Session::class);
+
+        $this->stringOrStream = '';
     }
 
     /**
@@ -100,7 +102,7 @@ class Context implements ArrayAccess
     /**
      * Returns streamed request.
      *
-     * @return Promise<string>
+     * @psalm-return Promise<null|string>
      */
     public function streamedBody(): Promise
     {
@@ -110,7 +112,7 @@ class Context implements ArrayAccess
     /**
      * Returns buffered request body.
      *
-     * @return Promise<string>
+     * @psalm-return Promise<string>
      */
     public function bufferedBody(): Promise
     {
@@ -118,7 +120,6 @@ class Context implements ArrayAccess
     }
 
     /**
-     * @return Iterator
      * @see \Amp\Http\Server\FormParser\StreamingParser::parseForm
      */
     public function streamedForm(): Iterator
@@ -127,7 +128,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * @return Promise<Form>
+     * @psalm-return Promise<string>
      * @see \Amp\Http\Server\FormParser\BufferingParser::parseForm
      */
     public function bufferedForm(): Promise
@@ -137,8 +138,6 @@ class Context implements ArrayAccess
 
     /**
      * Gets request query as string.
-     *
-     * @return string
      */
     public function queryString(): string
     {
@@ -147,8 +146,6 @@ class Context implements ArrayAccess
 
     /**
      * Gets request query as array.
-     *
-     * @return array
      */
     public function queryArray(): array
     {
@@ -157,8 +154,6 @@ class Context implements ArrayAccess
 
     /**
      * Gets session associated with this request.
-     *
-     * @return Session|null
      */
     public function session(): ?Session
     {
@@ -167,9 +162,6 @@ class Context implements ArrayAccess
 
     /**
      * Gets a request attribute.
-     *
-     * @param string $name
-     * @return mixed
      */
     public function attr(string $name): mixed
     {
@@ -178,9 +170,6 @@ class Context implements ArrayAccess
 
     /**
      * Checks for a request attribute.
-     *
-     * @param string $name
-     * @return bool
      */
     public function hasAttr(string $name): bool
     {
@@ -189,11 +178,8 @@ class Context implements ArrayAccess
 
     /**
      * Gets a request cookie.
-     *
-     * @param string $name
-     * @return RequestCookie
      */
-    public function cookie(string $name): RequestCookie
+    public function cookie(string $name): ?RequestCookie
     {
         return $this->request->getCookie($name);
     }
@@ -217,7 +203,7 @@ class Context implements ArrayAccess
      * @return $this
      * @throws InvalidCookieException
      */
-    public function responseCookie(string $name, string $value = '', CookieAttributes $attributes = null): self
+    public function responseCookie(string $name, string $value = '', CookieAttributes $attributes = null): static
     {
         $cookie = new ResponseCookie($name, $value, $attributes);
         $this->response->setCookie($cookie);
@@ -225,7 +211,7 @@ class Context implements ArrayAccess
         return $this;
     }
 
-    public function removeCookie(string $name)
+    public function removeCookie(string $name): static
     {
         $this->response->removeCookie($name);
 
@@ -234,10 +220,8 @@ class Context implements ArrayAccess
 
     /**
      * Gets client port.
-     *
-     * @return int|null
      */
-    public function port(): int
+    public function port(): ?int
     {
         return $this->request->getClient()->getLocalPort();
     }
@@ -264,10 +248,8 @@ class Context implements ArrayAccess
 
     /**
      * Gets the user agent string.
-     *
-     * @return string|null
      */
-    public function userAgent(): string
+    public function userAgent(): ?string
     {
         return $this->request->getHeader('User-Agent');
     }
@@ -279,7 +261,7 @@ class Context implements ArrayAccess
      * @param int $status
      * @return $this
      */
-    public function redirect(string $uri, int $status = Status::FOUND): self
+    public function redirect(string $uri, int $status = Status::FOUND): static
     {
         $this->response = redirectTo($uri, $status);
 
@@ -293,7 +275,7 @@ class Context implements ArrayAccess
      * @param string|null $reason
      * @return $this
      */
-    public function status(int $status, ?string $reason = null): self
+    public function status(int $status, ?string $reason = null): static
     {
         $this->response->setStatus($status, $reason);
 
@@ -306,21 +288,21 @@ class Context implements ArrayAccess
      * @param string $contentType
      * @return $this
      */
-    public function contentType(string $contentType): self
+    public function contentType(string $contentType): static
     {
         $this->response->setHeader('Content-Type', $contentType);
 
         return $this;
     }
 
-    public function header(string $name, $value): self
+    public function header(string $name, mixed $value): static
     {
         $this->response->setHeader($name, $value);
 
         return $this;
     }
 
-    public function removeHeader(string $name): self
+    public function removeHeader(string $name): static
     {
         $this->response->removeHeader($name);
 
@@ -334,11 +316,8 @@ class Context implements ArrayAccess
 
     /**
      * Sends a string or stream response.
-     *
-     * @param $stringOrStream
-     * @return $this
      */
-    public function response($stringOrStream): self
+    public function response(InputStream|string $stringOrStream): static
     {
         $this->stringOrStream = $stringOrStream;
 
@@ -349,8 +328,6 @@ class Context implements ArrayAccess
 
     /**
      * Gets response body to be sent.
-     *
-     * @return string|InputStream
      */
     public function responseBody(): InputStream|string
     {
@@ -359,11 +336,8 @@ class Context implements ArrayAccess
 
     /**
      * Sends an HTML response.
-     *
-     * @param $stringOrStream
-     * @return $this
      */
-    public function html($stringOrStream): self
+    public function html(InputStream|string $stringOrStream): static
     {
         return $this
             ->contentType('text/html')
@@ -372,12 +346,8 @@ class Context implements ArrayAccess
 
     /**
      * Sends a JSON response.
-     *
-     * @param array $data
-     * @return $this
-     * @throws JsonException
      */
-    public function json(array $data): self
+    public function json(array $data): static
     {
         $this->contentType('application/json');
 
@@ -386,15 +356,13 @@ class Context implements ArrayAccess
         return $this->response($result);
     }
 
-    public function halt(int $status = Status::OK, $stringOrStream = null, array $headers = [])
+    public function halt(int $status = Status::OK, InputStream|string|null $stringOrStream = null, array $headers = []): void
     {
         throw new HaltException($status, $headers, $stringOrStream);
     }
 
     /**
      * Gets the underlying request object.
-     *
-     * @return Request
      */
     public function getHttpServerRequest(): Request
     {
@@ -403,8 +371,6 @@ class Context implements ArrayAccess
 
     /**
      * Gets the underlying response object.
-     *
-     * @return Response
      */
     public function getHttpServerResponse(): Response
     {
