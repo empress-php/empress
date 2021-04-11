@@ -1,5 +1,6 @@
 <?php
 
+use Amp\ByteStream\ResourceInputStream;
 use Amp\Loop;
 use Empress\Application;
 use Empress\Context;
@@ -12,23 +13,20 @@ use Empress\Routing\RouteCollector\RouteCollectorInterface;
 require __DIR__ . '/../vendor/autoload.php';
 
 
-#[Group('/say')]
-class IndexController implements RouteCollectorInterface
+#[Group('/stream')]
+class StreamController implements RouteCollectorInterface
 {
-    private static int $count = 0;
-
     use AnnotatedRouteCollectorTrait;
 
-    #[Route('GET', '/hello')]
+    #[Route('GET', '/')]
     public function index(Context $ctx)
     {
-        $ctx->html('Hello World!');
+        $ctx->response($this->getStreamForVideo());
     }
 
-    #[Route('AFTER', '/*')]
-    public function afterIndex()
+    private function getStreamForVideo(): ResourceInputStream
     {
-        printf("After %d reqs\n", ++self::$count);
+        return new ResourceInputStream(fopen('http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', 'rb'));
     }
 }
 

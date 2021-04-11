@@ -1,6 +1,10 @@
 <?php
 
+use Amp\ByteStream\InputStream;
+use Amp\ByteStream\IteratorStream;
+use Amp\Delayed;
 use Amp\Loop;
+use Amp\Producer;
 use Empress\Application;
 use Empress\Context;
 use Empress\Empress;
@@ -12,23 +16,26 @@ use Empress\Routing\RouteCollector\RouteCollectorInterface;
 require __DIR__ . '/../vendor/autoload.php';
 
 
-#[Group('/say')]
+#[Group('/index')]
 class IndexController implements RouteCollectorInterface
 {
-    private static int $count = 0;
-
     use AnnotatedRouteCollectorTrait;
 
-    #[Route('GET', '/hello')]
+    #[Route('GET', '/')]
     public function index(Context $ctx)
     {
-        $ctx->html('Hello World!');
+        $ctx->response($this->createStream());
     }
 
-    #[Route('AFTER', '/*')]
-    public function afterIndex()
+    private function createStream(): InputStream
     {
-        printf("After %d reqs\n", ++self::$count);
+        return new IteratorStream(new Producer(function (callable $emit) {
+            for ($i = 0; $i < 10; $i++) {
+                yield $emit("Line #$i\n");
+
+                yield new Delayed(500);
+            }
+        }));
     }
 }
 
