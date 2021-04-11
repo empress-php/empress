@@ -9,6 +9,7 @@ use Amp\Success;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
+use Empress\Routing\RouteCollector\RouteCollectorInterface;
 use Empress\Routing\Router;
 use Empress\Routing\Routes;
 use Empress\Routing\Status\StatusHandler;
@@ -65,7 +66,7 @@ class Application implements ServerObserver
         return $this;
     }
 
-    public function routes(callable $collector): void
+    public function routes(RouteCollectorInterface|callable $collector): void
     {
         $collector($this->routes);
     }

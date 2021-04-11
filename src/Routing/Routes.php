@@ -192,7 +192,7 @@ class Routes
         return $this->handlerCollection;
     }
 
-    private function addEntry(int $handlerType, string $route, callable $handler): void
+    public function addEntry(int $handlerType, string $route, callable $handler): void
     {
         $entry = new HandlerEntry($handlerType, new Path($this->prefixRoute($route)), $handler);
 
