@@ -34,7 +34,7 @@ class IndexController implements RouteCollectorInterface
 
 Loop::run(function () {
     $app = Application::create(9010);
-    $app->routes(new StreamController());
+    $app->routes(new IndexController());
 
     $empress = new Empress($app);
 
