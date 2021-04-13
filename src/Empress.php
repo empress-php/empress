@@ -31,8 +31,6 @@ class Empress
     /**
      * Initializes routes and configures the environment for the application
      * and then runs it on http-server.
-
-     * @throws Socket\SocketException
      */
     public function boot(): Promise
     {
@@ -59,6 +57,7 @@ class Empress
         $router = $this->application->getRouter();
         $config = $this->application->getConfiguration();
 
+        $middlewares = $config->getMiddlewares();
         $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
         $logger = $this->getLogger();
         $options = $config->getServerOptions();
@@ -82,7 +81,7 @@ class Empress
 
         $this->server = new Server(
             $sockets,
-            stack($router, $sessionMiddleware),
+            stack($router, $sessionMiddleware, ...$middlewares),
             $logger,
             $options
         );

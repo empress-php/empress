@@ -9,7 +9,6 @@ use Amp\Http\Server\Session\Storage;
 use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Socket\Certificate;
 use Amp\Socket\ServerTlsContext;
-use Psr\Log\LoggerInterface;
 
 /**
  * Defines the application environment that will be used by http-server.
@@ -36,8 +35,13 @@ class Configuration
 
     public function __construct()
     {
-        $this->options = new Options;
+        $this->options = new Options();
         $this->sessionStorage = new InMemoryStorage();
+    }
+
+    public static function create(): static
+    {
+        return new static();
     }
 
     /**

@@ -40,10 +40,10 @@ class Application implements ServerObserver
         $this->routes = new Routes(new HandlerCollection());
     }
 
-    public static function create(int $port): self
+    public static function create(int $port, Configuration $configuration = null): self
     {
-        $configuration = (new Configuration())
-            ->withPort($port);
+        $configuration ??= new Configuration();
+        $configuration->withPort($port);
 
         return new self($configuration);
     }
