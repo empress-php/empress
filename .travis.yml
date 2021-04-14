@@ -14,7 +14,7 @@ install:
 
 script:
   - mkdir -p build/logs
-  - php vendor/bin/phpunit -c phpunit.xml.dist
+  - XDEBUG_MODE=coverage php vendor/bin/phpunit -c phpunit.xml.dist
   - vendor/bin/psalm --no-cache
 
 after_success:
