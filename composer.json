@@ -4,7 +4,7 @@
     "type": "project",
     "config": {
         "platform": {
-            "php": "8.0.0"
+            "php": "8.0.3"
         }
     },
     "require": {
@@ -36,6 +36,7 @@
         "amphp/phpunit-util": "^1.1",
         "amphp/php-cs-fixer-config": "dev-master",
         "php-coveralls/php-coveralls": "^2.2",
-        "vimeo/psalm": "^4.7"
+        "vimeo/psalm": "^4.7",
+        "friendsofphp/php-cs-fixer": "^2.18"
     }
 }
