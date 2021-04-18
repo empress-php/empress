@@ -1,6 +1,6 @@
 {
     "name": "empress-php/empress",
-    "description": "Small library built on top of amphp/http-server for creating async web apps.",
+    "description": "Empress is a flexible microframework for creating async web applications in PHP 8.",
     "type": "project",
     "config": {
         "platform": {
