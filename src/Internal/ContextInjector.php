@@ -23,8 +23,7 @@ class ContextInjector
     public function __construct(
         private Context $context,
         private ?Throwable $exception = null
-    )
-    {
+    ) {
     }
 
     /**

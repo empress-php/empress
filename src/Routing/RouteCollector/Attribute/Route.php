@@ -10,8 +10,7 @@ final class Route
     public function __construct(
         private string $type,
         private string $path
-    )
-    {
+    ) {
     }
 
     public function getType(): string

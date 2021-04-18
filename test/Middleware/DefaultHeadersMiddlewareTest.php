@@ -21,7 +21,7 @@ class DefaultHeadersMiddlewareTest extends AsyncTestCase
         ];
 
         $request = $this->createStubRequest();
-        $handler = new CallableRequestHandler(fn() => new Response());
+        $handler = new CallableRequestHandler(fn () => new Response());
         $middleware = new DefaultHeadersMiddleware($headers);
 
         /** @var Response $response */

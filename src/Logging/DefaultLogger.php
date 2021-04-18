@@ -11,7 +11,6 @@ class DefaultLogger extends Logger
 {
     public function __construct(string $name, OutputStream $outputStream)
     {
-
         $logHandler = new StreamHandler($outputStream);
         $logHandler->setFormatter(new ConsoleFormatter(null, null, true, true));
 

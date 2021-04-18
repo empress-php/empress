@@ -7,7 +7,6 @@ use Amp\Http\Server\Options;
 use Amp\Http\Server\Session\Storage;
 use Empress\Configuration;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 
 class ConfigurationTest extends TestCase
 {

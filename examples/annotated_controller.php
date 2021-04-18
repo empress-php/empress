@@ -28,7 +28,7 @@ class IndexController implements RouteCollectorInterface
     #[Route('AFTER', '/*')]
     public function afterIndex()
     {
-        printf("After %d reqs\n", ++self::$count);
+        \printf("After %d reqs\n", ++self::$count);
     }
 }
 

@@ -18,11 +18,11 @@ class StripTrailingSlashMiddleware implements Middleware
             $uri = $request->getUri();
             $path = $uri->getPath();
 
-            if ($path === '/' || !str_ends_with($path, '/')) {
+            if ($path === '/' || !\str_ends_with($path, '/')) {
                 return yield $requestHandler->handleRequest($request);
             }
 
-            $path = rtrim($path, '/');
+            $path = \rtrim($path, '/');
             $uri = $uri->withPath($path);
 
             if ($request->getMethod() === 'GET') {

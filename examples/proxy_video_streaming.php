@@ -26,7 +26,7 @@ class StreamController implements RouteCollectorInterface
 
     private function getStreamForVideo(): ResourceInputStream
     {
-        return new ResourceInputStream(fopen('http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', 'rb'));
+        return new ResourceInputStream(\fopen('http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', 'rb'));
     }
 }
 
