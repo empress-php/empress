@@ -44,7 +44,7 @@ class RequestStringifier extends BaseRequestResponseStringifier
                     $buffer .= \sprintf(
                         "\t%s [%s]\n",
                         HandlerType::toString($handler->getType()),
-                        $handler->getPath()
+                        (string) $handler->getPath()
                     );
                 }
             }
