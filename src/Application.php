@@ -6,6 +6,7 @@ use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Amp\Success;
+use Empress\Logging\RequestLogger;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
@@ -14,6 +15,7 @@ use Empress\Routing\Router;
 use Empress\Routing\Routes;
 use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
+use Psr\Log\LoggerInterface;
 
 /**
  * Defines an application object that will be run against http-server.
@@ -40,10 +42,14 @@ class Application implements ServerObserver
         $this->routes = new Routes(new HandlerCollection());
     }
 
-    public static function create(int $port, Configuration $configuration = null): self
+    public static function create(int $port, ?LoggerInterface $requestLogger = null, Configuration $configuration = null): self
     {
         $configuration ??= new Configuration();
         $configuration->withPort($port);
+
+        if ($requestLogger !== null) {
+            $configuration->withRequestLogger($requestLogger);
+        }
 
         return new self($configuration);
     }
@@ -73,10 +79,13 @@ class Application implements ServerObserver
 
     public function getRouter(): Router
     {
+        $requestLogger = $this->config->getRequestLogger();
+
         return new Router(
             $this->exceptionMapper,
             $this->statusMapper,
-            $this->routes->getHandlerCollection()
+            $this->routes->getHandlerCollection(),
+            $requestLogger ? new RequestLogger($requestLogger) : null
         );
     }
 
