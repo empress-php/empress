@@ -16,6 +16,7 @@ use Amp\Success;
 use Empress\Context;
 use Empress\Exception\HaltException;
 use Empress\Internal\ContextInjector;
+use Empress\Logging\RequestLogger;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
@@ -39,9 +40,9 @@ class Router implements RequestHandler, ServerObserver
     public function __construct(
         private ExceptionMapper $exceptionMapper,
         private StatusMapper $statusMapper,
-        private HandlerCollection $handlerCollection
-    )
-    {
+        private HandlerCollection $handlerCollection,
+        private ?RequestLogger $requestLogger = null
+    ) {
     }
 
     /**
@@ -52,26 +53,26 @@ class Router implements RequestHandler, ServerObserver
         $method = $request->getMethod();
         $path = \rawurldecode($request->getUri()->getPath());
 
-        $entries = $this->handlerCollection->filterByPath($path);
+        $filteredByPath = $this->handlerCollection->filterByPath($path);
 
-        if ($entries->count() === 0) {
+        if ($filteredByPath->count() === 0) {
             if ($this->fallback !== null) {
                 return $this->fallback->handleRequest($request);
             }
 
-            return $this->handleNotFound($request);
+            return $this->handleError($request, Status::NOT_FOUND);
         }
 
         $handlerType = HandlerType::fromString($method);
-        $entries = $entries->filterByType($handlerType);
+        $entries = $filteredByPath->filterByType($handlerType);
 
         $handlerEntry = $entries->first();
 
         if ($handlerEntry === null) {
-            return $this->handleMethodNotAllowed($request);
+            return $this->handleError($request, Status::METHOD_NOT_ALLOWED);
         }
 
-        return $this->dispatch($request, $handlerEntry, $path);
+        return $this->dispatch($request, $handlerEntry, $filteredByPath, $path);
     }
 
 
@@ -119,14 +120,11 @@ class Router implements RequestHandler, ServerObserver
     }
 
     /**
-     * @param Request $request
-     * @param HandlerEntry $handlerEntry
-     * @param string $path
      * @return Promise<Response>
      */
-    private function dispatch(Request $request, HandlerEntry $handlerEntry, string $path): Promise
+    private function dispatch(Request $request, HandlerEntry $handlerEntry, HandlerCollection $handlerCollection, string $path): Promise
     {
-        return call(function () use ($request, $handlerEntry, $path) {
+        return call(function () use ($request, $handlerEntry, $handlerCollection, $path) {
             $request->setAttribute(self::NAMED_PARAMS_ATTR_NAME, $handlerEntry->getPathMatcher()->extractNamedParams($path));
             $request->setAttribute(self::WILDCARDS_ATTR_NAME, $handlerEntry->getPathMatcher()->extractWildcards($path));
 
@@ -134,7 +132,7 @@ class Router implements RequestHandler, ServerObserver
             $injector = new ContextInjector($context);
 
             try {
-                $beforeFilters = $this->handlerCollection
+                $beforeFilters = $handlerCollection
                     ->filterByPath($path)
                     ->filterByType(HandlerType::BEFORE);
 
@@ -144,7 +142,7 @@ class Router implements RequestHandler, ServerObserver
 
                 yield $injector->inject($handlerEntry->getHandler());
 
-                $afterFilters = $this->handlerCollection
+                $afterFilters = $handlerCollection
                     ->filterByPath($path)
                     ->filterByType(HandlerType::AFTER);
 
@@ -161,17 +159,26 @@ class Router implements RequestHandler, ServerObserver
                 yield $this->exceptionMapper->process($injector);
             }
 
-            return $injector->getResponse();
+            $response = $injector->getResponse();
+
+            if ($this->requestLogger !== null) {
+                yield $this->requestLogger->debug($request, $response, $handlerCollection);
+            }
+
+            return $response;
         });
     }
 
-    private function handleNotFound(Request $request): Promise
+    private function handleError(Request $request, int $status): Promise
     {
-        return $this->errorHandler->handleError(Status::NOT_FOUND, null, $request);
-    }
+        return call(function () use ($request, $status) {
+            $response = yield $this->errorHandler->handleError($status, null, $request);
 
-    private function handleMethodNotAllowed(Request $request): Promise
-    {
-        return $this->errorHandler->handleError(Status::METHOD_NOT_ALLOWED, null, $request);
+            if ($this->requestLogger !== null) {
+                yield $this->requestLogger->debug($request, $response);
+            }
+
+            return $response;
+        });
     }
 }

@@ -13,7 +13,7 @@ trait StubRequestTrait
 {
     private function createStubRequest(string $method = 'GET', string $uri = '/', array $params = [], $includeSession = true): Request
     {
-        $client = $this->getMockBuilder(Client::class)->getMock();
+        $client = $this->createMock(Client::class);
         $client->method('getLocalPort')->willReturn(1234);
         $client->method('getLocalAddress')->willReturn('example.com');
 

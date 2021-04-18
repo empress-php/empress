@@ -9,6 +9,7 @@ use Amp\Http\Server\Session\Storage;
 use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Socket\Certificate;
 use Amp\Socket\ServerTlsContext;
+use Psr\Log\LoggerInterface;
 
 /**
  * Defines the application environment that will be used by http-server.
@@ -32,6 +33,8 @@ class Configuration
     private ?int $tlsPort = null;
 
     private int $port = 1337;
+
+    private ?LoggerInterface $requestLogger = null;
 
     public function __construct()
     {
@@ -103,6 +106,11 @@ class Configuration
         return $this->port;
     }
 
+    public function getRequestLogger(): ?LoggerInterface
+    {
+        return $this->requestLogger;
+    }
+
     /**
      * Adds a middleware.
      */
@@ -153,6 +161,13 @@ class Configuration
     public function withPort(int $port): static
     {
         $this->port = $port;
+
+        return $this;
+    }
+
+    public function withRequestLogger(LoggerInterface $logger): static
+    {
+        $this->requestLogger = $logger;
 
         return $this;
     }
