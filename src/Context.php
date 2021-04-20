@@ -217,21 +217,21 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Gets client port.
+     * Gets request port.
      */
     public function port(): ?int
     {
-        return $this->request->getClient()->getLocalPort();
+        return $this->request->getUri()->getPort();
     }
 
     /**
-     * Gets client host.
+     * Gets request host.
      *
      * @return string
      */
     public function host(): string
     {
-        return $this->request->getClient()->getLocalAddress();
+        return $this->request->getUri()->getHost();
     }
 
     /**

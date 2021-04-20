@@ -2,13 +2,14 @@
 
 namespace Empress;
 
-use Amp\Http\Server\Server;
+use Amp\Http\Server\HttpServer;
 use Amp\Http\Server\Session\SessionMiddleware;
 use Amp\Log\ConsoleFormatter;
 use Amp\Log\StreamHandler;
 use Amp\MultiReasonException;
 use Amp\Promise;
-use Amp\Socket;
+use Amp\Socket\BindContext;
+use Amp\Socket\Server;
 use Closure;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
@@ -22,7 +23,7 @@ use function Amp\Http\Server\Middleware\stack;
 
 class Empress
 {
-    private Server $server;
+    private HttpServer $server;
 
     public function __construct(private Application $application)
     {
@@ -69,17 +70,19 @@ class Empress
         }
 
         $sockets = [
-            Socket\listen('0.0.0.0:' . $port),
-            Socket\listen('[::]:' . $port),
+            Server::listen('0.0.0.0:' . $port),
+            Server::listen('[::]:' . $port),
         ];
 
         if (!\is_null($context = $config->getTlsContext())) {
             $tlsPort = $config->getTlsPort();
-            $sockets[] = Socket\listen('0.0.0.0:' . $tlsPort, null, $context);
-            $sockets[] = Socket\listen('[::]:' . $tlsPort, null, $context);
+            $bindContext = (new BindContext())->withTlsContext($context);
+
+            $sockets[] = Server::listen('0.0.0.0:' . $tlsPort, $bindContext);
+            $sockets[] = Server::listen('[::]:' . $tlsPort, $bindContext);
         }
 
-        $this->server = new Server(
+        $this->server = new HttpServer(
             $sockets,
             stack($router, $sessionMiddleware, ...$middlewares),
             $logger,

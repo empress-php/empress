@@ -45,7 +45,7 @@ class StripTrailingSlashesMiddlewareTest extends AsyncTestCase
         /** @var Response $response */
         $response = yield $middleware->handleRequest($request, $requestHandler);
 
-        static::assertEquals('/hello', $response->getHeader('Location'));
+        static::assertEquals('//example.com:1234/hello', $response->getHeader('Location'));
         static::assertEquals(Status::PERMANENT_REDIRECT, $response->getStatus());
     }
 

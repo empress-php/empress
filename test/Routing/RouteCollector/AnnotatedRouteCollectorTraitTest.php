@@ -70,7 +70,8 @@ class AnnotatedRouteCollectorTraitTest extends TestCase
     public function testCollectorWithGroup(): void
     {
         $application = Application::create(8000);
-        $collector = new #[Group('/group')] class implements RouteCollectorInterface {
+        $collector = new #[Group('/group')] class implements RouteCollectorInterface
+        {
             use AnnotatedRouteCollectorTrait;
 
             #[Route('GET', '/index')]
