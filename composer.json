@@ -1,7 +1,7 @@
 {
     "name": "empress-php/empress",
     "description": "Empress is a flexible microframework for creating async web applications in PHP 8.",
-    "type": "project",
+    "type": "library",
     "license": "MIT",
     "config": {
         "platform": {
