@@ -21,8 +21,7 @@ class HaltException extends Error
         private $status = Status::OK,
         private array $headers = [],
         private InputStream|string|null $stringOrStream = null
-    )
-    {
+    ) {
         parent::__construct();
     }
 

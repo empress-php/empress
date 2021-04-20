@@ -327,7 +327,8 @@ class RouterTest extends AsyncTestCase
 
     private function getStubServer(): Server
     {
-        $socketServer = $this->createMock(SocketServer::class);
+        $socket = \fopen('/dev/null', 'rb');
+        $socketServer = new SocketServer($socket);
 
         return new Server(
             [$socketServer],

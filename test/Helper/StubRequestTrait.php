@@ -14,10 +14,12 @@ trait StubRequestTrait
     private function createStubRequest(string $method = 'GET', string $uri = '/', array $params = [], $includeSession = true): Request
     {
         $client = $this->createMock(Client::class);
-        $client->method('getLocalPort')->willReturn(1234);
-        $client->method('getLocalAddress')->willReturn('example.com');
 
-        $request = new Request($client, $method, Http::createFromString($uri));
+        $uri = Http::createFromString($uri)
+            ->withPort(1234)
+            ->withHost('example.com');
+
+        $request = new Request($client, $method, $uri);
         $request->setAttribute(Router::NAMED_PARAMS_ATTR_NAME, $params);
 
         if ($includeSession) {
