@@ -12,7 +12,7 @@ class HandlerCollectionTest extends TestCase
 {
     public function testAddHandler(): void
     {
-        $entry = $this->createHandlerEntry();
+        $entry = $this->createHandlerEntry(HandlerType::GET, '/');
 
         $collection = new HandlerCollection();
         $collection->add($entry);
@@ -37,7 +37,7 @@ class HandlerCollectionTest extends TestCase
 
         static::assertEquals(2, $collection->filterByPath('/')->count());
 
-        $collection->add($this->createHandlerEntry(HandlerType::DELETE));
+        $collection->add($this->createHandlerEntry(HandlerType::DELETE, '/'));
 
         static::assertEquals(3, $collection->filterByPath('/')->count());
     }
@@ -66,7 +66,7 @@ class HandlerCollectionTest extends TestCase
 
         static::assertNull($collection->first());
 
-        $collection->add($this->createHandlerEntry());
+        $collection->add($this->createHandlerEntry(HandlerType::GET, '/'));
 
         static::assertNotNull($collection->first());
     }
@@ -77,12 +77,12 @@ class HandlerCollectionTest extends TestCase
 
         static::assertEquals(0, $collection->count());
 
-        $collection->add($this->createHandlerEntry());
+        $collection->add($this->createHandlerEntry(HandlerType::GET, '/'));
 
         static::assertEquals(1, $collection->count());
     }
 
-    private function createHandlerEntry(int $type = HandlerType::GET, string $path = '/', ?callable $handler = null): HandlerEntry
+    private function createHandlerEntry(int $type, string $path, ?callable $handler = null): HandlerEntry
     {
         return new HandlerEntry($type, new Path($path), $handler ?? fn () => null);
     }

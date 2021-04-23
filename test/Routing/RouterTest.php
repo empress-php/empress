@@ -2,13 +2,10 @@
 
 namespace Empress\Test\Routing;
 
-use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Response;
-use Amp\Http\Server\Server;
 use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Socket\Server as SocketServer;
 use Amp\Success;
 use Empress\Context;
 use Empress\Logging\RequestLogger;
@@ -22,13 +19,14 @@ use Empress\Routing\Router;
 use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
 use Empress\Test\Helper\StubRequestTrait;
+use Empress\Test\Helper\StubServerTrait;
 use Error;
 use InvalidArgumentException;
-use Psr\Log\LoggerInterface;
 
 class RouterTest extends AsyncTestCase
 {
     use StubRequestTrait;
+    use StubServerTrait;
 
     public function testServerAlreadyRunning(): \Generator
     {
@@ -52,9 +50,12 @@ class RouterTest extends AsyncTestCase
         $statusMapper = $this->createMock(StatusMapper::class);
 
         $collection = $this->createMock(HandlerCollection::class);
-        $collection->method('count')->willReturn(0);
+        $collection
+            ->method('count')
+            ->willReturn(0);
 
         $router = new Router($exceptionMapper, $statusMapper, $collection);
+
         yield $router->onStart($this->getStubServer());
     }
 
@@ -243,9 +244,11 @@ class RouterTest extends AsyncTestCase
         $statusMapper = new StatusMapper();
 
         $collection = new HandlerCollection();
+
         $collection->add(new HandlerEntry(HandlerType::AFTER, new Path('/'), function (Context $ctx) {
             $ctx->status(Status::BAD_REQUEST);
         }));
+
         $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->response('Hello');
         }));
@@ -271,7 +274,9 @@ class RouterTest extends AsyncTestCase
         $statusMapper = new StatusMapper();
 
         $collection = $this->createMock(HandlerCollection::class);
-        $collection->method('count')->willReturn(1);
+        $collection
+            ->method('count')
+            ->willReturn(1);
 
         $router = new Router($exceptionMapper, $statusMapper, $collection);
         yield $router->onStart($this->getStubServer());
@@ -323,17 +328,5 @@ class RouterTest extends AsyncTestCase
         yield $router->onStart($this->getStubServer());
 
         yield $router->handleRequest($request);
-    }
-
-    private function getStubServer(): Server
-    {
-        $socket = \fopen('/dev/null', 'rb');
-        $socketServer = new SocketServer($socket);
-
-        return new Server(
-            [$socketServer],
-            $this->createMock(RequestHandler::class),
-            $this->createMock(LoggerInterface::class)
-        );
     }
 }
