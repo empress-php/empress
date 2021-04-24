@@ -100,7 +100,7 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Returns request body
+     * Returns request body.
      *
      * @return RequestBody
      */

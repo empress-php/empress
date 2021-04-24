@@ -7,12 +7,14 @@ use Empress\Validation\Validator\ValidatorInterface;
 
 /**
  * @template T
+ * @template U
  */
 class WrappedValue
 {
 
     /**
      * @param T $value
+     * @param ValidatorInterface<T, U> $validator
      */
     public function __construct(
         private mixed $value,
@@ -21,7 +23,7 @@ class WrappedValue
     }
 
     /**
-     * @return T
+     * @return U
      * @throws ValidatorException
      */
     public function unwrap(): mixed
@@ -30,7 +32,7 @@ class WrappedValue
     }
 
     /**
-     * @return T|null
+     * @return U|null
      */
     public function unwrapOrNull(): mixed
     {
@@ -42,9 +44,9 @@ class WrappedValue
     }
 
     /**
-     * @template U
-     * @param U $value
-     * @return T|U
+     * @template V
+     * @param V $value
+     * @return U|V
      */
     public function unwrapOr(mixed $value): mixed
     {
@@ -56,6 +58,7 @@ class WrappedValue
     }
 
     /**
+     * @return U
      * @throws \Throwable
      */
     public function unwrapOrThrow(\Throwable $exception): mixed

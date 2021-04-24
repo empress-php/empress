@@ -23,4 +23,12 @@ class ValidationContextTest extends TestCase
 
         $context->to('validator');
     }
+
+    public function testUnsafeUnwrap(): void
+    {
+        $registry = $this->createMock(ValidatorRegistry::class);
+        $context = new ValidationContext('abc', $registry);
+
+        static::assertEquals('abc', $context->unsafeUnwrap());
+    }
 }

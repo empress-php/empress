@@ -20,7 +20,8 @@ class ValidationContext
     }
 
     /**
-     * @return WrappedValue<T>
+     * @template U
+     * @return WrappedValue<T, U>
      */
     public function to(string $validatorName): WrappedValue
     {

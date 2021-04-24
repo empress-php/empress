@@ -92,46 +92,6 @@ class RoutesTest extends TestCase
         static::assertEquals($this->closure, $entry->getHandler());
     }
 
-    public function testGet(): void
-    {
-        static::markTestSkipped();
-    }
-
-    public function testPost(): void
-    {
-        static::markTestSkipped();
-    }
-
-    public function testPut(): void
-    {
-        static::markTestSkipped();
-    }
-
-    public function testDelete(): void
-    {
-        static::markTestSkipped();
-    }
-
-    public function testPatch(): void
-    {
-        static::markTestSkipped();
-    }
-
-    public function testHead(): void
-    {
-        static::markTestSkipped();
-    }
-
-    public function testOptions(): void
-    {
-        static::markTestSkipped();
-    }
-
-    public function testGetPathMatcher(): void
-    {
-        static::markTestSkipped();
-    }
-
     private function getEntry(): ?HandlerEntry
     {
         return $this->routes->getHandlerCollection()->first();

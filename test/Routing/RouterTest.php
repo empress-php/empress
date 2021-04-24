@@ -20,6 +20,7 @@ use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
 use Empress\Test\Helper\StubRequestTrait;
 use Empress\Test\Helper\StubServerTrait;
+use Empress\Validation\Registry\ValidatorRegistry;
 use Error;
 use InvalidArgumentException;
 
@@ -35,8 +36,9 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper = $this->createMock(ExceptionMapper::class);
         $statusMapper = $this->createMock(StatusMapper::class);
         $collection = $this->createMock(HandlerCollection::class);
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
 
         yield $router->onStart($this->getStubServer());
         yield $router->onStart($this->getStubServer());
@@ -48,13 +50,14 @@ class RouterTest extends AsyncTestCase
 
         $exceptionMapper = $this->createMock(ExceptionMapper::class);
         $statusMapper = $this->createMock(StatusMapper::class);
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = $this->createMock(HandlerCollection::class);
         $collection
             ->method('count')
             ->willReturn(0);
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
 
         yield $router->onStart($this->getStubServer());
     }
@@ -63,13 +66,14 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
         $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->html('<h1>Hello World!</h1>');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest();
@@ -84,11 +88,12 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
         $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest('GET', '/hello');
@@ -103,11 +108,12 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
         $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest('POST');
@@ -124,6 +130,7 @@ class RouterTest extends AsyncTestCase
         $exceptionMapper->addHandler(new ExceptionHandler(function (Context $ctx) {
             $ctx->status(Status::BAD_REQUEST);
         }, InvalidArgumentException::class));
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $statusMapper = new StatusMapper();
 
@@ -132,7 +139,7 @@ class RouterTest extends AsyncTestCase
             throw new InvalidArgumentException('Inv4lid');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest();
@@ -150,13 +157,14 @@ class RouterTest extends AsyncTestCase
 
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
         $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function () {
             throw new InvalidArgumentException('Inv4lid');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest();
@@ -168,13 +176,14 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
         $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx) {
             $ctx->halt(Status::NOT_FOUND, 'Not found :(');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest();
@@ -189,6 +198,7 @@ class RouterTest extends AsyncTestCase
     public function testWithStatusMapper(): \Generator
     {
         $exceptionMapper = new ExceptionMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $statusMapper = new StatusMapper();
         $statusMapper->addHandler(new StatusHandler(
@@ -201,7 +211,7 @@ class RouterTest extends AsyncTestCase
             $ctx->status(Status::INTERNAL_SERVER_ERROR);
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest();
@@ -217,6 +227,7 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
         $collection->add(new HandlerEntry(HandlerType::BEFORE, new Path('/'), function (Context $ctx) {
@@ -226,7 +237,7 @@ class RouterTest extends AsyncTestCase
             $ctx->response('Hello');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest();
@@ -242,6 +253,7 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
 
@@ -253,7 +265,7 @@ class RouterTest extends AsyncTestCase
             $ctx->response('Hello');
         }));
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $request = $this->createStubRequest();
@@ -272,13 +284,14 @@ class RouterTest extends AsyncTestCase
 
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = $this->createMock(HandlerCollection::class);
         $collection
             ->method('count')
             ->willReturn(1);
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry);
         yield $router->onStart($this->getStubServer());
 
         $router->setFallback(new DocumentRoot('/'));
@@ -288,6 +301,7 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
         $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
@@ -301,7 +315,7 @@ class RouterTest extends AsyncTestCase
             ->with($request, static::isInstanceOf(Response::class), $collection)
             ->willReturn(new Success());
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection, $requestLogger);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry, $requestLogger);
         yield $router->onStart($this->getStubServer());
 
         yield $router->handleRequest($request);
@@ -311,6 +325,7 @@ class RouterTest extends AsyncTestCase
     {
         $exceptionMapper = new ExceptionMapper();
         $statusMapper = new StatusMapper();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
         $collection = new HandlerCollection();
         $collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
@@ -324,7 +339,7 @@ class RouterTest extends AsyncTestCase
             ->with($request, static::isInstanceOf(Response::class))
             ->willReturn(new Success());
 
-        $router = new Router($exceptionMapper, $statusMapper, $collection, $requestLogger);
+        $router = new Router($exceptionMapper, $statusMapper, $collection, $validatorRegistry, $requestLogger);
         yield $router->onStart($this->getStubServer());
 
         yield $router->handleRequest($request);
