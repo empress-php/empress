@@ -39,7 +39,7 @@ class ExceptionMapperTest extends AsyncTestCase
         $this->expectException(Error::class);
 
         $mapper = new ExceptionMapper();
-        $mapper->addHandler(new ExceptionHandler(Exception::class, fn () => null));
+        $mapper->addHandler(new ExceptionHandler(fn () => null, Exception::class));
 
         $request = $this->createStubRequest();
 

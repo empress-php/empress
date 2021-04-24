@@ -2,18 +2,18 @@
 
 namespace Empress\Test\Middleware;
 
-use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestHandler;
 use Amp\Http\Server\Response;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Success;
 use Empress\Middleware\StripTrailingSlashMiddleware;
+use Empress\Test\Helper\MockRequestHandlerTrait;
 use Empress\Test\Helper\StubRequestTrait;
 use Generator;
 
 class StripTrailingSlashesMiddlewareTest extends AsyncTestCase
 {
+    use MockRequestHandlerTrait;
     use StubRequestTrait;
 
     public function testHandleRequestWithRootPath(): Generator
@@ -58,17 +58,5 @@ class StripTrailingSlashesMiddlewareTest extends AsyncTestCase
         yield $middleware->handleRequest($request, $requestHandler);
 
         static::assertEquals('/hello', $request->getUri()->getPath());
-    }
-
-    private function createDefaultMockRequestHandler(Request $request): RequestHandler
-    {
-        $mockRequestHandler = $this->createMock(RequestHandler::class);
-        $mockRequestHandler
-            ->expects(static::once())
-            ->method('handleRequest')
-            ->with(static::identicalTo($request))
-            ->willReturn(new Success());
-
-        return $mockRequestHandler;
     }
 }
