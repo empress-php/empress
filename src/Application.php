@@ -15,6 +15,8 @@ use Empress\Routing\Router;
 use Empress\Routing\Routes;
 use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
+use Empress\Validation\Registry\DefaultValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistry;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -33,6 +35,8 @@ class Application implements ServerObserver
 
     private Routes $routes;
 
+    private ValidatorRegistry $validatorRegistry;
+
     public function __construct(Configuration $config = null)
     {
         $this->config = $config ?? new Configuration();
@@ -40,6 +44,7 @@ class Application implements ServerObserver
         $this->exceptionMapper = new ExceptionMapper();
         $this->statusMapper = new StatusMapper();
         $this->routes = new Routes(new HandlerCollection());
+        $this->validatorRegistry = new DefaultValidatorRegistry();
     }
 
     public static function create(int $port, ?LoggerInterface $requestLogger = null, Configuration $configuration = null): self
@@ -85,6 +90,7 @@ class Application implements ServerObserver
             $this->exceptionMapper,
             $this->statusMapper,
             $this->routes->getHandlerCollection(),
+            $this->validatorRegistry,
             $requestLogger ? new RequestLogger($requestLogger) : null
         );
     }
@@ -92,6 +98,11 @@ class Application implements ServerObserver
     public function getConfiguration(): Configuration
     {
         return $this->config;
+    }
+
+    public function getValidatorRegistry(): ValidatorRegistry
+    {
+        return $this->validatorRegistry;
     }
 
     /**

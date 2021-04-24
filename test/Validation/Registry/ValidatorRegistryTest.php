@@ -38,4 +38,14 @@ class ValidatorRegistryTest extends TestCase
 
         $registry->get('validator');
     }
+
+    public function testContextForNonexistentValidator(): void
+    {
+        $this->expectException(ValidatorRegistryException::class);
+
+        $registry = new ValidatorRegistry();
+        $context = $registry->contextFor('abc');
+
+        $context->to('validator');
+    }
 }

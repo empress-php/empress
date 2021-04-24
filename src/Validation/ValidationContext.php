@@ -26,4 +26,12 @@ class ValidationContext
     {
         return new WrappedValue($this->value, $this->registry->get($validatorName));
     }
+
+    /**
+     * @return T
+     */
+    public function unsafeUnwrap(): mixed
+    {
+        return $this->value;
+    }
 }
