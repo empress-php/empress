@@ -345,7 +345,7 @@ class Context implements ArrayAccess
     /**
      * Sends a JSON response.
      */
-    public function json(array $data): static
+    public function json(mixed $data): static
     {
         $this->contentType('application/json');
 
