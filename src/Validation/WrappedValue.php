@@ -13,6 +13,11 @@ class WrappedValue
 {
 
     /**
+     * @var array<array{callback: callable, message: string}>
+     */
+    private array $checks = [];
+
+    /**
      * @param T $value
      * @param ValidatorInterface<T, U> $validator
      */
@@ -28,7 +33,23 @@ class WrappedValue
      */
     public function unwrap(): mixed
     {
-        return $this->validator->validate($this->value);
+        $result = $this->validator->validate($this->value);
+
+        if (!empty($this->checks)) {
+            $errors = [];
+
+            foreach ($this->checks as ['callback' => $callback, 'message' => $message]) {
+                if (!$callback($result)) {
+                    $errors[] = new ValidatorException($message);
+                }
+            }
+
+            if (!empty($errors)) {
+                throw ValidatorException::collect($errors);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -68,5 +89,34 @@ class WrappedValue
         } catch (ValidatorException) {
             throw $exception;
         }
+    }
+
+    /**
+     * @template V
+     * @param callable(T, ValidatorException): V $callback
+     * @return U|V
+     */
+    public function unwrapOrFn(callable $callback): mixed
+    {
+        try {
+            return $this->unwrap();
+        } catch (ValidatorException $e) {
+            return $callback($this->value, $e);
+        }
+    }
+
+    /**
+     * @param callable(U): bool $callback
+     * @param string $message
+     * @return static
+     */
+    public function check(callable $callback, string $message = ''): static
+    {
+        $this->checks[] = [
+            'callback' => $callback,
+            'message' => $message,
+        ];
+
+        return $this;
     }
 }

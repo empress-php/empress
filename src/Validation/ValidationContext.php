@@ -29,6 +29,14 @@ class ValidationContext
     }
 
     /**
+     * @return WrappedValue<T, T>
+     */
+    public function pass(): WrappedValue
+    {
+        return new WrappedValue($this->value, $this->registry->get('noop'));
+    }
+
+    /**
      * @return T
      */
     public function unsafeUnwrap(): mixed

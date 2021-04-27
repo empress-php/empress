@@ -6,12 +6,15 @@ class IntValidator implements ValidatorInterface
 {
     public function validate(mixed $value): int
     {
-        $value = \filter_var($value, FILTER_VALIDATE_INT);
+        $filtered = \filter_var($value, FILTER_VALIDATE_INT);
 
-        if ($value === false) {
-            throw new ValidatorException();
+        if ($filtered === false) {
+            throw new ValidatorException(\sprintf(
+                'Value %s could not be converted to int.',
+                $value
+            ));
         }
 
-        return $value;
+        return $filtered;
     }
 }
