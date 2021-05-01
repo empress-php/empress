@@ -16,6 +16,6 @@ class DefaultValidatorRegistry extends ValidatorRegistry
         $this->register('float', new FloatValidator());
         $this->register('bool', new BoolValidator());
         $this->register(\DateTime::class, new DateTimeValidator());
-        $this->register('noop', new NoopValidator());
+        $this->register(NoopValidator::class, new NoopValidator());
     }
 }

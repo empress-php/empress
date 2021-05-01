@@ -3,6 +3,7 @@
 namespace Empress\Validation;
 
 use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Validator\NoopValidator;
 
 /**
  * @template T
@@ -33,7 +34,7 @@ class ValidationContext
      */
     public function pass(): WrappedValue
     {
-        return new WrappedValue($this->value, $this->registry->get('noop'));
+        return new WrappedValue($this->value, $this->registry->get(NoopValidator::class));
     }
 
     /**

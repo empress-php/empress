@@ -18,7 +18,7 @@ class ValidatorException extends \Exception
     }
 
     /**
-     * @return static[]
+     * @return ValidatorException[]
      */
     public function getExceptions(): array
     {
