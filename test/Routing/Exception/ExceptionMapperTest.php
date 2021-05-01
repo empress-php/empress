@@ -8,6 +8,7 @@ use Empress\Internal\ContextInjector;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Test\Helper\StubRequestTrait;
+use Empress\Validation\Registry\ValidatorRegistry;
 use Error;
 use Exception;
 use Generator;
@@ -24,8 +25,9 @@ class ExceptionMapperTest extends AsyncTestCase
         }, Exception::class));
 
         $request = $this->createStubRequest();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
-        $context = new Context($request);
+        $context = new Context($request, $validatorRegistry);
         $injector = new ContextInjector($context);
         $injector->setThrowable(new Exception());
 
@@ -42,8 +44,9 @@ class ExceptionMapperTest extends AsyncTestCase
         $mapper->addHandler(new ExceptionHandler(fn () => null, Exception::class));
 
         $request = $this->createStubRequest();
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
 
-        $context = new Context($request);
+        $context = new Context($request, $validatorRegistry);
         $injector = new ContextInjector($context);
         $injector->setThrowable(new Error());
 

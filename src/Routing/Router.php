@@ -22,6 +22,7 @@ use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
 use Empress\Routing\Handler\HandlerType;
 use Empress\Routing\Status\StatusMapper;
+use Empress\Validation\Registry\ValidatorRegistry;
 use Error;
 use Throwable;
 use function Amp\call;
@@ -41,6 +42,7 @@ class Router implements RequestHandler, ServerObserver
         private ExceptionMapper $exceptionMapper,
         private StatusMapper $statusMapper,
         private HandlerCollection $handlerCollection,
+        private ValidatorRegistry $validatorRegistry,
         private ?RequestLogger $requestLogger = null
     ) {
     }
@@ -128,7 +130,7 @@ class Router implements RequestHandler, ServerObserver
             $request->setAttribute(self::NAMED_PARAMS_ATTR_NAME, $handlerEntry->getPathMatcher()->extractNamedParams($path));
             $request->setAttribute(self::WILDCARDS_ATTR_NAME, $handlerEntry->getPathMatcher()->extractWildcards($path));
 
-            $context = new Context($request, new Response());
+            $context = new Context($request, $this->validatorRegistry, new Response());
             $injector = new ContextInjector($context);
 
             try {

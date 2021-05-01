@@ -10,6 +10,7 @@ use Amp\Http\Cookie\ResponseCookie;
 use Amp\Http\Server\FormParser\BufferingParser;
 use Amp\Http\Server\FormParser\StreamingParser;
 use Amp\Http\Server\Request;
+use Amp\Http\Server\RequestBody;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Session\Session;
 use Amp\Http\Status;
@@ -18,7 +19,10 @@ use Amp\Promise;
 use ArrayAccess;
 use Empress\Exception\HaltException;
 use Empress\Routing\Router;
+use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\ValidationContext;
 use LogicException;
+use function Amp\call;
 use function Amp\Http\Server\redirectTo;
 
 class Context implements ArrayAccess
@@ -41,13 +45,9 @@ class Context implements ArrayAccess
 
     private InputStream|string $stringOrStream;
 
-    /**
-     * Context constructor.
-     *
-     * @param Request $request
-     * @param Response|null $response
-     */
-    public function __construct(Request $request, Response $response = null)
+    private ValidatorRegistry $validatorRegistry;
+
+    public function __construct(Request $request, ValidatorRegistry $validatorRegistry, Response $response = null)
     {
         $this->request = $request;
         $this->response = $response ?? new Response();
@@ -63,6 +63,8 @@ class Context implements ArrayAccess
         $this->session = $this->request->getAttribute(Session::class);
 
         $this->stringOrStream = '';
+
+        $this->validatorRegistry = $validatorRegistry;
     }
 
     /**
@@ -76,9 +78,9 @@ class Context implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet($offset): mixed
+    public function offsetGet($offset): ValidationContext
     {
-        return $this->params[$offset];
+        return $this->validatorRegistry->contextFor($this->params[$offset]);
     }
 
     /**
@@ -98,19 +100,19 @@ class Context implements ArrayAccess
     }
 
     /**
-     * Returns streamed request.
+     * Returns request body.
      *
-     * @psalm-return Promise<null|string>
+     * @return RequestBody
      */
-    public function streamedBody(): Promise
+    public function requestBody(): RequestBody
     {
-        return $this->request->getBody()->read();
+        return $this->request->getBody();
     }
 
     /**
      * Returns buffered request body.
      *
-     * @psalm-return Promise<string>
+     * @return Promise<string>
      */
     public function bufferedBody(): Promise
     {
@@ -132,6 +134,18 @@ class Context implements ArrayAccess
     public function bufferedForm(): Promise
     {
         return $this->bufferingParser->parseForm($this->request);
+    }
+
+    /**
+     * @return Promise<ValidationContext>
+     */
+    public function validatedForm(): Promise
+    {
+        return call(function () {
+            $form = yield $this->bufferedForm();
+
+            return $this->validatorRegistry->contextFor($form);
+        });
     }
 
     /**

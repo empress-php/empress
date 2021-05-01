@@ -4,15 +4,17 @@ namespace Empress\Test;
 
 use Amp\Http\Cookie\RequestCookie;
 use Amp\Http\Cookie\ResponseCookie;
-use Amp\Http\Server\FormParser\Form;
-use Amp\Http\Server\FormParser\StreamedField;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Session\Session;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Exception\HaltException;
+use Empress\Test\Helper\SimpleForm;
+use Empress\Test\Helper\SimpleFormValidator;
 use Empress\Test\Helper\StubRequestTrait;
+use Empress\Validation\Registry\DefaultValidatorRegistry;
+use Empress\Validation\ValidationContext;
 use Generator;
 use JsonException;
 use LogicException;
@@ -33,20 +35,20 @@ class ContextTest extends AsyncTestCase
             'param2' => 'value2'
         ]);
 
-        $this->ctx = new Context($request, new Response());
+        $validatorRegistry = new DefaultValidatorRegistry();
+        $validatorRegistry->register(SimpleForm::class, new SimpleFormValidator($validatorRegistry));
+
+        $this->ctx = new Context($request, $validatorRegistry, new Response());
 
         parent::setUp();
     }
 
     public function testOffsets(): void
     {
-        static::assertNotNull($this->ctx['param1']);
-        static::assertNotNull($this->ctx['param2']);
-
-        static::assertEquals('value1', $this->ctx['param1']);
-        static::assertEquals('value2', $this->ctx['param2']);
-
+        static::assertEquals('value1', $this->ctx['param1']->unsafeUnwrap());
+        static::assertEquals('value2', $this->ctx['param2']->unsafeUnwrap());
         static::assertTrue(isset($this->ctx['param1']));
+        static::assertFalse(isset($this->ctx['param3']));
     }
 
     public function testSettingOffsets(): void
@@ -63,54 +65,28 @@ class ContextTest extends AsyncTestCase
         unset($this->ctx['param1']);
     }
 
-    public function testStreamedBody(): Generator
-    {
-        $body = 'Hello';
-        $this->ctx->getHttpServerRequest()->setBody($body);
-        $contents = '';
-
-        while ($chunk = yield $this->ctx->streamedBody()) {
-            $contents .= $chunk;
-        }
-
-        static::assertEquals($body, $contents);
-    }
-
     public function testBufferedBody(): Generator
     {
         $body = 'Hello';
         $this->ctx->getHttpServerRequest()->setBody($body);
+
         $contents = yield $this->ctx->bufferedBody();
 
         static::assertEquals($body, $contents);
     }
 
-    public function testStreamedForm(): Generator
+    public function testValidatedForm(): Generator
     {
         $this->ctx->getHttpServerRequest()->setHeader('Content-Type', 'application/x-www-form-urlencoded');
-        $this->ctx->getHttpServerRequest()->setBody('field1=value1');
+        $this->ctx->getHttpServerRequest()->setBody('field1=100');
 
-        $form = $this->ctx->streamedForm();
+        /** @var ValidationContext $form */
+        $form = yield $this->ctx->validatedForm();
 
-        /** @var StreamedField $field */
-        yield $form->advance();
-        $field = $form->getCurrent();
-        $value = yield $field->read();
+        /** @var SimpleForm $simpleForm */
+        $simpleForm = $form->to(SimpleForm::class)->unwrap();
 
-        static::assertEquals('field1', $field->getName());
-        static::assertEquals('value1', $value);
-    }
-
-    public function testBufferedForm(): Generator
-    {
-        $this->ctx->getHttpServerRequest()->setHeader('Content-Type', 'application/x-www-form-urlencoded');
-        $this->ctx->getHttpServerRequest()->setBody('field1=value1');
-
-        /** @var Form $form */
-        $form = yield $this->ctx->bufferedForm();
-        $value = $form->getValue('field1');
-
-        static::assertEquals('value1', $value);
+        static::assertEquals(100, $simpleForm->field);
     }
 
     public function testQueryString(): void

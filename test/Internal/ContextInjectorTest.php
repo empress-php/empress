@@ -7,6 +7,7 @@ use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Internal\ContextInjector;
 use Empress\Test\Helper\StubRequestTrait;
+use Empress\Validation\Registry\ValidatorRegistry;
 use Exception;
 use Generator;
 
@@ -17,7 +18,8 @@ class ContextInjectorTest extends AsyncTestCase
     public function testInjectorWithExistingResponse(): Generator
     {
         $request = $this->createStubRequest();
-        $context = new Context($request);
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
+        $context = new Context($request, $validatorRegistry);
         $injector = new ContextInjector($context);
 
         yield $injector->inject(function (Context $ctx) {
@@ -35,7 +37,8 @@ class ContextInjectorTest extends AsyncTestCase
         $this->expectException(Exception::class);
 
         $request = $this->createStubRequest();
-        $context = new Context($request);
+        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
+        $context = new Context($request, $validatorRegistry);
         $injector = new ContextInjector($context);
 
         yield $injector->inject(fn () => throw new Exception());
