@@ -1,0 +1,37 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup PHP Action
+      uses: shivammathur/setup-php@2.11.0
+      with:
+        php-version: '8.0'
+        coverage: xdebug
+        extensions: inotify
+        tools: composer:v2, phpunit, vimeo/psalm, php-cs-fixer
+      env:
+        fail-fast: true
+
+    - name: Install dependencies
+      run: composer update --prefer-dist --optimize-autoloader --no-progress
+
+    - name: Run psalm
+      run: vendor/bin/psalm --no-cache
+
+    - name: Run tests
+      run: |
+        mkdir -p build/logs
+        XDEBUG_MODE=coverage php vendor/bin/phpunit -c phpunit.xml.dist
+        
+    - name: Coveralls
+      run: php vendor/bin/php-coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{secrets.GITHUB_TOKEN}}
