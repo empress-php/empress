@@ -52,9 +52,9 @@ $empress = new Empress($app);
 Loop::onSignal(\defined('SIGINT') ? \SIGINT : 2, function ($watcherId) use ($empress) {
     Loop::unreference($watcherId);
 
-    echo "Stopping Empress...\n";
-
     try {
+        echo "Stopping Empress...\n";
+
         yield $empress->shutDown();
     } catch (ShutdownException $e) {
         \printf("Server shutdown error: %s\n", $e->getMessage());
@@ -69,7 +69,6 @@ Loop::run(function () use ($empress) {
         yield $empress->boot();
     } catch (StartupException $e) {
         \printf("Server startup error: %s\n", $e->getMessage());
-
         exit(1);
     }
 });
