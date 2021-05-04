@@ -1,4 +1,5 @@
 [![Build](https://github.com/empress-php/empress/actions/workflows/php.yml/badge.svg)](https://github.com/empress-php/empress/actions/workflows/php.yml)
+[![Latest Stable Version](https://poser.pugx.org/empress-php/empress/v)](//packagist.org/packages/empress-php/empress)
 [![Coverage Status](https://coveralls.io/repos/github/empress-php/empress/badge.svg)](https://coveralls.io/github/empress-php/empress)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
