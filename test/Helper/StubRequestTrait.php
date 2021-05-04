@@ -11,8 +11,13 @@ use League\Uri\Http;
 
 trait StubRequestTrait
 {
-    private function createStubRequest(string $method = 'GET', string $uri = '/', array $params = [], $includeSession = true): Request
-    {
+    private function createStubRequest(
+        string $method = 'GET',
+        string $uri = '/',
+        array $params = [],
+        array $wildcards = [],
+        $includeSession = true
+    ): Request {
         $client = $this->createMock(Client::class);
 
         $uri = Http::createFromString($uri)
@@ -21,6 +26,7 @@ trait StubRequestTrait
 
         $request = new Request($client, $method, $uri);
         $request->setAttribute(Router::NAMED_PARAMS_ATTR_NAME, $params);
+        $request->setAttribute(Router::WILDCARDS_ATTR_NAME, $wildcards);
 
         if ($includeSession) {
             $session = new Session(new InMemoryStorage(), null);
