@@ -3,13 +3,11 @@
     "description": "Empress is a flexible microframework for creating async web applications in PHP 8.",
     "type": "library",
     "license": "MIT",
-    "config": {
-        "platform": {
-            "php": "8.0.1"
-        }
-    },
-    "bin": ["bin/empress"],
+    "bin": [
+        "bin/empress"
+    ],
     "require": {
+        "php": "^8.0",
         "amphp/amp": "^2.5",
         "amphp/http-server": "^2.1",
         "monolog/monolog": "^1.24",
