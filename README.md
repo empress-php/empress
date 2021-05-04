@@ -10,7 +10,7 @@ Empress is a flexible PHP 8 microframework for creating async web applications. 
 The name is a portmanteau of Express and Amp as Empress's simplicity was first inspired by Express.js. Later, many useful ideas were incorporated from [Spark](http://sparkjava.com/) and [Javalin](https://javalin.io/). Ultimately it's also the name of one of the cards from major arcana, part of the tarot deck.
 
 # Documentation
-Read the [Wiki](https://github.com/empress-php/empress/wiki/Welcome-to-Empress) for more information and make sure to check out the [Getting Started](https://github.com/empress-php/empress/wiki/Getting-Started) tutorial.
+Read the [Wiki](https://github.com/empress-php/empress/wiki) for more information and make sure to check out the [Getting Started](https://github.com/empress-php/empress/wiki/Getting-Started) tutorial.
 
 # Taste it
 
