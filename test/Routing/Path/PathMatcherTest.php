@@ -24,7 +24,7 @@ class PathMatcherTest extends TestCase
         $matcher = new PathMatcher($regexBuilder);
 
         static::assertTrue($matcher->matches('/foo'));
-        static::assertTrue($matcher->matches('/foo/bar'));
+        static::assertFalse($matcher->matches('/foo/bar'));
     }
 
     public function testInnerWildcardPath(): void

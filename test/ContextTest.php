@@ -33,6 +33,9 @@ class ContextTest extends AsyncTestCase
         $request = $this->createStubRequest('GET', '/?a=b&c=d', [
             'param1' => 'value1',
             'param2' => 'value2'
+        ], [
+            'abc',
+            'def',
         ]);
 
         $validatorRegistry = new DefaultValidatorRegistry();
@@ -310,5 +313,12 @@ class ContextTest extends AsyncTestCase
             $response = $e->toResponse();
             static::assertEquals('Go away', yield $response->getBody()->read());
         }
+    }
+
+    public function testWildcards()
+    {
+        $wildcards = $this->ctx->wildcards();
+
+        static::assertEquals(['abc', 'def'], $wildcards);
     }
 }

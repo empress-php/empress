@@ -21,7 +21,7 @@ class RegexBuilderTest extends TestCase
         $path = new Path('/hello/*');
         $builder = new RegexBuilder($path);
 
-        static::assertEquals('~^/hello/(.+?)/?$~', $builder->getRegex());
+        static::assertEquals('~^/hello/([^/]*)/?$~', $builder->getRegex());
     }
 
     public function testRootWildcardPath(): void
@@ -29,7 +29,7 @@ class RegexBuilderTest extends TestCase
         $path = new Path('/*');
         $builder = new RegexBuilder($path);
 
-        static::assertEquals('~^/(.+?)/?$~', $builder->getRegex());
+        static::assertEquals('~^/([^/]*)/?$~', $builder->getRegex());
     }
 
     public function testMultipleWildcardPaths(): void
@@ -37,7 +37,7 @@ class RegexBuilderTest extends TestCase
         $path = new Path('/foo/*/bar/*/baz');
         $builder = new RegexBuilder($path);
 
-        static::assertEquals('~^/foo/(.+?)/bar/(.+?)/baz/?$~', $builder->getRegex());
+        static::assertEquals('~^/foo/([^/]*)/bar/([^/]*)/baz/?$~', $builder->getRegex());
     }
 
     public function testSingleParam(): void
@@ -61,6 +61,6 @@ class RegexBuilderTest extends TestCase
         $path = new Path('/*/php/*/:abc/:z');
         $builder = new RegexBuilder($path);
 
-        static::assertEquals('~^/(.+?)/php/(.+?)/(?<abc>.+?)/(?<z>.+?)/?$~', $builder->getRegex());
+        static::assertEquals('~^/([^/]*)/php/([^/]*)/(?<abc>.+?)/(?<z>.+?)/?$~', $builder->getRegex());
     }
 }

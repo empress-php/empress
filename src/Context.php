@@ -41,6 +41,8 @@ class Context implements ArrayAccess
 
     private array $params;
 
+    private array $wildcards;
+
     private ?Session $session;
 
     private InputStream|string $stringOrStream;
@@ -60,6 +62,7 @@ class Context implements ArrayAccess
         $this->queryArray = $parsed;
 
         $this->params = $this->request->getAttribute(Router::NAMED_PARAMS_ATTR_NAME);
+        $this->wildcards = $this->request->getAttribute(Router::WILDCARDS_ATTR_NAME);
         $this->session = $this->request->getAttribute(Session::class);
 
         $this->stringOrStream = '';
@@ -371,6 +374,14 @@ class Context implements ArrayAccess
     public function halt(int $status = Status::OK, InputStream|string|null $stringOrStream = null, array $headers = []): void
     {
         throw new HaltException($status, $headers, $stringOrStream);
+    }
+
+    /**
+     * Gets wildcard params from path.
+     */
+    public function wildcards(): array
+    {
+        return $this->wildcards;
     }
 
     /**
