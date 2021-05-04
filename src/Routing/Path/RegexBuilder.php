@@ -22,7 +22,7 @@ class RegexBuilder
 
         foreach ($path->getParts() as $part) {
             if ($part === '*') {
-                $regexParts[] = '(.+?)';
+                $regexParts[] = '([^/]*)';
             } elseif (\mb_strlen($part) > 1 && \mb_strpos($part, ':') !== false) {
                 $paramName = \mb_substr($part, 1);
 
