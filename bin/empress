@@ -1,0 +1,75 @@
+#!/usr/bin/env php
+
+<?php
+
+use Amp\Loop;
+use Empress\Application;
+use Empress\Empress;
+use Empress\Exception\ShutdownException;
+use Empress\Exception\StartupException;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$banner = <<<EOF
+    ______                                   
+   / ____/___ ___  ____  ________  __________
+  / __/ / __ `__ \/ __ \/ ___/ _ \/ ___/ ___/
+ / /___/ / / / / / /_/ / /  /  __(__  |__  ) 
+/_____/_/ /_/ /_/ .___/_/   \___/____/____/  
+               /_/
+
+EOF;
+
+$usage = <<<EOF
+Usage: empress [FILE]
+
+EOF;
+
+
+echo $banner;
+
+$path = $argv[1] ?? null;
+
+if ($path === null) {
+    echo $usage;
+    exit(1);
+}
+
+if (!\is_file($path)) {
+    \printf("File not found: %s\n", $path);
+    exit(1);
+}
+
+$app = require $path;
+
+if (!$app instanceof Application) {
+    echo "Error: $path was supposed to return an instance of " . Application::class . "\n";
+    exit(1);
+}
+
+$empress = new Empress($app);
+
+Loop::onSignal(\defined('SIGINT') ? \SIGINT : 2, function ($watcherId) use ($empress) {
+    Loop::unreference($watcherId);
+
+    echo "Stopping Empress...\n";
+
+    try {
+        yield $empress->shutDown();
+    } catch (ShutdownException $e) {
+        \printf("Server shutdown error: %s\n", $e->getMessage());
+        exit(1);
+    }
+});
+
+Loop::run(function () use ($empress) {
+    try {
+        echo "Starting Empress...\n";
+
+        yield $empress->boot();
+    } catch (StartupException $e) {
+        \printf("Server startup error: %s\n", $e->getMessage());
+
+        exit(1);
+    }
+});

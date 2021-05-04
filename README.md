@@ -16,18 +16,16 @@ Read the [Wiki](https://github.com/empress-php/empress/wiki/Welcome-to-Empress) 
 
 ```php
 <?php
+// app.php
 
-use Amp\Loop;
 use Empress\Application;
 use Empress\Context;
-use Empress\Empress;
 use Empress\Routing\RouteCollector\AnnotatedRouteCollectorTrait;
 use Empress\Routing\RouteCollector\Attribute\Group;
 use Empress\Routing\RouteCollector\Attribute\Route;
-use Empress\Routing\RouteCollector\RouteCollectorInterface;
 
-#[Group('/index')]
-class IndexController implements RouteCollectorInterface
+#[Group('/hello')]
+class IndexController
 {
     use AnnotatedRouteCollectorTrait;
 
@@ -38,12 +36,11 @@ class IndexController implements RouteCollectorInterface
     }
 }
 
-Loop::run(function () {
-    $app = Application::create(9010);
-    $app->routes(new IndexController());
+$app = Application::create(9010);
+$app->routes(new IndexController());
 
-    $empress = new Empress($app);
+return $app;
 
-    yield $empress->boot();
-});
+// Run it:
+// vendor/bin/empress app.php
 ```

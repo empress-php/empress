@@ -8,7 +8,7 @@ use Empress\Routing\Handler\HandlerEntry;
 use Empress\Routing\Handler\HandlerType;
 use Empress\Routing\Path\Path;
 
-class Routes
+final class Routes
 {
     private string $prefix = '';
 
@@ -18,9 +18,6 @@ class Routes
 
     /**
      * Registers a before filter.
-     *
-     * @param callable $callable
-     * @return Routes
      */
     public function before(callable $callable): self
     {
@@ -31,10 +28,6 @@ class Routes
 
     /**
      * Registers a before filter.
-     *
-     * @param string $path
-     * @param callable $callable
-     * @return Routes
      */
     public function beforeAt(string $path, callable $callable): self
     {
@@ -45,9 +38,6 @@ class Routes
 
     /**
      * Registers an after filter.
-     *
-     * @param callable $callable
-     * @return Routes
      */
     public function after(callable $callable): self
     {
@@ -58,10 +48,6 @@ class Routes
 
     /**
      * Registers an after filter.
-     *
-     * @param string $path
-     * @param callable $callable
-     * @return Routes
      */
     public function afterAt(string $path, callable $callable): self
     {
@@ -73,9 +59,7 @@ class Routes
     /**
      * Groups routes under one prefix.
      *
-     * @param string $prefix
-     * @param Closure $closure,
-     * @return Routes
+     * @psalm-param \Closure(Routes): void $closure
      */
     public function group(string $prefix, Closure $closure): self
     {
@@ -91,10 +75,6 @@ class Routes
 
     /**
      * Adds a GET route.
-     *
-     * @param string $route
-     * @param callable $handler
-     * @return Routes
      */
     public function get(string $route, callable $handler): self
     {
@@ -105,10 +85,6 @@ class Routes
 
     /**
      * Adds a POST route.
-     *
-     * @param string $route
-     * @param callable $handler
-     * @return Routes
      */
     public function post(string $route, callable $handler): self
     {
@@ -119,10 +95,6 @@ class Routes
 
     /**
      * Adds a PUT route.
-     *
-     * @param string $route
-     * @param callable $handler
-     * @return Routes
      */
     public function put(string $route, callable $handler): self
     {
@@ -133,10 +105,6 @@ class Routes
 
     /**
      * Adds a DELETE route.
-     *
-     * @param string $route
-     * @param callable $handler
-     * @return Routes
      */
     public function delete(string $route, callable $handler): self
     {
@@ -147,10 +115,6 @@ class Routes
 
     /**
      * Adds a PATCH route.
-     *
-     * @param string $route
-     * @param callable $handler
-     * @return Routes
      */
     public function patch(string $route, callable $handler): self
     {
@@ -161,10 +125,6 @@ class Routes
 
     /**
      * Adds a HEAD route.
-     *
-     * @param string $route
-     * @param callable $handler
-     * @return Routes
      */
     public function head(string $route, callable $handler): self
     {
@@ -175,10 +135,6 @@ class Routes
 
     /**
      * Adds an OPTIONS route.
-     *
-     * @param string $route
-     * @param callable $handler
-     * @return Routes
      */
     public function options(string $route, callable $handler): self
     {
