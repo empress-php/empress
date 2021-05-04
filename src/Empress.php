@@ -4,8 +4,6 @@ namespace Empress;
 
 use Amp\Http\Server\HttpServer;
 use Amp\Http\Server\Session\SessionMiddleware;
-use Amp\Log\ConsoleFormatter;
-use Amp\Log\StreamHandler;
 use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket\BindContext;
@@ -13,9 +11,8 @@ use Amp\Socket\Server;
 use Closure;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
+use Empress\Logging\DefaultLogger;
 use Exception;
-use Monolog\Logger;
-use Psr\Log\LoggerInterface;
 use Throwable;
 use function Amp\ByteStream\getStdout;
 use function Amp\call;
@@ -27,6 +24,7 @@ class Empress
 
     public function __construct(private Application $application)
     {
+        $this->initializeServer();
     }
 
     /**
@@ -35,8 +33,6 @@ class Empress
      */
     public function boot(): Promise
     {
-        $this->initializeServer();
-
         $closure = Closure::fromCallable([$this->server, 'start']);
 
         return $this->handleMultiReasonException($closure, StartupException::class);
@@ -60,7 +56,8 @@ class Empress
 
         $middlewares = $config->getMiddlewares();
         $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
-        $logger = $this->getLogger();
+
+        $logger = new DefaultLogger('Empress', getStdout());
         $options = $config->getServerOptions();
         $port = $config->getPort();
 
@@ -115,15 +112,5 @@ class Empress
                 throw new $exceptionClass(\implode(PHP_EOL, $messages));
             }
         });
-    }
-
-    private function getLogger(): LoggerInterface
-    {
-        $logHandler = new StreamHandler(getStdout());
-        $logHandler->setFormatter(new ConsoleFormatter);
-        $logger = new Logger('Empress');
-        $logger->pushHandler($logHandler);
-
-        return $logger;
     }
 }

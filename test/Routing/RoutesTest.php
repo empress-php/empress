@@ -28,9 +28,9 @@ class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        static::assertEquals(HandlerType::BEFORE, $entry->getType());
-        static::assertEquals(new Path('/*'), $entry->getPath());
-        static::assertEquals($this->closure, $entry->getHandler());
+        static::assertEquals(HandlerType::BEFORE, $entry?->getType());
+        static::assertEquals(new Path('/*'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
     }
 
     public function testBeforeAt(): void
@@ -39,9 +39,9 @@ class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        static::assertEquals(HandlerType::BEFORE, $entry->getType());
-        static::assertEquals(new Path('/home'), $entry->getPath());
-        static::assertEquals($this->closure, $entry->getHandler());
+        static::assertEquals(HandlerType::BEFORE, $entry?->getType());
+        static::assertEquals(new Path('/home'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
     }
 
     public function testAfter(): void
@@ -50,9 +50,9 @@ class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        static::assertEquals(HandlerType::AFTER, $entry->getType());
-        static::assertEquals(new Path('/*'), $entry->getPath());
-        static::assertEquals($this->closure, $entry->getHandler());
+        static::assertEquals(HandlerType::AFTER, $entry?->getType());
+        static::assertEquals(new Path('/*'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
     }
 
     public function testAfterAt(): void
@@ -61,9 +61,9 @@ class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        static::assertEquals(HandlerType::AFTER, $entry->getType());
-        static::assertEquals(new Path('/home'), $entry->getPath());
-        static::assertEquals($this->closure, $entry->getHandler());
+        static::assertEquals(HandlerType::AFTER, $entry?->getType());
+        static::assertEquals(new Path('/home'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
     }
 
     public function testGroup(): void
@@ -74,9 +74,9 @@ class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        static::assertEquals(HandlerType::GET, $entry->getType());
-        static::assertEquals(new Path('/foo/bar'), $entry->getPath());
-        static::assertEquals($this->closure, $entry->getHandler());
+        static::assertEquals(HandlerType::GET, $entry?->getType());
+        static::assertEquals(new Path('/foo/bar'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
     }
 
     public function testGroupWhereNestedHandlerHasNoSlash(): void
@@ -87,9 +87,86 @@ class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        static::assertEquals(HandlerType::GET, $entry->getType());
-        static::assertEquals(new Path('/foo/bar'), $entry->getPath());
-        static::assertEquals($this->closure, $entry->getHandler());
+        static::assertEquals(HandlerType::GET, $entry?->getType());
+        static::assertEquals(new Path('/foo/bar'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
+    }
+
+    public function testGet(): void
+    {
+        $this->routes->get('/', $this->closure);
+
+        $entry = $this->getEntry();
+
+        static::assertEquals(HandlerType::GET, $entry?->getType());
+        static::assertEquals(new Path('/'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
+    }
+
+    public function testPost(): void
+    {
+        $this->routes->post('/', $this->closure);
+
+        $entry = $this->getEntry();
+
+        static::assertEquals(HandlerType::POST, $entry?->getType());
+        static::assertEquals(new Path('/'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
+    }
+
+    public function testPut(): void
+    {
+        $this->routes->put('/', $this->closure);
+
+        $entry = $this->getEntry();
+
+        static::assertEquals(HandlerType::PUT, $entry?->getType());
+        static::assertEquals(new Path('/'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
+    }
+
+    public function testDelete(): void
+    {
+        $this->routes->delete('/', $this->closure);
+
+        $entry = $this->getEntry();
+
+        static::assertEquals(HandlerType::DELETE, $entry?->getType());
+        static::assertEquals(new Path('/'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
+    }
+
+    public function testPatch(): void
+    {
+        $this->routes->patch('/', $this->closure);
+
+        $entry = $this->getEntry();
+
+        static::assertEquals(HandlerType::PATCH, $entry?->getType());
+        static::assertEquals(new Path('/'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
+    }
+
+    public function testHead(): void
+    {
+        $this->routes->head('/', $this->closure);
+
+        $entry = $this->getEntry();
+
+        static::assertEquals(HandlerType::HEAD, $entry?->getType());
+        static::assertEquals(new Path('/'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
+    }
+
+    public function testOptions(): void
+    {
+        $this->routes->options('/', $this->closure);
+
+        $entry = $this->getEntry();
+
+        static::assertEquals(HandlerType::OPTIONS, $entry?->getType());
+        static::assertEquals(new Path('/'), $entry?->getPath());
+        static::assertEquals($this->closure, $entry?->getHandler());
     }
 
     private function getEntry(): ?HandlerEntry

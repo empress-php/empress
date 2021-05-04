@@ -7,7 +7,6 @@ use Empress\Routing\Handler\HandlerType;
 use Empress\Routing\RouteCollector\AnnotatedRouteCollectorTrait;
 use Empress\Routing\RouteCollector\Attribute\Group;
 use Empress\Routing\RouteCollector\Attribute\Route;
-use Empress\Routing\RouteCollector\RouteCollectorInterface;
 use Empress\Routing\Routes;
 use PHPUnit\Framework\TestCase;
 
@@ -16,7 +15,7 @@ class AnnotatedRouteCollectorTraitTest extends TestCase
     public function testSimpleRoute(): void
     {
         $application = Application::create(8000);
-        $collector = new class implements RouteCollectorInterface {
+        $collector = new class {
             use AnnotatedRouteCollectorTrait;
 
             #[Route('GET', '/')]
@@ -39,7 +38,7 @@ class AnnotatedRouteCollectorTraitTest extends TestCase
     public function testRegisterManyRoutesForOneHandler(): void
     {
         $application = Application::create(8000);
-        $collector = new class implements RouteCollectorInterface {
+        $collector = new class {
             use AnnotatedRouteCollectorTrait;
 
             #[Route('GET', '/')]
@@ -70,7 +69,7 @@ class AnnotatedRouteCollectorTraitTest extends TestCase
     public function testCollectorWithGroup(): void
     {
         $application = Application::create(8000);
-        $collector = new #[Group('/group')] class implements RouteCollectorInterface
+        $collector = new #[Group('/group')] class
         {
             use AnnotatedRouteCollectorTrait;
 

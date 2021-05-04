@@ -17,7 +17,7 @@ use Amp\Http\Status;
 use Amp\Iterator;
 use Amp\Promise;
 use ArrayAccess;
-use Empress\Exception\HaltException;
+use Empress\Routing\HaltException;
 use Empress\Routing\Router;
 use Empress\Validation\Registry\ValidatorRegistry;
 use Empress\Validation\ValidationContext;

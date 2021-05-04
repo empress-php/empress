@@ -9,7 +9,7 @@ use Amp\Http\Server\Session\Session;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
-use Empress\Exception\HaltException;
+use Empress\Routing\HaltException;
 use Empress\Test\Helper\SimpleForm;
 use Empress\Test\Helper\SimpleFormValidator;
 use Empress\Test\Helper\StubRequestTrait;

@@ -14,7 +14,6 @@ use Amp\Http\Status;
 use Amp\Promise;
 use Amp\Success;
 use Empress\Context;
-use Empress\Exception\HaltException;
 use Empress\Internal\ContextInjector;
 use Empress\Logging\RequestLogger;
 use Empress\Routing\Exception\ExceptionMapper;

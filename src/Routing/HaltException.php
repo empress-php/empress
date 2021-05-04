@@ -1,6 +1,6 @@
 <?php
 
-namespace Empress\Exception;
+namespace Empress\Routing;
 
 use Amp\ByteStream\InputStream;
 use Amp\Http\Server\Response;
@@ -9,14 +9,6 @@ use Error;
 
 class HaltException extends Error
 {
-
-    /**
-     * HaltException constructor.
-     *
-     * @param int $status
-     * @param array $headers
-     * @param InputStream|string|null $stringOrStream
-     */
     public function __construct(
         private $status = Status::OK,
         private array $headers = [],
