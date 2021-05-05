@@ -134,7 +134,6 @@ class Router implements RequestHandler, ServerObserver
 
             try {
                 $beforeFilters = $handlerCollection
-                    ->filterByPath($path)
                     ->filterByType(HandlerType::BEFORE);
 
                 foreach ($beforeFilters as $beforeFilter) {
@@ -144,7 +143,6 @@ class Router implements RequestHandler, ServerObserver
                 yield $injector->inject($handlerEntry->getHandler());
 
                 $afterFilters = $handlerCollection
-                    ->filterByPath($path)
                     ->filterByType(HandlerType::AFTER);
 
                 foreach ($afterFilters as $afterFilter) {
