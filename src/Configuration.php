@@ -15,8 +15,9 @@ use Psr\Log\LoggerInterface;
  * Defines the application environment that will be used by http-server.
  * Server logging, server options and middlewares are all registered using this class.
  */
-class Configuration
+final class Configuration
 {
+
     /**
      * @var Middleware[]
      */
@@ -32,6 +33,11 @@ class Configuration
 
     private ?int $tlsPort = null;
 
+    /**
+     * @var string[]
+     */
+    private array $hosts;
+
     private int $port = 1337;
 
     private ?LoggerInterface $requestLogger = null;
@@ -40,11 +46,12 @@ class Configuration
     {
         $this->options = new Options();
         $this->sessionStorage = new InMemoryStorage();
+        $this->hosts = ['0.0.0.0', '[::]'];
     }
 
-    public static function create(): static
+    public static function create(): self
     {
-        return new static();
+        return new self();
     }
 
     /**
@@ -78,12 +85,11 @@ class Configuration
      */
     public function getDocumentRootHandler(): ?DocumentRoot
     {
-        if ($this->getStaticContentPath() === null) {
+        if ($this->staticContentPath === null) {
             return null;
         }
 
-        /** @psalm-suppress PossiblyNullArgument */
-        return new DocumentRoot($this->getStaticContentPath());
+        return new DocumentRoot($this->staticContentPath);
     }
 
     public function getSessionStorage(): Storage
@@ -101,6 +107,11 @@ class Configuration
         return $this->tlsPort;
     }
 
+    public function getHosts(): array
+    {
+        return $this->hosts;
+    }
+
     public function getPort(): int
     {
         return $this->port;
@@ -114,7 +125,7 @@ class Configuration
     /**
      * Adds a middleware.
      */
-    public function withMiddleware(Middleware $middleware): static
+    public function withMiddleware(Middleware $middleware): self
     {
         $this->middlewares[] = $middleware;
 
@@ -124,7 +135,7 @@ class Configuration
     /**
      * Adds http-server options.
      */
-    public function withServerOptions(Options $options): static
+    public function withServerOptions(Options $options): self
     {
         $this->options = $options;
 
@@ -134,21 +145,21 @@ class Configuration
     /**
      * Sets path that will be used for serving static files.
      */
-    public function withStaticContentPath(string $path): static
+    public function withStaticContentPath(string $path): self
     {
         $this->staticContentPath = $path;
 
         return $this;
     }
 
-    public function withSessionStorage(Storage $storage): static
+    public function withSessionStorage(Storage $storage): self
     {
         $this->sessionStorage = $storage;
 
         return $this;
     }
 
-    public function withTls(string $certFileName, int $port, ?string $keyFileName = null): static
+    public function withTls(string $certFileName, int $port, ?string $keyFileName = null): self
     {
         $cert = new Certificate($certFileName, $keyFileName);
         $this->tlsContext = (new ServerTlsContext())->withDefaultCertificate($cert);
@@ -158,14 +169,21 @@ class Configuration
         return $this;
     }
 
-    public function withPort(int $port): static
+    public function withHosts(string ...$hosts): self
+    {
+        $this->hosts = $hosts;
+
+        return $this;
+    }
+
+    public function withPort(int $port): self
     {
         $this->port = $port;
 
         return $this;
     }
 
-    public function withRequestLogger(LoggerInterface $logger): static
+    public function withRequestLogger(LoggerInterface $logger): self
     {
         $this->requestLogger = $logger;
 

@@ -9,8 +9,11 @@
     </report>
   </coverage>
   <testsuites>
-    <testsuite name="Empress test">
+    <testsuite name="Empress tests">
       <directory>test</directory>
+    </testsuite>
+    <testsuite name="Empress functional tests">
+      <directory>test/Functional</directory>
     </testsuite>
   </testsuites>
   <logging/>

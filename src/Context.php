@@ -43,7 +43,7 @@ class Context implements ArrayAccess
 
     private array $wildcards;
 
-    private ?Session $session;
+    private Session $session;
 
     private InputStream|string $stringOrStream;
 
@@ -170,7 +170,7 @@ class Context implements ArrayAccess
     /**
      * Gets session associated with this request.
      */
-    public function session(): ?Session
+    public function session(): Session
     {
         return $this->session;
     }

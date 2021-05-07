@@ -17,6 +17,5 @@ class EmpressTest extends AsyncTestCase
         $empress = new Empress($app);
 
         yield $empress->boot();
-        yield $empress->shutDown();
     }
 }

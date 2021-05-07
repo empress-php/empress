@@ -38,6 +38,8 @@
         "amphp/php-cs-fixer-config": "dev-master",
         "php-coveralls/php-coveralls": "^2.2",
         "vimeo/psalm": "^4.7",
-        "friendsofphp/php-cs-fixer": "^2.18"
+        "friendsofphp/php-cs-fixer": "^2.18",
+        "amphp/http-client": "^4.5",
+        "amphp/http-client-cookies": "^1.1"
     }
 }

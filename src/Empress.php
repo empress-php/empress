@@ -8,7 +8,7 @@ use Amp\MultiReasonException;
 use Amp\Promise;
 use Amp\Socket\BindContext;
 use Amp\Socket\Server;
-use Closure;
+use Amp\Socket\ServerTlsContext;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
 use Empress\Logging\DefaultLogger;
@@ -33,9 +33,7 @@ class Empress
      */
     public function boot(): Promise
     {
-        $closure = Closure::fromCallable([$this->server, 'start']);
-
-        return $this->handleMultiReasonException($closure, StartupException::class);
+        return $this->handleMultiReasonException([$this->server, 'start'], StartupException::class);
     }
 
     /**
@@ -44,40 +42,37 @@ class Empress
      */
     public function shutDown(): Promise
     {
-        $closure = Closure::fromCallable([$this->server, 'stop']);
-
-        return $this->handleMultiReasonException($closure, ShutdownException::class);
+        return $this->handleMultiReasonException([$this->server, 'stop'], ShutdownException::class);
     }
 
     private function initializeServer(): void
     {
-        $router = $this->application->getRouter();
         $config = $this->application->getConfiguration();
-
-        $middlewares = $config->getMiddlewares();
-        $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
-
-        $logger = new DefaultLogger('Empress', getStdout());
-        $options = $config->getServerOptions();
-        $port = $config->getPort();
+        $router = $this->application->getRouter();
 
         // Static content serving
         if ($handler = $config->getDocumentRootHandler()) {
             $router->setFallback($handler);
         }
 
-        $sockets = [
-            Server::listen('0.0.0.0:' . $port),
-            Server::listen('[::]:' . $port),
-        ];
+        $port = $config->getPort();
+        $hosts = $config->getHosts();
 
-        if (!\is_null($context = $config->getTlsContext())) {
+        $sockets = $this->buildSockets($hosts, $port);
+
+        if (($context = $config->getTlsContext()) !== null) {
             $tlsPort = $config->getTlsPort();
-            $bindContext = (new BindContext())->withTlsContext($context);
 
-            $sockets[] = Server::listen('0.0.0.0:' . $tlsPort, $bindContext);
-            $sockets[] = Server::listen('[::]:' . $tlsPort, $bindContext);
+            \assert($tlsPort !== null);
+
+            $tlsSockets = $this->buildTlsSockets($hosts, $tlsPort, $context);
+            $sockets = \array_merge($sockets, $tlsSockets);
         }
+
+        $middlewares = $config->getMiddlewares();
+        $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
+        $logger = new DefaultLogger('Empress', getStdout());
+        $options = $config->getServerOptions();
 
         $this->server = new HttpServer(
             $sockets,
@@ -89,11 +84,38 @@ class Empress
         $this->server->attach($this->application);
     }
 
-    private function handleMultiReasonException(Closure $closure, string $exceptionClass = Exception::class): Promise
+    /**
+     * @return Server[]
+     */
+    private function buildSockets(array $hosts, int $port): array
     {
-        return call(function () use ($closure, $exceptionClass) {
+        $sockets = [];
+
+        foreach ($hosts as $host) {
+            $sockets[] = Server::listen($host . ':' . $port);
+        }
+
+        return $sockets;
+    }
+
+    private function buildTlsSockets(array $hosts, int $tlsPort, ServerTlsContext $context): array
+    {
+        $bindContext = (new BindContext())->withTlsContext($context);
+
+        $sockets = [];
+
+        foreach ($hosts as $host) {
+            $sockets[] = Server::listen($host . ':' . $tlsPort, $bindContext);
+        }
+
+        return $sockets;
+    }
+
+    private function handleMultiReasonException(callable $callable, string $exceptionClass = Exception::class): Promise
+    {
+        return call(function () use ($callable, $exceptionClass) {
             try {
-                yield $closure();
+                yield $callable();
             } catch (MultiReasonException $e) {
                 $reasons = $e->getReasons();
 
