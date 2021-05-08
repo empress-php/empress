@@ -4,6 +4,7 @@ namespace Empress\Test;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Application;
+use Empress\ConfigurationBuilder;
 use Empress\Test\Helper\StubServerTrait;
 use Psr\Log\LoggerInterface;
 
@@ -13,12 +14,14 @@ class ApplicationTest extends AsyncTestCase
 
     public function testCreate()
     {
-        $port = 1234;
         $logger = $this->createMock(LoggerInterface::class);
+        $configuration = (new ConfigurationBuilder())
+            ->withRequestLogger($logger)
+            ->build();
 
-        $app = Application::create($port, $logger);
+        $app = Application::create(1234, $configuration);
 
-        static::assertEquals($port, $app->getConfiguration()->getPort());
+        static::assertEquals(1234, $app->getPort());
         static::assertEquals($logger, $app->getConfiguration()->getRequestLogger());
     }
 
