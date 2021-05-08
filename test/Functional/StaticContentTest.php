@@ -5,6 +5,7 @@ namespace Empress\Test\Functional;
 use Amp\Http\Client\Response;
 use Empress\Application;
 use Empress\Configuration;
+use Empress\ConfigurationBuilder;
 use Empress\Routing\Routes;
 
 class StaticContentTest extends FunctionalTestCase
@@ -24,9 +25,11 @@ class StaticContentTest extends FunctionalTestCase
 
     protected function getApplication(): Application
     {
-        $config = Configuration::create()->withStaticContentPath(__DIR__ . '/Resources');
+        $configuration = (new ConfigurationBuilder())
+            ->withStaticContentPath(__DIR__ . '/Resources')
+            ->build();
 
-        $app = Application::create(1234, null, $config);
+        $app = Application::create(1234, $configuration);
 
         $app->routes(function (Routes $routes) {
             $routes->get('/', fn () => null);
