@@ -5,77 +5,66 @@ namespace Empress\Test;
 use Amp\Http\Server\Middleware;
 use Amp\Http\Server\Options;
 use Amp\Http\Server\Session\Storage;
-use Empress\Configuration;
+use Empress\ConfigurationBuilder;
 use PHPUnit\Framework\TestCase;
 
 class ConfigurationTest extends TestCase
 {
-    private Configuration $configuration;
+    private ConfigurationBuilder $builder;
 
     public function setUp(): void
     {
-        $this->configuration = new Configuration();
+        $this->builder = new ConfigurationBuilder();
     }
 
     public function testWithTls(): void
     {
-        static::assertNull($this->configuration->getTlsContext());
-        static::assertNull($this->configuration->getTlsPort());
+        $configuration = $this->builder
+            ->withTls('some.cert', 1024)
+            ->build();
 
-        $this->configuration->withTls('some.cert', 1024);
 
-        static::assertNotNull($this->configuration->getTlsContext());
-        static::assertEquals(1024, $this->configuration->getTlsPort());
+        static::assertNotNull($configuration->getTlsContext());
+        static::assertEquals(1024, $configuration->getTlsPort());
     }
 
     public function testWithStaticContentPath(): void
     {
-        static::assertNull($this->configuration->getStaticContentPath());
-        static::assertNull($this->configuration->getDocumentRootHandler());
+        $configuration = $this->builder
+            ->withStaticContentPath('/')
+            ->build();
 
-        $this->configuration->withStaticContentPath('/');
-
-        static::assertEquals('/', $this->configuration->getStaticContentPath());
-        static::assertNotNull($this->configuration->getDocumentRootHandler());
+        static::assertEquals('/', $configuration->getStaticContentPath());
+        static::assertNotNull($configuration->getDocumentRootHandler());
     }
 
     public function testWithMiddleware(): void
     {
-        static::assertEmpty($this->configuration->getMiddlewares());
-
         $middleware = $this->createMock(Middleware::class);
-        $this->configuration->withMiddleware($middleware);
-        $middlewares = $this->configuration->getMiddlewares();
+        $configuration = $this->builder
+            ->withMiddleware($middleware)
+            ->build();
+
+        $middlewares = $configuration->getMiddlewares();
 
         static::assertContains($middleware, $middlewares);
     }
 
     public function testWithSessionStorage(): void
     {
-        static::assertNotNull($this->configuration->getSessionStorage());
-
         $storage = $this->createMock(Storage::class);
-        $this->configuration->withSessionStorage($storage);
+        $configuration = $this->builder->withSessionStorage($storage)->build();
 
-        static::assertSame($storage, $this->configuration->getSessionStorage());
+        static::assertSame($storage, $configuration->getSessionStorage());
     }
 
     public function testWithServerOptions(): void
     {
-        static::assertNotNull($this->configuration->getServerOptions());
-
         $options = new Options();
-        $this->configuration->withServerOptions($options);
+        $configuration = $this->builder
+            ->withServerOptions($options)
+            ->build();
 
-        static::assertSame($options, $this->configuration->getServerOptions());
-    }
-
-    public function testWithPort(): void
-    {
-        static::assertNotNull($this->configuration->getPort());
-
-        $this->configuration->withPort(1234);
-
-        static::assertEquals(1234, $this->configuration->getPort());
+        static::assertSame($options, $configuration->getServerOptions());
     }
 }

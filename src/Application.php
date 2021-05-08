@@ -16,12 +16,13 @@ use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
 use Empress\Validation\Registry\DefaultValidatorRegistry;
 use Empress\Validation\Registry\ValidatorRegistry;
-use Psr\Log\LoggerInterface;
 use function Amp\call;
 
 final class Application implements ServerObserver
 {
     public function __construct(
+        private int $port,
+        private array $hosts,
         private Configuration $configuration,
         private ExceptionMapper $exceptionMapper,
         private StatusMapper $statusMapper,
@@ -32,17 +33,12 @@ final class Application implements ServerObserver
     ) {
     }
 
-    public static function create(int $port, ?LoggerInterface $requestLogger = null, Configuration $configuration = null): self
+    public static function create(int $port, Configuration $configuration = null, array $hosts = ['0.0.0.0', '[::]']): self
     {
-        $configuration ??= new Configuration();
-        $configuration->withPort($port);
-
-        if ($requestLogger !== null) {
-            $configuration->withRequestLogger($requestLogger);
-        }
-
         return new self(
-            $configuration,
+            $port,
+            $hosts,
+            $configuration ?? (new ConfigurationBuilder())->build(),
             new ExceptionMapper(),
             new StatusMapper(),
             new Routes(new HandlerCollection()),
@@ -99,6 +95,16 @@ final class Application implements ServerObserver
     public function getValidatorRegistry(): ValidatorRegistry
     {
         return $this->validatorRegistry;
+    }
+
+    public function getPort(): int
+    {
+        return $this->port;
+    }
+
+    public function getHosts(): array
+    {
+        return $this->hosts;
     }
 
     public function onServerStart(callable $callable): self
