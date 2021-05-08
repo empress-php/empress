@@ -2,12 +2,14 @@
 
 namespace Empress\Test;
 
+use Amp\ByteStream\InputStream;
 use Amp\Http\Cookie\RequestCookie;
 use Amp\Http\Cookie\ResponseCookie;
 use Amp\Http\Server\Response;
 use Amp\Http\Server\Session\Session;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
+use Amp\Success;
 use Empress\Context;
 use Empress\Routing\HaltException;
 use Empress\Test\Helper\SimpleForm;
@@ -76,6 +78,25 @@ class ContextTest extends AsyncTestCase
         $contents = yield $this->ctx->bufferedBody();
 
         static::assertEquals($body, $contents);
+    }
+
+    public function testValidatedBody(): \Generator
+    {
+        $requestBody = $this->createMock(InputStream::class);
+        $requestBody
+            ->expects(static::atLeastOnce())
+            ->method('read')
+            ->willReturnOnConsecutiveCalls(new Success('{"a":123,"b":456}'), new Success());
+
+        $this->ctx->getHttpServerRequest()->setBody($requestBody);
+
+        /** @var ValidationContext $validated */
+        $validated = yield $this->ctx->validatedBody();
+        $body = $validated
+            ->pass()
+            ->unwrap();
+
+        static::assertEquals('{"a":123,"b":456}', $body);
     }
 
     public function testValidatedForm(): Generator

@@ -4,7 +4,6 @@ namespace Empress\Test\Functional;
 
 use Amp\Http\Client\Response;
 use Empress\Application;
-use Empress\Configuration;
 use Empress\ConfigurationBuilder;
 use Empress\Routing\Routes;
 

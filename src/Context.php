@@ -122,6 +122,15 @@ class Context implements ArrayAccess
         return $this->request->getBody()->buffer();
     }
 
+    public function validatedBody(): Promise
+    {
+        return call(function () {
+            $buffered = yield $this->bufferedBody();
+
+            return $this->validatorRegistry->contextFor($buffered);
+        });
+    }
+
     /**
      * @see \Amp\Http\Server\FormParser\StreamingParser::parseForm
      */
