@@ -17,7 +17,6 @@ final class Configuration
 {
 
     /**
-     * Configuration constructor.
      * @param Middleware[] $middlewares
      * @param string[] $hosts
      */
