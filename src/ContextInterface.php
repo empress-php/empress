@@ -20,16 +20,6 @@ interface ContextInterface
 {
 
     /**
-     * @inheritDoc
-     */
-    public function offsetSet($offset, $value): void;
-
-    /**
-     * @inheritDoc
-     */
-    public function offsetUnset($offset): void;
-
-    /**
      * Returns request body.
      *
      * @return RequestBody
