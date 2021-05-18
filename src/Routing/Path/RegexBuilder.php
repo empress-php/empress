@@ -4,23 +4,15 @@ namespace Empress\Routing\Path;
 
 class RegexBuilder
 {
-    private string $regex;
-
-    public function __construct(Path $path)
+    public function __construct(private Path $path)
     {
-        $this->regex = $this->buildRegex($path);
     }
 
-    public function getRegex(): string
-    {
-        return $this->regex;
-    }
-
-    private function buildRegex(Path $path): string
+    public function buildRegex(): string
     {
         $regexParts = [];
 
-        foreach ($path->getParts() as $part) {
+        foreach ($this->path->getParts() as $part) {
             if ($part === '*') {
                 $regexParts[] = '([^/]*)';
             } elseif (\mb_strlen($part) > 1 && \mb_strpos($part, ':') !== false) {
