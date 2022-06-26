@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Helper;
 
 use Amp\Http\Server\FormParser\Form;
-use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Empress\Validation\Validator\ValidatorException;
 use Empress\Validation\Validator\ValidatorInterface;
 
-class SimpleFormValidator implements ValidatorInterface
+final class SimpleFormValidator implements ValidatorInterface
 {
-    public function __construct(private ValidatorRegistry $registry)
+    public function __construct(private ValidatorRegistryInterface $registry)
     {
     }
 

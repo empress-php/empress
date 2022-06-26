@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Validation\Validator;
 
-class FloatValidator implements ValidatorInterface
+final class FloatValidator implements ValidatorInterface
 {
     public function validate(mixed $value): float
     {
-        $filtered = \filter_var($value, FILTER_VALIDATE_FLOAT);
+        $filtered = \filter_var($value, \FILTER_VALIDATE_FLOAT);
 
         if ($filtered === false) {
             throw new ValidatorException(\sprintf(

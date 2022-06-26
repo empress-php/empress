@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Validation\Validator;
 
-class DateTimeValidator implements ValidatorInterface
+final class DateTimeValidator implements ValidatorInterface
 {
-    public function validate(mixed $value): \DateTime
+    public function validate(mixed $value): \DateTimeImmutable
     {
         try {
-            $dateTime = new \DateTime($value);
-        } catch (\Exception $e) {
+            $dateTime = new \DateTimeImmutable($value);
+        } catch (\Exception|\Error $e) {
             throw new ValidatorException($e->getMessage());
         }
 

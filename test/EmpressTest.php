@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test;
 
 use Amp\PHPUnit\AsyncTestCase;
@@ -7,7 +9,7 @@ use Empress\Application;
 use Empress\Empress;
 use Empress\Exception\StartupException;
 
-class EmpressTest extends AsyncTestCase
+final class EmpressTest extends AsyncTestCase
 {
     public function testBootNoRoutes(): \Generator
     {

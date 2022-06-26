@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Middleware;
 
 use Amp\Http\Server\Middleware;
@@ -13,9 +15,8 @@ use function Amp\call;
 /**
  * Middleware that adds additional response headers to each response.
  */
-class DefaultHeadersMiddleware implements Middleware
+final class DefaultHeadersMiddleware implements Middleware
 {
-
     /**
      * DefaultHeadersMiddleware constructor.
      *

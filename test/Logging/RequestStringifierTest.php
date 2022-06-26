@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Logging;
 
 use Amp\ByteStream\InMemoryStream;
@@ -8,7 +10,7 @@ use Amp\PHPUnit\AsyncTestCase;
 use Empress\Logging\RequestStringifier;
 use Empress\Logging\StringifierInterface;
 
-class RequestStringifierTest extends AsyncTestCase
+final class RequestStringifierTest extends AsyncTestCase
 {
     public function testStringify(): \Generator
     {
@@ -24,15 +26,15 @@ class RequestStringifierTest extends AsyncTestCase
         $requestStringifier = new RequestStringifier($method, $path, $headers, $requestBody, null);
         $stringified = yield $requestStringifier->stringify();
 
-        static::assertStringContainsString('/foo/bar', $stringified);
-        static::assertStringContainsString('GET', $stringified);
-        static::assertStringContainsString('X-Foo', $stringified);
-        static::assertStringContainsString('X-Bar', $stringified);
-        static::assertStringContainsString('!@#', $stringified);
-        static::assertStringContainsString('#$%', $stringified);
-        static::assertStringContainsString('abc', $stringified);
-        static::assertStringContainsString('def', $stringified);
-        static::assertStringContainsString('test', $stringified);
+        self::assertStringContainsString('/foo/bar', $stringified);
+        self::assertStringContainsString('GET', $stringified);
+        self::assertStringContainsString('X-Foo', $stringified);
+        self::assertStringContainsString('X-Bar', $stringified);
+        self::assertStringContainsString('!@#', $stringified);
+        self::assertStringContainsString('#$%', $stringified);
+        self::assertStringContainsString('abc', $stringified);
+        self::assertStringContainsString('def', $stringified);
+        self::assertStringContainsString('test', $stringified);
     }
 
     public function testLongRequestBody(): \Generator
@@ -43,6 +45,6 @@ class RequestStringifierTest extends AsyncTestCase
 
         $stringified = yield $requestStringifier->stringify();
 
-        static::assertMatchesRegularExpression('/Body: .*?\.\.\./', $stringified);
+        self::assertMatchesRegularExpression('/Body: .*?\.\.\./', $stringified);
     }
 }

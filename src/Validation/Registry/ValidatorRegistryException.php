@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Validation\Registry;
 
-class ValidatorRegistryException extends \Exception
+final class ValidatorRegistryException extends \Exception
 {
 }

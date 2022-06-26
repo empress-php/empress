@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Logging;
 
 use Amp\Http\Server\Request;
@@ -9,7 +11,7 @@ use Empress\Routing\Handler\HandlerCollection;
 use Psr\Log\LoggerInterface;
 use function Amp\call;
 
-class RequestLogger
+final class RequestLogger implements RequestLoggerInterface
 {
     public function __construct(private LoggerInterface $logger)
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Logging;
 
 use Amp\Http\Server\RequestBody;
@@ -9,7 +11,7 @@ use Empress\Routing\Handler\HandlerEntry;
 use Empress\Routing\Handler\HandlerType;
 use function Amp\call;
 
-class RequestStringifier extends BaseRequestResponseStringifier
+final class RequestStringifier extends BaseRequestResponseStringifier
 {
     public function __construct(
         private string $method,

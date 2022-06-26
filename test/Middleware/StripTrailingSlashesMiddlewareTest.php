@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Middleware;
 
 use Amp\Http\Server\RequestHandler;
@@ -11,52 +13,48 @@ use Empress\Test\Helper\MockRequestHandlerTrait;
 use Empress\Test\Helper\StubRequestTrait;
 use Generator;
 
-class StripTrailingSlashesMiddlewareTest extends AsyncTestCase
+final class StripTrailingSlashesMiddlewareTest extends AsyncTestCase
 {
     use MockRequestHandlerTrait;
     use StubRequestTrait;
 
-    public function testHandleRequestWithRootPath(): Generator
+    private StripTrailingSlashMiddleware $middleware;
+
+    protected function setUp(): void
     {
-        $request = $this->createStubRequest('GET', '/hello');
-        $middleware = new StripTrailingSlashMiddleware();
+        $this->middleware = new StripTrailingSlashMiddleware();
 
-        $mockRequestHandler = $this->createDefaultMockRequestHandler($request);
-
-        yield $middleware->handleRequest($request, $mockRequestHandler);
+        parent::setUp();
     }
 
     public function testHandleRequestWithNoTrailingSlash(): Generator
     {
         $request = $this->createStubRequest('GET', '/hello');
-        $middleware = new StripTrailingSlashMiddleware();
 
         $mockRequestHandler = $this->createDefaultMockRequestHandler($request);
 
-        yield $middleware->handleRequest($request, $mockRequestHandler);
+        yield $this->middleware->handleRequest($request, $mockRequestHandler);
     }
 
     public function testRedirectForGetRequest(): Generator
     {
         $request = $this->createStubRequest('GET', '/hello/');
         $requestHandler = $this->createMock(RequestHandler::class);
-        $middleware = new StripTrailingSlashMiddleware();
 
         /** @var Response $response */
-        $response = yield $middleware->handleRequest($request, $requestHandler);
+        $response = yield $this->middleware->handleRequest($request, $requestHandler);
 
-        static::assertEquals('//example.com:1234/hello', $response->getHeader('Location'));
-        static::assertEquals(Status::PERMANENT_REDIRECT, $response->getStatus());
+        self::assertSame('//example.com:1234/hello', $response->getHeader('Location'));
+        self::assertSame(Status::PERMANENT_REDIRECT, $response->getStatus());
     }
 
     public function testNoRedirectForPostRequest(): Generator
     {
         $request = $this->createStubRequest('POST', '/hello/');
         $requestHandler = $this->createDefaultMockRequestHandler($request);
-        $middleware = new StripTrailingSlashMiddleware();
 
-        yield $middleware->handleRequest($request, $requestHandler);
+        yield $this->middleware->handleRequest($request, $requestHandler);
 
-        static::assertEquals('/hello', $request->getUri()->getPath());
+        self::assertSame('/hello', $request->getUri()->getPath());
     }
 }

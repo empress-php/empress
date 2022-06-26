@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Validation;
 
 use Empress\Validation\Validator\ValidatorException;
@@ -7,7 +9,7 @@ use Empress\Validation\Validator\ValidatorInterface;
 use Empress\Validation\WrappedValue;
 use PHPUnit\Framework\TestCase;
 
-class WrappedValueTest extends TestCase
+final class WrappedValueTest extends TestCase
 {
     public function testSuccessfulUnwrap(): void
     {
@@ -19,7 +21,7 @@ class WrappedValueTest extends TestCase
 
         $wrappedValue = new WrappedValue($value, $validator);
 
-        static::assertEquals($value, $wrappedValue->unwrap());
+        self::assertSame($value, $wrappedValue->unwrap());
     }
 
     public function testFailedUnwrap(): void
@@ -45,7 +47,7 @@ class WrappedValueTest extends TestCase
 
         $wrappedValue = new WrappedValue('abc', $validator);
 
-        static::assertNull($wrappedValue->unwrapOrNull());
+        self::assertNull($wrappedValue->unwrapOrNull());
     }
 
     public function testUnwrapOr(): void
@@ -57,7 +59,7 @@ class WrappedValueTest extends TestCase
 
         $wrappedValue = new WrappedValue(null, $validator);
 
-        static::assertEquals(10, $wrappedValue->unwrapOr(10));
+        self::assertSame(10, $wrappedValue->unwrapOr(10));
     }
 
     public function testUnwrapOrThrow(): void
@@ -85,9 +87,9 @@ class WrappedValueTest extends TestCase
 
         $wrappedValue = new WrappedValue(null, $validator);
 
-        $wrappedValue->unwrapOrFn(function (mixed $value, \Throwable $e) use ($exception) {
+        $wrappedValue->unwrapOrFn(function (mixed $value, \Throwable $e) use ($exception): void {
             static::assertNull($value);
-            static::assertEquals($exception, $e);
+            static::assertSame($exception, $e);
         });
     }
 
@@ -105,7 +107,7 @@ class WrappedValueTest extends TestCase
             ->check(fn ($value) => $value === $i)
             ->unwrap();
 
-        static::assertEquals($i, $value);
+        self::assertSame($i, $value);
     }
 
     public function testFailedCheck(): void
@@ -138,7 +140,7 @@ class WrappedValueTest extends TestCase
             ->check(fn ($value) => !\is_float($value))
             ->unwrap();
 
-        static::assertEquals($i, $value);
+        self::assertSame($i, $value);
     }
 
     public function testMultipleFailedChecks(): void
@@ -156,13 +158,13 @@ class WrappedValueTest extends TestCase
             ->check(fn ($value) => $value > 10, '1')
             ->check(fn ($value) => $value < 1, '2')
             ->check(fn ($value) => \is_float($value), '3')
-            ->unwrapOrFn(function (mixed $_, ValidatorException $e) {
+            ->unwrapOrFn(function (mixed $_, ValidatorException $e): void {
                 $exceptions = $e->getExceptions();
 
                 static::assertNotEmpty($exceptions);
-                static::assertEquals('1', $exceptions[0]->getMessage());
-                static::assertEquals('2', $exceptions[1]->getMessage());
-                static::assertEquals('3', $exceptions[2]->getMessage());
+                static::assertSame('1', $exceptions[0]->getMessage());
+                static::assertSame('2', $exceptions[1]->getMessage());
+                static::assertSame('3', $exceptions[2]->getMessage());
             });
     }
 }

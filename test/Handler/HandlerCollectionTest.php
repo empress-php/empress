@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Handler;
 
 use Empress\Routing\Handler\HandlerCollection;
@@ -8,7 +10,7 @@ use Empress\Routing\Handler\HandlerType;
 use Empress\Routing\Path\Path;
 use PHPUnit\Framework\TestCase;
 
-class HandlerCollectionTest extends TestCase
+final class HandlerCollectionTest extends TestCase
 {
     public function testAddHandler(): void
     {
@@ -17,7 +19,7 @@ class HandlerCollectionTest extends TestCase
         $collection = new HandlerCollection();
         $collection->add($entry);
 
-        static::assertEquals(
+        self::assertSame(
             $entry,
             $collection
                 ->filterByPath('/')
@@ -35,11 +37,11 @@ class HandlerCollectionTest extends TestCase
 
         $collection = new HandlerCollection($entries);
 
-        static::assertEquals(2, $collection->filterByPath('/')->count());
+        self::assertSame(2, $collection->filterByPath('/')->count());
 
         $collection->add($this->createHandlerEntry(HandlerType::DELETE, '/'));
 
-        static::assertEquals(3, $collection->filterByPath('/')->count());
+        self::assertSame(3, $collection->filterByPath('/')->count());
     }
 
     public function testFilterByType(): void
@@ -55,31 +57,31 @@ class HandlerCollectionTest extends TestCase
 
         $collection = new HandlerCollection($entries);
 
-        static::assertEquals(3, $collection->filterByType(HandlerType::GET)->count());
-        static::assertEquals(2, $collection->filterByType(HandlerType::POST)->count());
-        static::assertEquals(1, $collection->filterByType(HandlerType::PATCH)->count());
+        self::assertSame(3, $collection->filterByType(HandlerType::GET)->count());
+        self::assertSame(2, $collection->filterByType(HandlerType::POST)->count());
+        self::assertSame(1, $collection->filterByType(HandlerType::PATCH)->count());
     }
 
     public function testFirst(): void
     {
         $collection = new HandlerCollection();
 
-        static::assertNull($collection->first());
+        self::assertNull($collection->first());
 
         $collection->add($this->createHandlerEntry(HandlerType::GET, '/'));
 
-        static::assertNotNull($collection->first());
+        self::assertNotNull($collection->first());
     }
 
     public function testCount(): void
     {
         $collection = new HandlerCollection([]);
 
-        static::assertEquals(0, $collection->count());
+        self::assertSame(0, $collection->count());
 
         $collection->add($this->createHandlerEntry(HandlerType::GET, '/'));
 
-        static::assertEquals(1, $collection->count());
+        self::assertSame(1, $collection->count());
     }
 
     private function createHandlerEntry(int $type, string $path, ?callable $handler = null): HandlerEntry

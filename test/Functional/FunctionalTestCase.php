@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Functional;
 
 use Amp\Http\Client\Cookie\CookieInterceptor;

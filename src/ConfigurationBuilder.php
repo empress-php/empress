@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress;
 
 use Amp\Http\Server\Middleware;
@@ -12,11 +14,9 @@ use Psr\Log\LoggerInterface;
 
 final class ConfigurationBuilder
 {
-
     /**
      * @var Middleware[]
      */
-
     private array $middlewares = [];
 
     private Options $options;

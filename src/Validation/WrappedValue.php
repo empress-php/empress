@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Validation;
 
 use Empress\Validation\Validator\ValidatorException;
@@ -9,9 +11,8 @@ use Empress\Validation\Validator\ValidatorInterface;
  * @template T
  * @template U
  */
-class WrappedValue
+final class WrappedValue
 {
-
     /**
      * @var array<array{callback: callable, message: string}>
      */
@@ -107,8 +108,6 @@ class WrappedValue
 
     /**
      * @param callable(U): bool $callback
-     * @param string $message
-     * @return static
      */
     public function check(callable $callback, string $message = ''): static
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Logging;
 
 use Amp\ByteStream\OutputStream;
@@ -7,7 +9,7 @@ use Amp\Log\ConsoleFormatter;
 use Amp\Log\StreamHandler;
 use Monolog\Logger;
 
-class DefaultLogger extends Logger
+final class DefaultLogger extends Logger
 {
     public function __construct(string $name, OutputStream $outputStream)
     {

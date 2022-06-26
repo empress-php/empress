@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Middleware;
 
 use Amp\Http\Server\Middleware;
@@ -10,7 +12,7 @@ use Amp\Http\Status;
 use Amp\Promise;
 use function Amp\call;
 
-class StripTrailingSlashMiddleware implements Middleware
+final class StripTrailingSlashMiddleware implements Middleware
 {
     public function handleRequest(Request $request, RequestHandler $requestHandler): Promise
     {

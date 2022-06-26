@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Validation\Validator;
 
-class ValidatorException extends \Exception
+final class ValidatorException extends \Exception
 {
     public function __construct(string $message = '', private array $exceptions = [])
     {
@@ -14,7 +16,7 @@ class ValidatorException extends \Exception
      */
     public static function collect(array $exceptions): static
     {
-        return new static('Validation errors', $exceptions);
+        return new self('Validation errors', $exceptions);
     }
 
     /**

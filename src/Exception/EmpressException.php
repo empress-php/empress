@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Exception;
 
 /** @codeCoverageIgnore */
-class EmpressException extends \Exception
+abstract class EmpressException extends \Exception
 {
 }

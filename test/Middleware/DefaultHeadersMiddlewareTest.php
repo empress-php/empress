@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Middleware;
 
 use Amp\Http\Server\RequestHandler\CallableRequestHandler;
@@ -9,7 +11,7 @@ use Empress\Middleware\DefaultHeadersMiddleware;
 use Empress\Test\Helper\StubRequestTrait;
 use Generator;
 
-class DefaultHeadersMiddlewareTest extends AsyncTestCase
+final class DefaultHeadersMiddlewareTest extends AsyncTestCase
 {
     use StubRequestTrait;
 
@@ -28,8 +30,8 @@ class DefaultHeadersMiddlewareTest extends AsyncTestCase
         $response = yield $middleware->handleRequest($request, $handler);
 
         foreach ($headers as $name => $value) {
-            static::assertNotContains($name, $response->getHeaders());
-            static::assertEquals($value, $response->getHeader($name));
+            self::assertNotContains($name, $response->getHeaders());
+            self::assertSame($value, $response->getHeader($name));
         }
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Functional;
 
 use Amp\Http\Client\Response;
@@ -8,7 +10,7 @@ use Empress\Application;
 use Empress\Context;
 use Empress\Routing\Routes;
 
-class ExceptionHandlersTest extends FunctionalTestCase
+final class ExceptionHandlersTest extends FunctionalTestCase
 {
     private const PORT = 1234;
 
@@ -21,9 +23,9 @@ class ExceptionHandlersTest extends FunctionalTestCase
         $body = yield $response->getBody()->buffer();
         $json = \json_decode($body, true);
 
-        static::assertEquals([
+        self::assertSame([
             'status' => Status::INTERNAL_SERVER_ERROR,
-            'message' => 'An exception happened'
+            'message' => 'An exception happened',
         ], $json);
     }
 
@@ -31,15 +33,15 @@ class ExceptionHandlersTest extends FunctionalTestCase
     {
         $app = Application::create(self::PORT);
 
-        $app->exception(\Exception::class, function (Context $ctx, \Exception $e) {
+        $app->exception(\Exception::class, function (Context $ctx, \Exception $e): void {
             $ctx->json([
                 'status' => Status::INTERNAL_SERVER_ERROR,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
         });
 
-        $app->routes(function (Routes $routes) {
-            $routes->get('/', function () {
+        $app->routes(function (Routes $routes): void {
+            $routes->get('/', function (): void {
                 throw new \Exception('An exception happened');
             });
         });

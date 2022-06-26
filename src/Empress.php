@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress;
 
 use Amp\Http\Server\HttpServer;
@@ -18,7 +20,7 @@ use function Amp\ByteStream\getStdout;
 use function Amp\call;
 use function Amp\Http\Server\Middleware\stack;
 
-class Empress
+final class Empress
 {
     private HttpServer $server;
 
@@ -126,12 +128,10 @@ class Empress
                     throw new $exceptionClass($reason->getMessage(), $reason->getCode(), $reason);
                 }
 
-                $messages = \array_map(function (Throwable $reason) {
-                    return $reason->getMessage();
-                }, $reasons);
+                $messages = \array_map(fn (Throwable $reason) => $reason->getMessage(), $reasons);
 
                 /** @psalm-suppress InvalidThrow */
-                throw new $exceptionClass(\implode(PHP_EOL, $messages));
+                throw new $exceptionClass(\implode(\PHP_EOL, $messages));
             }
         });
     }

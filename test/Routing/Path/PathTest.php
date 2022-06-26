@@ -1,26 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Routing\Path;
 
 use Empress\Routing\Path\Path;
 use PHPUnit\Framework\TestCase;
 
-class PathTest extends TestCase
+final class PathTest extends TestCase
 {
     public function testNewPath(): void
     {
         $path = new Path('/');
 
-        static::assertEquals('/', (string) $path);
+        self::assertSame('/', (string) $path);
     }
 
     public function testToSegments(): void
     {
         $path = new Path('/hello/world');
 
-        static::assertEquals([
+        self::assertSame([
             'hello',
-            'world'
+            'world',
         ], $path->getParts());
     }
 
@@ -28,10 +30,10 @@ class PathTest extends TestCase
     {
         $path = new Path('/hello//:world/*');
 
-        static::assertEquals([
+        self::assertSame([
             'hello',
             ':world',
-            '*'
+            '*',
         ], $path->getParts());
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing;
 
 use Amp\Failure;
@@ -15,20 +17,21 @@ use Amp\Promise;
 use Amp\Success;
 use Empress\Context;
 use Empress\Internal\ContextInjector;
-use Empress\Logging\RequestLogger;
+use Empress\Logging\RequestLoggerInterface;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
 use Empress\Routing\Handler\HandlerType;
 use Empress\Routing\Status\StatusMapper;
-use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Error;
 use Throwable;
 use function Amp\call;
 
-class Router implements RequestHandler, ServerObserver
+final class Router implements RequestHandler, ServerObserver
 {
     public const NAMED_PARAMS_ATTR_NAME = self::class . '_namedParams';
+
     public const WILDCARDS_ATTR_NAME = self::class . '_wildcards';
 
     private bool $running = false;
@@ -41,8 +44,8 @@ class Router implements RequestHandler, ServerObserver
         private ExceptionMapper $exceptionMapper,
         private StatusMapper $statusMapper,
         private HandlerCollection $handlerCollection,
-        private ValidatorRegistry $validatorRegistry,
-        private ?RequestLogger $requestLogger = null
+        private ValidatorRegistryInterface $validatorRegistry,
+        private ?RequestLoggerInterface $requestLogger = null
     ) {
     }
 
@@ -75,7 +78,6 @@ class Router implements RequestHandler, ServerObserver
 
         return $this->dispatch($request, $handlerEntry, $filteredByPath, $path);
     }
-
 
     public function setFallback(DocumentRoot $requestHandler): void
     {

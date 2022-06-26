@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\Handler;
 
 use ArrayIterator;
 use IteratorAggregate;
 use Traversable;
 
-class HandlerCollection implements IteratorAggregate
+final class HandlerCollection implements HandlerCollectionInterface, IteratorAggregate
 {
     public function __construct(private array $entries = [])
     {
@@ -25,7 +27,7 @@ class HandlerCollection implements IteratorAggregate
             return $matcher->matches($path);
         });
 
-        return new static($entries);
+        return new self($entries);
     }
 
     public function filterByType(int $type): static
@@ -47,13 +49,18 @@ class HandlerCollection implements IteratorAggregate
         return \count($this->entries);
     }
 
-    public function merge(HandlerCollection $handlerCollection): HandlerCollection
+    public function merge(HandlerCollectionInterface $handlerCollection): self
     {
-        return new static(\array_merge($this->entries, $handlerCollection->entries));
+        return new static(\array_merge($this->entries, $handlerCollection->getEntries()));
     }
 
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->entries);
+    }
+
+    public function getEntries(): array
+    {
+        return $this->entries;
     }
 }

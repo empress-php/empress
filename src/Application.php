@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress;
 
 use Amp\Http\Server\Server;
@@ -15,7 +17,7 @@ use Empress\Routing\Routes;
 use Empress\Routing\Status\StatusHandler;
 use Empress\Routing\Status\StatusMapper;
 use Empress\Validation\Registry\DefaultValidatorRegistry;
-use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistryInterface;
 use function Amp\call;
 
 final class Application implements ServerObserver
@@ -27,13 +29,13 @@ final class Application implements ServerObserver
         private ExceptionMapper $exceptionMapper,
         private StatusMapper $statusMapper,
         private Routes $routes,
-        private ValidatorRegistry $validatorRegistry,
+        private ValidatorRegistryInterface $validatorRegistry,
         private $onServerStart = null,
         private $onServerStop = null
     ) {
     }
 
-    public static function create(int $port, Configuration $configuration = null, array $hosts = ['0.0.0.0', '[::]']): self
+    public static function create(int $port, ?Configuration $configuration = null, array $hosts = ['0.0.0.0', '[::]']): self
     {
         return new self(
             $port,
@@ -92,7 +94,7 @@ final class Application implements ServerObserver
         return $this->configuration;
     }
 
-    public function getValidatorRegistry(): ValidatorRegistry
+    public function getValidatorRegistry(): ValidatorRegistryInterface
     {
         return $this->validatorRegistry;
     }

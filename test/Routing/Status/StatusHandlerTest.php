@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Routing\Status;
 
 use Amp\Http\Status;
@@ -7,7 +9,7 @@ use Empress\Routing\Status\StatusHandler;
 use Empress\Test\Helper\StubRequestTrait;
 use PHPUnit\Framework\TestCase;
 
-class StatusHandlerTest extends TestCase
+final class StatusHandlerTest extends TestCase
 {
     use StubRequestTrait;
 
@@ -18,13 +20,13 @@ class StatusHandlerTest extends TestCase
             'X-Custom-2' => 'bar',
         ];
 
-        $statusHandler = new StatusHandler(function () {
+        $statusHandler = new StatusHandler(function (): void {
         }, Status::OK, $headers);
 
         $request = $this->createStubRequest();
         $request->setHeaders($headers);
 
-        static::assertTrue($statusHandler->satisfiesHeaders($request));
+        self::assertTrue($statusHandler->satisfiesHeaders($request));
     }
 
     public function testDoesNotSatisfyEmptyHeaderArray(): void
@@ -36,14 +38,14 @@ class StatusHandlerTest extends TestCase
 
         $request = $this->createStubRequest();
 
-        static::assertFalse($statusHandler->satisfiesHeaders($request));
+        self::assertFalse($statusHandler->satisfiesHeaders($request));
     }
 
     public function testGetStatus(): void
     {
         $handler = new StatusHandler(fn () => null, Status::NOT_FOUND);
 
-        static::assertEquals(Status::NOT_FOUND, $handler->getStatus());
+        self::assertSame(Status::NOT_FOUND, $handler->getStatus());
     }
 
     public function testGetHeaders(): void
@@ -52,25 +54,27 @@ class StatusHandlerTest extends TestCase
             'X-Custom' => 'Foo',
         ]);
 
-        static::assertEquals([
+        self::assertSame([
             'X-Custom' => 'Foo',
         ], $handler->getHeaders());
     }
 
     public function testHasHeaders(): void
     {
-        $handler = new StatusHandler(function () {}, Status::NOT_FOUND, [
+        $handler = new StatusHandler(function (): void {
+        }, Status::NOT_FOUND, [
             'X-Custom' => 'Foo',
         ]);
 
-        static::assertTrue($handler->hasHeaders());
+        self::assertTrue($handler->hasHeaders());
     }
 
     public function testHasNoHeaders(): void
     {
-        $handler = new StatusHandler(function () {}, Status::NOT_FOUND);
+        $handler = new StatusHandler(function (): void {
+        }, Status::NOT_FOUND);
 
-        static::assertFalse($handler->hasHeaders());
+        self::assertFalse($handler->hasHeaders());
     }
 
     public function testGetCallable(): void
@@ -78,6 +82,6 @@ class StatusHandlerTest extends TestCase
         $closure = fn () => 1;
         $handler = new StatusHandler($closure, Status::NOT_FOUND);
 
-        static::assertEquals($closure(), ($handler->getCallable())());
+        self::assertSame($closure(), ($handler->getCallable())());
     }
 }

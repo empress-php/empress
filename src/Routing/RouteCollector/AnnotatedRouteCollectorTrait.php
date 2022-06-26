@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\RouteCollector;
 
 use Empress\Routing\Handler\HandlerType;
@@ -14,7 +16,7 @@ trait AnnotatedRouteCollectorTrait
 {
     public function __invoke(Routes $routes): void
     {
-        $processRoutes = function (Routes $routes, array $methods) {
+        $processRoutes = function (Routes $routes, array $methods): void {
             foreach ($methods as $method) {
                 $attributes = $method->getAttributes(Route::class);
 

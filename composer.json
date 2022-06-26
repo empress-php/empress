@@ -7,8 +7,8 @@
         "bin/empress"
     ],
     "require": {
-        "php": "^8.0",
-        "amphp/amp": "^2.5",
+        "php": "^8.1",
+        "amphp/amp": "^2.6",
         "amphp/http-server": "^2.1",
         "monolog/monolog": "^1.24",
         "amphp/log": "^1.1",
@@ -19,7 +19,7 @@
         "cash/lrucache": "^1.0",
         "ext-mbstring": "*",
         "amphp/byte-stream": "^1.8",
-        "amphp/socket": "^1.1"
+        "amphp/socket": "^1.2"
     },
     "autoload": {
         "psr-4": {
@@ -35,11 +35,10 @@
         "psy/psysh": "^0.9.9",
         "phpunit/phpunit": "^9.5.4",
         "amphp/phpunit-util": "^1.1",
-        "amphp/php-cs-fixer-config": "dev-master",
         "php-coveralls/php-coveralls": "^2.2",
         "vimeo/psalm": "^4.7",
-        "friendsofphp/php-cs-fixer": "^2.18",
         "amphp/http-client": "^4.5",
-        "amphp/http-client-cookies": "^1.1"
+        "amphp/http-client-cookies": "^1.1",
+        "symplify/easy-coding-standard": "^11.0"
     }
 }

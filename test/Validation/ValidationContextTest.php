@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Validation;
 
-use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Empress\Validation\ValidationContext;
 use Empress\Validation\Validator\NoopValidator;
 use Empress\Validation\Validator\ValidatorInterface;
 use PHPUnit\Framework\TestCase;
 
-class ValidationContextTest extends TestCase
+final class ValidationContextTest extends TestCase
 {
     public function testCorrectValidatorIsChosen(): void
     {
         $validator = $this->createMock(ValidatorInterface::class);
-        $registry = $this->createMock(ValidatorRegistry::class);
+        $registry = $this->createMock(ValidatorRegistryInterface::class);
         $registry
-            ->expects(static::once())
+            ->expects(self::once())
             ->method('get')
             ->with('validator')
             ->willReturn($validator);
@@ -27,17 +29,17 @@ class ValidationContextTest extends TestCase
 
     public function testUnsafeUnwrap(): void
     {
-        $registry = $this->createMock(ValidatorRegistry::class);
+        $registry = $this->createMock(ValidatorRegistryInterface::class);
         $context = new ValidationContext('abc', $registry);
 
-        static::assertEquals('abc', $context->unsafeUnwrap());
+        self::assertSame('abc', $context->unsafeUnwrap());
     }
 
     public function testPass(): void
     {
-        $registry = $this->createMock(ValidatorRegistry::class);
+        $registry = $this->createMock(ValidatorRegistryInterface::class);
         $registry
-            ->expects(static::once())
+            ->expects(self::once())
             ->method('get')
             ->with(NoopValidator::class);
 
