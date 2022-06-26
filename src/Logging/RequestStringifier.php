@@ -8,7 +8,6 @@ use Amp\Http\Server\RequestBody;
 use Amp\Promise;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
-use Empress\Routing\Handler\HandlerType;
 use function Amp\call;
 
 final class RequestStringifier extends BaseRequestResponseStringifier
@@ -45,7 +44,7 @@ final class RequestStringifier extends BaseRequestResponseStringifier
                 foreach ($this->handlerCollection as $handler) {
                     $buffer .= \sprintf(
                         "\t%s [%s]\n",
-                        HandlerType::toString($handler->getType()),
+                        $handler->getType()->value,
                         (string) $handler->getPath()
                     );
                 }

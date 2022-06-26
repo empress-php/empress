@@ -16,7 +16,7 @@ use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerCollectionInterface;
 use Empress\Routing\Handler\HandlerEntry;
-use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Handler\HandlerTypeEnum;
 use Empress\Routing\Path\Path;
 use Empress\Routing\Router;
 use Empress\Routing\Status\StatusHandler;
@@ -71,7 +71,7 @@ final class RouterTest extends AsyncTestCase
 
     public function testHandleRequest(): \Generator
     {
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), function (Context $ctx): void {
             $ctx->html('<h1>Hello World!</h1>');
         }));
 
@@ -89,7 +89,7 @@ final class RouterTest extends AsyncTestCase
 
     public function testHandleNotFound(): \Generator
     {
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), fn () => null));
 
         $router = new Router($this->exceptionMapper, $this->statusMapper, $this->collection, $this->validatorRegistry);
 
@@ -105,7 +105,7 @@ final class RouterTest extends AsyncTestCase
 
     public function testHandleMethodNotAllowed(): \Generator
     {
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), fn () => null));
 
         $router = new Router($this->exceptionMapper, $this->statusMapper, $this->collection, $this->validatorRegistry);
 
@@ -125,7 +125,7 @@ final class RouterTest extends AsyncTestCase
             $ctx->status(Status::BAD_REQUEST);
         }, InvalidArgumentException::class));
 
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), function (): void {
             throw new InvalidArgumentException('Inv4lid');
         }));
 
@@ -146,7 +146,7 @@ final class RouterTest extends AsyncTestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Inv4lid');
 
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), function (): void {
             throw new InvalidArgumentException('Inv4lid');
         }));
 
@@ -161,7 +161,7 @@ final class RouterTest extends AsyncTestCase
 
     public function testWithHalt(): \Generator
     {
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), function (Context $ctx): void {
             $ctx->halt(Status::NOT_FOUND, 'Not found :(');
         }));
 
@@ -185,7 +185,7 @@ final class RouterTest extends AsyncTestCase
             Status::INTERNAL_SERVER_ERROR
         ));
 
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), function (Context $ctx): void {
             $ctx->status(Status::INTERNAL_SERVER_ERROR);
         }));
 
@@ -204,11 +204,11 @@ final class RouterTest extends AsyncTestCase
 
     public function testWithBefore(): \Generator
     {
-        $this->collection->add(new HandlerEntry(HandlerType::BEFORE, new Path('/'), function (Context $ctx): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::BEFORE, new Path('/'), function (Context $ctx): void {
             $ctx->status(Status::BAD_REQUEST);
         }));
 
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), function (Context $ctx): void {
             $ctx->response('Hello');
         }));
 
@@ -227,11 +227,11 @@ final class RouterTest extends AsyncTestCase
 
     public function testWithAfter(): \Generator
     {
-        $this->collection->add(new HandlerEntry(HandlerType::AFTER, new Path('/'), function (Context $ctx): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::AFTER, new Path('/'), function (Context $ctx): void {
             $ctx->status(Status::BAD_REQUEST);
         }));
 
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), function (Context $ctx): void {
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), function (Context $ctx): void {
             $ctx->response('Hello');
         }));
 
@@ -264,7 +264,7 @@ final class RouterTest extends AsyncTestCase
 
     public function testDebugInfoIsLogged(): \Generator
     {
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), fn () => null));
 
         $request = $this->createStubRequest();
 
@@ -284,7 +284,7 @@ final class RouterTest extends AsyncTestCase
 
     public function testDebugInfoIsLoggedOnError(): \Generator
     {
-        $this->collection->add(new HandlerEntry(HandlerType::GET, new Path('/'), fn () => null));
+        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), fn () => null));
 
         $request = $this->createStubRequest('POST');
 

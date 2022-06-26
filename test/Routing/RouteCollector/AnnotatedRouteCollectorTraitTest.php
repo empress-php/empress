@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Empress\Test\Routing\RouteCollector;
 
 use Empress\Application;
-use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Handler\HandlerTypeEnum;
 use Empress\Routing\RouteCollector\AnnotatedRouteCollectorTrait;
 use Empress\Routing\RouteCollector\Attribute\Group;
 use Empress\Routing\RouteCollector\Attribute\Route;
@@ -32,7 +32,7 @@ final class AnnotatedRouteCollectorTraitTest extends TestCase
             $collection = $routes->getHandlerCollection();
             $entry = $collection->first();
 
-            self::assertSame(HandlerType::GET, $entry?->getType());
+            self::assertSame(HandlerTypeEnum::GET, $entry?->getType());
             self::assertSame('/', (string) $entry?->getPath());
         });
     }
@@ -58,7 +58,7 @@ final class AnnotatedRouteCollectorTraitTest extends TestCase
 
             self::assertSame(
                 2,
-                $collection->filterByType(HandlerType::GET)->count()
+                $collection->filterByType(HandlerTypeEnum::GET)->count()
             );
 
             self::assertSame(

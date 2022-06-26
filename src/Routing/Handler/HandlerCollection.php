@@ -30,11 +30,11 @@ final class HandlerCollection implements HandlerCollectionInterface, IteratorAgg
         return new self($entries);
     }
 
-    public function filterByType(int $type): static
+    public function filterByType(HandlerTypeEnum $type): static
     {
         $entries = \array_filter($this->entries, fn (HandlerEntry $entry) => $entry->getType() === $type);
 
-        return new static($entries);
+        return new self($entries);
     }
 
     public function first(): ?HandlerEntry
@@ -51,7 +51,7 @@ final class HandlerCollection implements HandlerCollectionInterface, IteratorAgg
 
     public function merge(HandlerCollectionInterface $handlerCollection): self
     {
-        return new static(\array_merge($this->entries, $handlerCollection->getEntries()));
+        return new self(\array_merge($this->entries, $handlerCollection->getEntries()));
     }
 
     public function getIterator(): Traversable

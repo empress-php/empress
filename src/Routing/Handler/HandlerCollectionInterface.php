@@ -10,7 +10,7 @@ interface HandlerCollectionInterface
 
     public function filterByPath(string $path): static;
 
-    public function filterByType(int $type): static;
+    public function filterByType(HandlerTypeEnum $type): static;
 
     public function first(): ?HandlerEntry;
 

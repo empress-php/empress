@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Empress\Routing\RouteCollector;
 
-use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Handler\HandlerTypeEnum;
 use Empress\Routing\RouteCollector\Attribute\Group;
 use Empress\Routing\RouteCollector\Attribute\Route;
 use Empress\Routing\Routes;
@@ -24,7 +24,7 @@ trait AnnotatedRouteCollectorTrait
 
                     /** @var Route $attributeInstance */
                     $attributeInstance = $attribute->newInstance();
-                    $type = HandlerType::fromString($attributeInstance->getType());
+                    $type = HandlerTypeEnum::from($attributeInstance->getType());
 
                     $routes->addEntry($type, $attributeInstance->getPath(), $method->getClosure($this));
                 }

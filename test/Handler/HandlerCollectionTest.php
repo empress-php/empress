@@ -6,7 +6,7 @@ namespace Empress\Test\Handler;
 
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
-use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Handler\HandlerTypeEnum;
 use Empress\Routing\Path\Path;
 use PHPUnit\Framework\TestCase;
 
@@ -14,7 +14,7 @@ final class HandlerCollectionTest extends TestCase
 {
     public function testAddHandler(): void
     {
-        $entry = $this->createHandlerEntry(HandlerType::GET, '/');
+        $entry = $this->createHandlerEntry(HandlerTypeEnum::GET, '/');
 
         $collection = new HandlerCollection();
         $collection->add($entry);
@@ -23,7 +23,7 @@ final class HandlerCollectionTest extends TestCase
             $entry,
             $collection
                 ->filterByPath('/')
-                ->filterByType(HandlerType::GET)
+                ->filterByType(HandlerTypeEnum::GET)
                 ->first()
         );
     }
@@ -31,15 +31,15 @@ final class HandlerCollectionTest extends TestCase
     public function testFindByPath(): void
     {
         $entries = [
-            $this->createHandlerEntry(HandlerType::GET, '/'),
-            $this->createHandlerEntry(HandlerType::POST, '/'),
+            $this->createHandlerEntry(HandlerTypeEnum::GET, '/'),
+            $this->createHandlerEntry(HandlerTypeEnum::POST, '/'),
         ];
 
         $collection = new HandlerCollection($entries);
 
         self::assertSame(2, $collection->filterByPath('/')->count());
 
-        $collection->add($this->createHandlerEntry(HandlerType::DELETE, '/'));
+        $collection->add($this->createHandlerEntry(HandlerTypeEnum::DELETE, '/'));
 
         self::assertSame(3, $collection->filterByPath('/')->count());
     }
@@ -47,19 +47,19 @@ final class HandlerCollectionTest extends TestCase
     public function testFilterByType(): void
     {
         $entries = [
-            $this->createHandlerEntry(HandlerType::GET, '/'),
-            $this->createHandlerEntry(HandlerType::GET, '/hello'),
-            $this->createHandlerEntry(HandlerType::GET, '/foo'),
-            $this->createHandlerEntry(HandlerType::POST, '/baz'),
-            $this->createHandlerEntry(HandlerType::POST, '/bar'),
-            $this->createHandlerEntry(HandlerType::PATCH, '/xyz'),
+            $this->createHandlerEntry(HandlerTypeEnum::GET, '/'),
+            $this->createHandlerEntry(HandlerTypeEnum::GET, '/hello'),
+            $this->createHandlerEntry(HandlerTypeEnum::GET, '/foo'),
+            $this->createHandlerEntry(HandlerTypeEnum::POST, '/baz'),
+            $this->createHandlerEntry(HandlerTypeEnum::POST, '/bar'),
+            $this->createHandlerEntry(HandlerTypeEnum::PATCH, '/xyz'),
         ];
 
         $collection = new HandlerCollection($entries);
 
-        self::assertSame(3, $collection->filterByType(HandlerType::GET)->count());
-        self::assertSame(2, $collection->filterByType(HandlerType::POST)->count());
-        self::assertSame(1, $collection->filterByType(HandlerType::PATCH)->count());
+        self::assertSame(3, $collection->filterByType(HandlerTypeEnum::GET)->count());
+        self::assertSame(2, $collection->filterByType(HandlerTypeEnum::POST)->count());
+        self::assertSame(1, $collection->filterByType(HandlerTypeEnum::PATCH)->count());
     }
 
     public function testFirst(): void
@@ -68,7 +68,7 @@ final class HandlerCollectionTest extends TestCase
 
         self::assertNull($collection->first());
 
-        $collection->add($this->createHandlerEntry(HandlerType::GET, '/'));
+        $collection->add($this->createHandlerEntry(HandlerTypeEnum::GET, '/'));
 
         self::assertNotNull($collection->first());
     }
@@ -79,12 +79,12 @@ final class HandlerCollectionTest extends TestCase
 
         self::assertSame(0, $collection->count());
 
-        $collection->add($this->createHandlerEntry(HandlerType::GET, '/'));
+        $collection->add($this->createHandlerEntry(HandlerTypeEnum::GET, '/'));
 
         self::assertSame(1, $collection->count());
     }
 
-    private function createHandlerEntry(int $type, string $path, ?callable $handler = null): HandlerEntry
+    private function createHandlerEntry(HandlerTypeEnum $type, string $path, ?callable $handler = null): HandlerEntry
     {
         return new HandlerEntry($type, new Path($path), $handler ?? fn () => null);
     }
