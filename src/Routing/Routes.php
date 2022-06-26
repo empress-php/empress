@@ -7,7 +7,7 @@ namespace Empress\Routing;
 use Closure;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
-use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Handler\HandlerTypeEnum;
 use Empress\Routing\Path\Path;
 
 final class Routes
@@ -23,7 +23,7 @@ final class Routes
      */
     public function before(callable $callable): self
     {
-        $this->addEntry(HandlerType::BEFORE, '/*', $callable);
+        $this->addEntry(HandlerTypeEnum::BEFORE, '/*', $callable);
 
         return $this;
     }
@@ -33,7 +33,7 @@ final class Routes
      */
     public function beforeAt(string $path, callable $callable): self
     {
-        $this->addEntry(HandlerType::BEFORE, $path, $callable);
+        $this->addEntry(HandlerTypeEnum::BEFORE, $path, $callable);
 
         return $this;
     }
@@ -43,7 +43,7 @@ final class Routes
      */
     public function after(callable $callable): self
     {
-        $this->addEntry(HandlerType::AFTER, '/*', $callable);
+        $this->addEntry(HandlerTypeEnum::AFTER, '/*', $callable);
 
         return $this;
     }
@@ -53,7 +53,7 @@ final class Routes
      */
     public function afterAt(string $path, callable $callable): self
     {
-        $this->addEntry(HandlerType::AFTER, $path, $callable);
+        $this->addEntry(HandlerTypeEnum::AFTER, $path, $callable);
 
         return $this;
     }
@@ -80,7 +80,7 @@ final class Routes
      */
     public function get(string $route, callable $handler): self
     {
-        $this->addEntry(HandlerType::GET, $route, $handler);
+        $this->addEntry(HandlerTypeEnum::GET, $route, $handler);
 
         return $this;
     }
@@ -90,7 +90,7 @@ final class Routes
      */
     public function post(string $route, callable $handler): self
     {
-        $this->addEntry(HandlerType::POST, $route, $handler);
+        $this->addEntry(HandlerTypeEnum::POST, $route, $handler);
 
         return $this;
     }
@@ -100,7 +100,7 @@ final class Routes
      */
     public function put(string $route, callable $handler): self
     {
-        $this->addEntry(HandlerType::PUT, $route, $handler);
+        $this->addEntry(HandlerTypeEnum::PUT, $route, $handler);
 
         return $this;
     }
@@ -110,7 +110,7 @@ final class Routes
      */
     public function delete(string $route, callable $handler): self
     {
-        $this->addEntry(HandlerType::DELETE, $route, $handler);
+        $this->addEntry(HandlerTypeEnum::DELETE, $route, $handler);
 
         return $this;
     }
@@ -120,7 +120,7 @@ final class Routes
      */
     public function patch(string $route, callable $handler): self
     {
-        $this->addEntry(HandlerType::PATCH, $route, $handler);
+        $this->addEntry(HandlerTypeEnum::PATCH, $route, $handler);
 
         return $this;
     }
@@ -130,7 +130,7 @@ final class Routes
      */
     public function head(string $route, callable $handler): self
     {
-        $this->addEntry(HandlerType::HEAD, $route, $handler);
+        $this->addEntry(HandlerTypeEnum::HEAD, $route, $handler);
 
         return $this;
     }
@@ -140,7 +140,7 @@ final class Routes
      */
     public function options(string $route, callable $handler): self
     {
-        $this->addEntry(HandlerType::OPTIONS, $route, $handler);
+        $this->addEntry(HandlerTypeEnum::OPTIONS, $route, $handler);
 
         return $this;
     }
@@ -150,7 +150,7 @@ final class Routes
         return $this->handlerCollection;
     }
 
-    public function addEntry(int $handlerType, string $route, callable $handler): void
+    public function addEntry(HandlerTypeEnum $handlerType, string $route, callable $handler): void
     {
         $entry = new HandlerEntry($handlerType, new Path($this->prefixRoute($route)), $handler);
 

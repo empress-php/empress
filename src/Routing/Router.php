@@ -21,7 +21,7 @@ use Empress\Logging\RequestLoggerInterface;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
-use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Handler\HandlerTypeEnum;
 use Empress\Routing\Status\StatusMapper;
 use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Error;
@@ -67,7 +67,7 @@ final class Router implements RequestHandler, ServerObserver
             return $this->handleError($request, Status::NOT_FOUND);
         }
 
-        $handlerType = HandlerType::fromString($method);
+        $handlerType = HandlerTypeEnum::from($method);
         $entries = $filteredByPath->filterByType($handlerType);
 
         $handlerEntry = $entries->first();
@@ -136,7 +136,7 @@ final class Router implements RequestHandler, ServerObserver
 
             try {
                 $beforeFilters = $handlerCollection
-                    ->filterByType(HandlerType::BEFORE);
+                    ->filterByType(HandlerTypeEnum::BEFORE);
 
                 foreach ($beforeFilters as $beforeFilter) {
                     yield $injector->inject($beforeFilter->getHandler());
@@ -145,7 +145,7 @@ final class Router implements RequestHandler, ServerObserver
                 yield $injector->inject($handlerEntry->getHandler());
 
                 $afterFilters = $handlerCollection
-                    ->filterByType(HandlerType::AFTER);
+                    ->filterByType(HandlerTypeEnum::AFTER);
 
                 foreach ($afterFilters as $afterFilter) {
                     yield $injector->inject($afterFilter->getHandler());

@@ -7,7 +7,7 @@ namespace Empress\Test\Routing;
 use Closure;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
-use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Handler\HandlerTypeEnum;
 use Empress\Routing\Path\Path;
 use Empress\Routing\Routes;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +30,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::BEFORE, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::BEFORE, $entry?->getType());
         self::assertEquals(new Path('/*'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -41,7 +41,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::BEFORE, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::BEFORE, $entry?->getType());
         self::assertEquals(new Path('/home'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -52,7 +52,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::AFTER, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::AFTER, $entry?->getType());
         self::assertEquals(new Path('/*'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -63,7 +63,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::AFTER, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::AFTER, $entry?->getType());
         self::assertEquals(new Path('/home'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -76,7 +76,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::GET, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::GET, $entry?->getType());
         self::assertEquals(new Path('/foo/bar'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -89,7 +89,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::GET, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::GET, $entry?->getType());
         self::assertEquals(new Path('/foo/bar'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -100,7 +100,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::GET, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::GET, $entry?->getType());
         self::assertEquals(new Path('/'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -111,7 +111,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::POST, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::POST, $entry?->getType());
         self::assertEquals(new Path('/'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -122,7 +122,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::PUT, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::PUT, $entry?->getType());
         self::assertEquals(new Path('/'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -133,7 +133,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::DELETE, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::DELETE, $entry?->getType());
         self::assertEquals(new Path('/'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -144,7 +144,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::PATCH, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::PATCH, $entry?->getType());
         self::assertEquals(new Path('/'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -155,7 +155,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::HEAD, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::HEAD, $entry?->getType());
         self::assertEquals(new Path('/'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }
@@ -166,7 +166,7 @@ final class RoutesTest extends TestCase
 
         $entry = $this->getEntry();
 
-        self::assertSame(HandlerType::OPTIONS, $entry?->getType());
+        self::assertSame(HandlerTypeEnum::OPTIONS, $entry?->getType());
         self::assertEquals(new Path('/'), $entry?->getPath());
         self::assertSame($this->closure, $entry?->getHandler());
     }

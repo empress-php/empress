@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Empress\Test\Handler;
 
 use Empress\Routing\Handler\HandlerEntry;
-use Empress\Routing\Handler\HandlerType;
+use Empress\Routing\Handler\HandlerTypeEnum;
 use Empress\Routing\Path\Path;
 use PHPUnit\Framework\TestCase;
 
@@ -15,7 +15,7 @@ final class HandlerEntryTest extends TestCase
     {
         $path = new Path('/');
         $entry = new HandlerEntry(
-            HandlerType::GET,
+            HandlerTypeEnum::GET,
             $path,
             fn () => null
         );
