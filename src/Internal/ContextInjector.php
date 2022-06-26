@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Internal;
 
 use Amp\Http\Server\Request;
@@ -15,10 +17,9 @@ use function Amp\call;
  * Used for injecting the context object into handlers.
  * The context is injected in such a way that alleviates the need for manually returning a response from handlers.
  *
- * @package Empress\Internal
  * @internal
  */
-class ContextInjector
+final class ContextInjector
 {
     public function __construct(
         private Context $context,
@@ -30,7 +31,6 @@ class ContextInjector
      * Injects the context object into the handler.
      * It runs the handler and returns a promise that will eventually resolve to a response.
      *
-     * @param callable $handler
      * @return Promise<Response>
      */
     public function inject(callable $handler): Promise

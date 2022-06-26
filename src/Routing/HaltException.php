@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing;
 
 use Amp\ByteStream\InputStream;
@@ -7,7 +9,7 @@ use Amp\Http\Server\Response;
 use Amp\Http\Status;
 use Error;
 
-class HaltException extends Error
+final class HaltException extends Error
 {
     public function __construct(
         private $status = Status::OK,

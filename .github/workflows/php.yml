@@ -13,7 +13,7 @@ jobs:
     - name: Setup PHP Action
       uses: shivammathur/setup-php@2.11.0
       with:
-        php-version: '8.0'
+        php-version: '8.1'
         coverage: xdebug
         extensions: inotify
         tools: composer:v2, phpunit, vimeo/psalm, php-cs-fixer
@@ -22,6 +22,9 @@ jobs:
 
     - name: Install dependencies
       run: composer update --prefer-dist --optimize-autoloader --no-progress
+
+    - name: Run ecs check
+      run: vendor/bin/ecs check --fix src/ test/
 
     - name: Run psalm
       run: vendor/bin/psalm --no-cache

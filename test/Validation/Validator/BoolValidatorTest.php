@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Validation\Validator;
 
 use Empress\Validation\Validator\BoolValidator;
 use Empress\Validation\Validator\ValidatorException;
 use PHPUnit\Framework\TestCase;
 
-class BoolValidatorTest extends TestCase
+final class BoolValidatorTest extends TestCase
 {
     public function testBoolValue(): void
     {
@@ -14,8 +16,8 @@ class BoolValidatorTest extends TestCase
         $true = $validator->validate('true');
         $false = $validator->validate('0');
 
-        static::assertTrue($true);
-        static::assertFalse($false);
+        self::assertTrue($true);
+        self::assertFalse($false);
     }
 
     public function testNonBoolValue(): void

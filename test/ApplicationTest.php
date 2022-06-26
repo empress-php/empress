@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test;
 
 use Amp\PHPUnit\AsyncTestCase;
@@ -8,11 +10,11 @@ use Empress\ConfigurationBuilder;
 use Empress\Test\Helper\StubServerTrait;
 use Psr\Log\LoggerInterface;
 
-class ApplicationTest extends AsyncTestCase
+final class ApplicationTest extends AsyncTestCase
 {
     use StubServerTrait;
 
-    public function testCreate()
+    public function testCreate(): void
     {
         $logger = $this->createMock(LoggerInterface::class);
         $configuration = (new ConfigurationBuilder())
@@ -21,8 +23,8 @@ class ApplicationTest extends AsyncTestCase
 
         $app = Application::create(1234, $configuration);
 
-        static::assertEquals(1234, $app->getPort());
-        static::assertEquals($logger, $app->getConfiguration()->getRequestLogger());
+        self::assertSame(1234, $app->getPort());
+        self::assertSame($logger, $app->getConfiguration()->getRequestLogger());
     }
 
     public function testOnServerStartStop(): \Generator
@@ -30,11 +32,14 @@ class ApplicationTest extends AsyncTestCase
         $s = '';
 
         $app = Application::create(1234);
-        $app->onServerStart(function () use (&$s) {
-            $s .= '#';
-        })->onServerStop(function () use (&$s) {
-            $s .= '!';
-        });
+
+        $app
+            ->onServerStart(function () use (&$s): void {
+                $s .= '#';
+            })
+            ->onServerStop(function () use (&$s): void {
+                $s .= '!';
+            });
 
         $server = $this->getStubServer();
         $server->attach($app);
@@ -42,6 +47,6 @@ class ApplicationTest extends AsyncTestCase
         yield $server->start();
         yield $server->stop();
 
-        static::assertEquals('#!', $s);
+        self::assertSame('#!', $s);
     }
 }

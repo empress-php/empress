@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test;
 
 use Amp\Http\Server\Middleware;
@@ -8,7 +10,7 @@ use Amp\Http\Server\Session\Storage;
 use Empress\ConfigurationBuilder;
 use PHPUnit\Framework\TestCase;
 
-class ConfigurationTest extends TestCase
+final class ConfigurationTest extends TestCase
 {
     private ConfigurationBuilder $builder;
 
@@ -24,8 +26,8 @@ class ConfigurationTest extends TestCase
             ->build();
 
 
-        static::assertNotNull($configuration->getTlsContext());
-        static::assertEquals(1024, $configuration->getTlsPort());
+        self::assertNotNull($configuration->getTlsContext());
+        self::assertSame(1024, $configuration->getTlsPort());
     }
 
     public function testWithStaticContentPath(): void
@@ -34,8 +36,8 @@ class ConfigurationTest extends TestCase
             ->withStaticContentPath('/')
             ->build();
 
-        static::assertEquals('/', $configuration->getStaticContentPath());
-        static::assertNotNull($configuration->getDocumentRootHandler());
+        self::assertSame('/', $configuration->getStaticContentPath());
+        self::assertNotNull($configuration->getDocumentRootHandler());
     }
 
     public function testWithMiddleware(): void
@@ -47,7 +49,7 @@ class ConfigurationTest extends TestCase
 
         $middlewares = $configuration->getMiddlewares();
 
-        static::assertContains($middleware, $middlewares);
+        self::assertContains($middleware, $middlewares);
     }
 
     public function testWithSessionStorage(): void
@@ -55,7 +57,7 @@ class ConfigurationTest extends TestCase
         $storage = $this->createMock(Storage::class);
         $configuration = $this->builder->withSessionStorage($storage)->build();
 
-        static::assertSame($storage, $configuration->getSessionStorage());
+        self::assertSame($storage, $configuration->getSessionStorage());
     }
 
     public function testWithServerOptions(): void
@@ -65,6 +67,6 @@ class ConfigurationTest extends TestCase
             ->withServerOptions($options)
             ->build();
 
-        static::assertSame($options, $configuration->getServerOptions());
+        self::assertSame($options, $configuration->getServerOptions());
     }
 }

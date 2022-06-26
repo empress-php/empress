@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\Path;
 
-class Path
+final class Path
 {
-
     /**
      * @var string[]
      */
@@ -15,14 +16,14 @@ class Path
         $this->parts = $this->toParts($path);
     }
 
-    public function getParts(): array
-    {
-        return $this->parts;
-    }
-
     public function __toString(): string
     {
         return $this->path;
+    }
+
+    public function getParts(): array
+    {
+        return $this->parts;
     }
 
     private function toParts(string $path): array

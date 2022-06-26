@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Validation\Validator;
 
 /**
@@ -8,7 +10,6 @@ namespace Empress\Validation\Validator;
  */
 interface ValidatorInterface
 {
-
     /**
      * @param T $value
      * @return U

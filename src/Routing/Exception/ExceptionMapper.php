@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\Exception;
 
 use Amp\Promise;
@@ -8,9 +10,8 @@ use Empress\Internal\ContextInjector;
 use Empress\Routing\MapperInterface;
 use function Amp\call;
 
-class ExceptionMapper implements MapperInterface
+final class ExceptionMapper implements MapperInterface
 {
-
     /**
      * @var ExceptionHandler[]
      */

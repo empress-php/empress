@@ -1,22 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Validation;
 
-use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Empress\Validation\Validator\NoopValidator;
 
 /**
  * @template T
  */
-class ValidationContext
+final class ValidationContext
 {
-
     /**
      * @param T $value
      */
     public function __construct(
         private mixed $value,
-        private ValidatorRegistry $registry
+        private ValidatorRegistryInterface $registry
     ) {
     }
 

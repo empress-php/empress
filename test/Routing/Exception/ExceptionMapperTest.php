@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Routing\Exception;
 
 use Amp\PHPUnit\AsyncTestCase;
@@ -8,24 +10,24 @@ use Empress\Internal\ContextInjector;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Test\Helper\StubRequestTrait;
-use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Error;
 use Exception;
 use Generator;
 
-class ExceptionMapperTest extends AsyncTestCase
+final class ExceptionMapperTest extends AsyncTestCase
 {
     use StubRequestTrait;
 
     public function testHandleRequest(): Generator
     {
         $mapper = new ExceptionMapper();
-        $mapper->addHandler(new ExceptionHandler(function (Context $ctx) {
+        $mapper->addHandler(new ExceptionHandler(function (Context $ctx): void {
             $ctx->response('Foo');
         }, Exception::class));
 
         $request = $this->createStubRequest();
-        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
+        $validatorRegistry = $this->createMock(ValidatorRegistryInterface::class);
 
         $context = new Context($request, $validatorRegistry);
         $injector = new ContextInjector($context);
@@ -33,7 +35,7 @@ class ExceptionMapperTest extends AsyncTestCase
 
         yield $mapper->process($injector);
 
-        static::assertEquals('Foo', yield $injector->getResponse()->getBody()->read());
+        self::assertSame('Foo', yield $injector->getResponse()->getBody()->read());
     }
 
     public function testHandleUncaughtException(): Generator
@@ -44,7 +46,7 @@ class ExceptionMapperTest extends AsyncTestCase
         $mapper->addHandler(new ExceptionHandler(fn () => null, Exception::class));
 
         $request = $this->createStubRequest();
-        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
+        $validatorRegistry = $this->createMock(ValidatorRegistryInterface::class);
 
         $context = new Context($request, $validatorRegistry);
         $injector = new ContextInjector($context);

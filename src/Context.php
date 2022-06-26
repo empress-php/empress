@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress;
 
 use Amp\ByteStream\InputStream;
@@ -18,7 +20,7 @@ use Amp\Promise;
 use ArrayAccess;
 use Empress\Routing\HaltException;
 use Empress\Routing\Router;
-use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Empress\Validation\ValidationContext;
 use LogicException;
 use function Amp\call;
@@ -46,9 +48,9 @@ final class Context implements ArrayAccess, ContextInterface
 
     private InputStream|string $stringOrStream;
 
-    private ValidatorRegistry $validatorRegistry;
+    private ValidatorRegistryInterface $validatorRegistry;
 
-    public function __construct(Request $request, ValidatorRegistry $validatorRegistry, Response $response = null)
+    public function __construct(Request $request, ValidatorRegistryInterface $validatorRegistry, ?Response $response = null)
     {
         $this->request = $request;
         $this->response = $response ?? new Response();
@@ -174,7 +176,7 @@ final class Context implements ArrayAccess, ContextInterface
         return $this->request->getCookies();
     }
 
-    public function responseCookie(string $name, string $value = '', CookieAttributes $attributes = null): ContextInterface
+    public function responseCookie(string $name, string $value = '', ?CookieAttributes $attributes = null): ContextInterface
     {
         $cookie = new ResponseCookie($name, $value, $attributes);
         $this->response->setCookie($cookie);
@@ -274,7 +276,7 @@ final class Context implements ArrayAccess, ContextInterface
     {
         $this->contentType('application/json');
 
-        $result = \json_encode($data, JSON_THROW_ON_ERROR);
+        $result = \json_encode($data, \JSON_THROW_ON_ERROR);
 
         return $this->response($result);
     }

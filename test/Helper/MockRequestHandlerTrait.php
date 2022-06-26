@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Helper;
 
 use Amp\Http\Server\Request;

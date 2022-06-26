@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\Status;
 
 use Amp\Promise;
@@ -7,17 +9,13 @@ use Empress\Internal\ContextInjector;
 use Empress\Routing\MapperInterface;
 use function Amp\call;
 
-class StatusMapper implements MapperInterface
+final class StatusMapper implements MapperInterface
 {
-
     /**
      * @var StatusHandler[]
      */
     private array $handlers = [];
-
-    /**
-     * @param StatusHandler $handler
-     */
+    
     public function addHandler(StatusHandler $handler): void
     {
         $this->handlers[] = $handler;

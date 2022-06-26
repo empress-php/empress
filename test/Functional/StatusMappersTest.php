@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Functional;
 
 use Amp\Http\Client\Response;
@@ -8,7 +10,7 @@ use Empress\Application;
 use Empress\Context;
 use Empress\Routing\Routes;
 
-class StatusMappersTest extends FunctionalTestCase
+final class StatusMappersTest extends FunctionalTestCase
 {
     private const PORT = 1234;
 
@@ -20,7 +22,7 @@ class StatusMappersTest extends FunctionalTestCase
 
         $body = yield $response->getBody()->buffer();
 
-        static::assertEquals('<h1>Not found</h1>', $body);
+        self::assertSame('<h1>Not found</h1>', $body);
     }
 
     public function testJsonStatusMapper(): \Generator
@@ -32,8 +34,8 @@ class StatusMappersTest extends FunctionalTestCase
         $body = yield $response->getBody()->buffer();
         $json = \json_decode($body, true);
 
-        static::assertEquals([
-            'status' => 'Not found'
+        self::assertSame([
+            'status' => 'Not found',
         ], $json);
     }
 
@@ -41,15 +43,15 @@ class StatusMappersTest extends FunctionalTestCase
     {
         $app = Application::create(self::PORT);
 
-        $app->status(Status::NOT_FOUND, function (Context $ctx) {
+        $app->status(Status::NOT_FOUND, function (Context $ctx): void {
             $ctx->html('<h1>Not found</h1>');
         }, ['Accept' => 'text/html']);
 
-        $app->status(Status::NOT_FOUND, function (Context $ctx) {
+        $app->status(Status::NOT_FOUND, function (Context $ctx): void {
             $ctx->json(['status' => 'Not found']);
         }, ['Accept' => 'application/json']);
 
-        $app->routes(function (Routes $routes) {
+        $app->routes(function (Routes $routes): void {
             $routes->get('/', fn (Context $ctx) => $ctx->status(Status::NOT_FOUND));
         });
 

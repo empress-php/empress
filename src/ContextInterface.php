@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress;
 
 use Amp\ByteStream\InputStream;
 use Amp\Http\Cookie\CookieAttributes;
 use Amp\Http\Cookie\InvalidCookieException;
 use Amp\Http\Cookie\RequestCookie;
+use Amp\Http\Server\FormParser\Form;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestBody;
 use Amp\Http\Server\Response;
@@ -18,11 +21,9 @@ use Empress\Validation\ValidationContext;
 
 interface ContextInterface
 {
-
     /**
      * Returns request body.
      *
-     * @return RequestBody
      */
     public function requestBody(): RequestBody;
 
@@ -41,7 +42,7 @@ interface ContextInterface
     public function streamedForm(): Iterator;
 
     /**
-     * @psalm-return Promise<string>
+     * @psalm-return Promise<Form>
      * @see \Amp\Http\Server\FormParser\BufferingParser::parseForm
      */
     public function bufferedForm(): Promise;
@@ -93,7 +94,7 @@ interface ContextInterface
      *
      * @throws InvalidCookieException
      */
-    public function responseCookie(string $name, string $value = '', CookieAttributes $attributes = null): self;
+    public function responseCookie(string $name, string $value = '', ?CookieAttributes $attributes = null): self;
 
     /**
      * Removes a response cookie.
@@ -108,14 +109,12 @@ interface ContextInterface
     /**
      * Gets request host.
      *
-     * @return string
      */
     public function host(): string;
 
     /**
      * Gets request method.
      *
-     * @return string
      */
     public function method(): string;
 

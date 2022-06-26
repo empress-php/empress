@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Internal;
 
 use Amp\Http\Status;
@@ -7,29 +9,29 @@ use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
 use Empress\Internal\ContextInjector;
 use Empress\Test\Helper\StubRequestTrait;
-use Empress\Validation\Registry\ValidatorRegistry;
+use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Exception;
 use Generator;
 
-class ContextInjectorTest extends AsyncTestCase
+final class ContextInjectorTest extends AsyncTestCase
 {
     use StubRequestTrait;
 
     public function testInjectorWithExistingResponse(): Generator
     {
         $request = $this->createStubRequest();
-        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
+        $validatorRegistry = $this->createMock(ValidatorRegistryInterface::class);
         $context = new Context($request, $validatorRegistry);
         $injector = new ContextInjector($context);
 
-        yield $injector->inject(function (Context $ctx) {
+        yield $injector->inject(function (Context $ctx): void {
             $ctx
                 ->status(Status::NOT_FOUND)
                 ->response('Hello');
         });
 
-        static::assertEquals(Status::NOT_FOUND, $injector->getResponse()->getStatus());
-        static::assertEquals('Hello', yield $injector->getResponse()->getBody()->read());
+        self::assertSame(Status::NOT_FOUND, $injector->getResponse()->getStatus());
+        self::assertSame('Hello', yield $injector->getResponse()->getBody()->read());
     }
 
     public function testInjectorWithException(): Generator
@@ -37,7 +39,7 @@ class ContextInjectorTest extends AsyncTestCase
         $this->expectException(Exception::class);
 
         $request = $this->createStubRequest();
-        $validatorRegistry = $this->createMock(ValidatorRegistry::class);
+        $validatorRegistry = $this->createMock(ValidatorRegistryInterface::class);
         $context = new Context($request, $validatorRegistry);
         $injector = new ContextInjector($context);
 

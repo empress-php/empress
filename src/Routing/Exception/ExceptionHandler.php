@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\Exception;
 
-class ExceptionHandler
+final class ExceptionHandler
 {
     private string $exceptionClass;
 
@@ -16,10 +18,7 @@ class ExceptionHandler
         $this->exceptionClass = $exceptionClass;
         $this->callable = $callable;
     }
-
-    /**
-     * @return callable
-     */
+    
     public function getCallable(): callable
     {
         return $this->callable;

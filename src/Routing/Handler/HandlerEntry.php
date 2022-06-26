@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\Handler;
 
 use Empress\Routing\Path\Path;
 use Empress\Routing\Path\PathMatcher;
 use Empress\Routing\Path\RegexBuilder;
 
-class HandlerEntry
+final class HandlerEntry
 {
     private int $type;
 

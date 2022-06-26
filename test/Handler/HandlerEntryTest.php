@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Handler;
 
 use Empress\Routing\Handler\HandlerEntry;
@@ -7,7 +9,7 @@ use Empress\Routing\Handler\HandlerType;
 use Empress\Routing\Path\Path;
 use PHPUnit\Framework\TestCase;
 
-class HandlerEntryTest extends TestCase
+final class HandlerEntryTest extends TestCase
 {
     public function testSetPath(): void
     {
@@ -18,11 +20,11 @@ class HandlerEntryTest extends TestCase
             fn () => null
         );
 
-        static::assertEquals($path, $entry->getPath());
+        self::assertSame($path, $entry->getPath());
 
         $path = new Path('/hello');
         $entry->setPath($path);
 
-        static::assertEquals($path, $entry->getPath());
+        self::assertSame($path, $entry->getPath());
     }
 }

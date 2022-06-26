@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Functional;
 
 use Amp\Http\Client\Body\FormBody;
@@ -10,7 +12,7 @@ use Empress\Application;
 use Empress\Context;
 use Empress\Routing\Routes;
 
-class BasicRoutesTest extends FunctionalTestCase
+final class BasicRoutesTest extends FunctionalTestCase
 {
     private const PORT = 1234;
 
@@ -20,8 +22,8 @@ class BasicRoutesTest extends FunctionalTestCase
         /** @var Response $response */
         $response = yield $this->request('/');
 
-        static::assertEquals(Status::OK, $response->getStatus());
-        static::assertEmpty(yield $response->getBody()->buffer());
+        self::assertSame(Status::OK, $response->getStatus());
+        self::assertEmpty(yield $response->getBody()->buffer());
     }
 
     public function testPostForm(): \Generator
@@ -33,8 +35,8 @@ class BasicRoutesTest extends FunctionalTestCase
         /** @var Response $response */
         $response = yield $this->request('/form', 'POST', $form);
 
-        static::assertEquals(Status::OK, $response->getStatus());
-        static::assertEquals('value1-value2', yield $response->getBody()->buffer());
+        self::assertSame(Status::OK, $response->getStatus());
+        self::assertSame('value1-value2', yield $response->getBody()->buffer());
     }
 
     public function testBeforeAfter(): \Generator
@@ -42,8 +44,8 @@ class BasicRoutesTest extends FunctionalTestCase
         /** @var Response $response */
         $response = yield $this->request('/greet');
 
-        static::assertEquals(Status::OK, $response->getStatus());
-        static::assertEquals('Hello World', yield $response->getBody()->buffer());
+        self::assertSame(Status::OK, $response->getStatus());
+        self::assertSame('Hello World', yield $response->getBody()->buffer());
     }
 
     public function testPathParam(): \Generator
@@ -52,7 +54,7 @@ class BasicRoutesTest extends FunctionalTestCase
         /** @var Response $response */
         $response = yield $this->request('/name/Alex/surname/Goldberg');
 
-        static::assertEquals('Hello, Alex Goldberg', yield $response->getBody()->buffer());
+        self::assertSame('Hello, Alex Goldberg', yield $response->getBody()->buffer());
     }
 
     public function testJson(): \Generator
@@ -61,7 +63,7 @@ class BasicRoutesTest extends FunctionalTestCase
         /** @var Response $response */
         $response = yield $this->request('/json');
 
-        static::assertEquals('{"a":"b","c":"d"}', yield $response->getBody()->buffer());
+        self::assertSame('{"a":"b","c":"d"}', yield $response->getBody()->buffer());
     }
 
     public function testRedirect(): \Generator
@@ -70,14 +72,14 @@ class BasicRoutesTest extends FunctionalTestCase
         /** @var Response $response */
         $response = yield $this->request('/redirect-from');
 
-        static::assertEquals(Status::UNAUTHORIZED, $response->getStatus());
+        self::assertSame(Status::UNAUTHORIZED, $response->getStatus());
     }
 
     protected function getApplication(): Application
     {
         $app = Application::create(self::PORT);
 
-        $app->routes(function (Routes $routes) {
+        $app->routes(function (Routes $routes): void {
             $routes->get('/', fn () => null);
 
             $routes->post('/form', function (Context $ctx) {
@@ -90,20 +92,20 @@ class BasicRoutesTest extends FunctionalTestCase
 
             $routes->beforeAt('/greet', fn (Context $ctx) => $ctx->response('Hello '));
             $routes->get('/greet', fn () => null);
-            $routes->afterAt('/greet', function (Context $ctx) {
+            $routes->afterAt('/greet', function (Context $ctx): void {
 
                 /** @psalm-suppress PossiblyInvalidOperand */
                 $ctx->response($ctx->responseBody() . 'World');
             });
 
-            $routes->get('/name/:name/surname/:surname', function (Context $ctx) {
+            $routes->get('/name/:name/surname/:surname', function (Context $ctx): void {
                 $name = $ctx['name']->unsafeUnwrap();
                 $surname = $ctx['surname']->unsafeUnwrap();
 
                 $ctx->response("Hello, $name $surname");
             });
 
-            $routes->get('/json', function (Context $ctx) {
+            $routes->get('/json', function (Context $ctx): void {
                 $ctx->json([
                     'a' => 'b',
                     'c' => 'd',

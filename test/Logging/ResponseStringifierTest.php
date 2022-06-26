@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Logging;
 
 use Amp\ByteStream\InMemoryStream;
@@ -7,7 +9,7 @@ use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Logging\ResponseStringifier;
 
-class ResponseStringifierTest extends AsyncTestCase
+final class ResponseStringifierTest extends AsyncTestCase
 {
     public function testStringify(): \Generator
     {
@@ -16,6 +18,6 @@ class ResponseStringifierTest extends AsyncTestCase
 
         $stringified = yield $responseStringifier->stringify();
 
-        static::assertStringContainsString('200', $stringified);
+        self::assertStringContainsString('200', $stringified);
     }
 }

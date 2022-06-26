@@ -1,25 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Handler;
 
 use Empress\Routing\Handler\HandlerType;
 use PHPUnit\Framework\TestCase;
 
-class HandlerTypeTest extends TestCase
+final class HandlerTypeTest extends TestCase
 {
     public function testFromString(): void
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        static::assertEquals(HandlerType::BEFORE, HandlerType::fromString('BEFORE'));
-        static::assertEquals(HandlerType::AFTER, HandlerType::fromString('AFTER'));
-        static::assertEquals(HandlerType::GET, HandlerType::fromString('GET'));
-        static::assertEquals(HandlerType::POST, HandlerType::fromString('POST'));
-        static::assertEquals(HandlerType::PUT, HandlerType::fromString('PUT'));
-        static::assertEquals(HandlerType::DELETE, HandlerType::fromString('DELETE'));
-        static::assertEquals(HandlerType::PATCH, HandlerType::fromString('PATCH'));
-        static::assertEquals(HandlerType::HEAD, HandlerType::fromString('HEAD'));
-        static::assertEquals(HandlerType::OPTIONS, HandlerType::fromString('OPTIONS'));
+        self::assertSame(HandlerType::BEFORE, HandlerType::fromString('BEFORE'));
+        self::assertSame(HandlerType::AFTER, HandlerType::fromString('AFTER'));
+        self::assertSame(HandlerType::GET, HandlerType::fromString('GET'));
+        self::assertSame(HandlerType::POST, HandlerType::fromString('POST'));
+        self::assertSame(HandlerType::PUT, HandlerType::fromString('PUT'));
+        self::assertSame(HandlerType::DELETE, HandlerType::fromString('DELETE'));
+        self::assertSame(HandlerType::PATCH, HandlerType::fromString('PATCH'));
+        self::assertSame(HandlerType::HEAD, HandlerType::fromString('HEAD'));
+        self::assertSame(HandlerType::OPTIONS, HandlerType::fromString('OPTIONS'));
 
         HandlerType::fromString('xyz');
     }
@@ -28,15 +30,15 @@ class HandlerTypeTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        static::assertEquals('BEFORE', HandlerType::toString(HandlerType::BEFORE));
-        static::assertEquals('AFTER', HandlerType::toString(HandlerType::AFTER));
-        static::assertEquals('GET', HandlerType::toString(HandlerType::GET));
-        static::assertEquals('POST', HandlerType::toString(HandlerType::POST));
-        static::assertEquals('PUT', HandlerType::toString(HandlerType::PUT));
-        static::assertEquals('DELETE', HandlerType::toString(HandlerType::DELETE));
-        static::assertEquals('PATCH', HandlerType::toString(HandlerType::PATCH));
-        static::assertEquals('HEAD', HandlerType::toString(HandlerType::HEAD));
-        static::assertEquals('OPTIONS', HandlerType::toString(HandlerType::OPTIONS));
+        self::assertSame('BEFORE', HandlerType::toString(HandlerType::BEFORE));
+        self::assertSame('AFTER', HandlerType::toString(HandlerType::AFTER));
+        self::assertSame('GET', HandlerType::toString(HandlerType::GET));
+        self::assertSame('POST', HandlerType::toString(HandlerType::POST));
+        self::assertSame('PUT', HandlerType::toString(HandlerType::PUT));
+        self::assertSame('DELETE', HandlerType::toString(HandlerType::DELETE));
+        self::assertSame('PATCH', HandlerType::toString(HandlerType::PATCH));
+        self::assertSame('HEAD', HandlerType::toString(HandlerType::HEAD));
+        self::assertSame('OPTIONS', HandlerType::toString(HandlerType::OPTIONS));
 
         HandlerType::toString(-100);
     }

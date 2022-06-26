@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Exception;
 
 /** @codeCoverageIgnore */
-class ShutdownException extends EmpressException
+final class ShutdownException extends EmpressException
 {
 }

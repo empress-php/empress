@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Test\Functional;
 
 use Amp\Http\Client\Response;
@@ -7,7 +9,7 @@ use Empress\Application;
 use Empress\ConfigurationBuilder;
 use Empress\Routing\Routes;
 
-class StaticContentTest extends FunctionalTestCase
+final class StaticContentTest extends FunctionalTestCase
 {
     private const PORT = 1234;
 
@@ -19,7 +21,7 @@ class StaticContentTest extends FunctionalTestCase
 
         $body = yield $response->getBody()->buffer();
 
-        static::assertEquals('Hello World!', $body);
+        self::assertSame('Hello World!', $body);
     }
 
     protected function getApplication(): Application
@@ -30,7 +32,7 @@ class StaticContentTest extends FunctionalTestCase
 
         $app = Application::create(1234, $configuration);
 
-        $app->routes(function (Routes $routes) {
+        $app->routes(function (Routes $routes): void {
             $routes->get('/', fn () => null);
         });
 

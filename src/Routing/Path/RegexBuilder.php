@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\Path;
 
-class RegexBuilder
+final class RegexBuilder
 {
     private string $regex;
 
@@ -32,6 +34,6 @@ class RegexBuilder
             }
         }
 
-        return  '~^/' . \implode('/', $regexParts) . '/?$~';
+        return '~^/' . \implode('/', $regexParts) . '/?$~';
     }
 }

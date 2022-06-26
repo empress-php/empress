@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Routing\Status;
 
 use Amp\Http\Server\Request;
 
-class StatusHandler
+final class StatusHandler
 {
     private int $status;
 
@@ -24,9 +26,7 @@ class StatusHandler
 
     public function satisfiesHeaders(Request $request): bool
     {
-        return \array_reduce(\array_keys($this->headers), function (bool $acc, mixed $key) use ($request) {
-            return $acc && ($request->getHeader($key) === $this->headers[$key]);
-        }, true);
+        return \array_reduce(\array_keys($this->headers), fn (bool $acc, mixed $key) => $acc && ($request->getHeader($key) === $this->headers[$key]), true);
     }
 
     public function getStatus(): int

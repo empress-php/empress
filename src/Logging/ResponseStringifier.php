@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Empress\Logging;
 
 use Amp\ByteStream\InputStream;
@@ -7,7 +9,7 @@ use Amp\ByteStream\Payload;
 use Amp\Promise;
 use function Amp\call;
 
-class ResponseStringifier extends BaseRequestResponseStringifier
+final class ResponseStringifier extends BaseRequestResponseStringifier
 {
     public function __construct(
         private int $status,
