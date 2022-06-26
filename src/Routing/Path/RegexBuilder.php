@@ -6,19 +6,7 @@ namespace Empress\Routing\Path;
 
 final class RegexBuilder
 {
-    private string $regex;
-
-    public function __construct(Path $path)
-    {
-        $this->regex = $this->buildRegex($path);
-    }
-
-    public function getRegex(): string
-    {
-        return $this->regex;
-    }
-
-    private function buildRegex(Path $path): string
+    public function buildRegex(Path $path): string
     {
         $regexParts = [];
 

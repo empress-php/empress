@@ -11,10 +11,17 @@ use PHPUnit\Framework\TestCase;
 
 final class PathMatcherTest extends TestCase
 {
+    private RegexBuilder $regexBuilder;
+
+    protected function setUp(): void
+    {
+        $this->regexBuilder = new RegexBuilder();
+    }
+
     public function testMatchSimplePath(): void
     {
-        $regexBuilder = new RegexBuilder(new Path('/hello'));
-        $matcher = new PathMatcher($regexBuilder);
+        $regex = $this->regexBuilder->buildRegex(new Path('/hello'));
+        $matcher = new PathMatcher($regex);
 
         self::assertTrue($matcher->matches('/hello'));
         self::assertFalse($matcher->matches('/foo'));
@@ -22,8 +29,8 @@ final class PathMatcherTest extends TestCase
 
     public function testMatchWildcardPath(): void
     {
-        $regexBuilder = new RegexBuilder(new Path('/*'));
-        $matcher = new PathMatcher($regexBuilder);
+        $regex = $this->regexBuilder->buildRegex(new Path('/*'));
+        $matcher = new PathMatcher($regex);
 
         self::assertTrue($matcher->matches('/foo'));
         self::assertFalse($matcher->matches('/foo/bar'));
@@ -31,16 +38,16 @@ final class PathMatcherTest extends TestCase
 
     public function testInnerWildcardPath(): void
     {
-        $regexBuilder = new RegexBuilder(new Path('/foo/*/bar/*'));
-        $matcher = new PathMatcher($regexBuilder);
+        $regex = $this->regexBuilder->buildRegex(new Path('/foo/*/bar/*'));
+        $matcher = new PathMatcher($regex);
 
         self::assertTrue($matcher->matches('/foo/baz/bar/bazzz'));
     }
 
     public function testExtractNamedParams(): void
     {
-        $regexBuilder = new RegexBuilder(new Path('/greet/:name'));
-        $matcher = new PathMatcher($regexBuilder);
+        $regex = $this->regexBuilder->buildRegex(new Path('/greet/:name'));
+        $matcher = new PathMatcher($regex);
 
         self::assertSame([
             'name' => 'Alex',
@@ -49,8 +56,8 @@ final class PathMatcherTest extends TestCase
 
     public function testExtractMultipleNamedParams(): void
     {
-        $regexBuilder = new RegexBuilder(new Path('/greet/:name/:lastname'));
-        $matcher = new PathMatcher($regexBuilder);
+        $regex = $this->regexBuilder->buildRegex(new Path('/greet/:name/:lastname'));
+        $matcher = new PathMatcher($regex);
 
         self::assertSame([
             'name' => 'Alex',
@@ -60,8 +67,8 @@ final class PathMatcherTest extends TestCase
 
     public function testExtractMultipleNamedParamsSeparatedByWildcard(): void
     {
-        $regexBuilder = new RegexBuilder(new Path('/users/:userId/*/:userName'));
-        $matcher = new PathMatcher($regexBuilder);
+        $regex = $this->regexBuilder->buildRegex(new Path('/users/:userId/*/:userName'));
+        $matcher = new PathMatcher($regex);
 
         self::assertSame([
             'userId' => '123',
@@ -71,8 +78,8 @@ final class PathMatcherTest extends TestCase
 
     public function testExtractWildcards(): void
     {
-        $regexBuilder = new RegexBuilder(new Path('/start/*/*/*/stop'));
-        $matcher = new PathMatcher($regexBuilder);
+        $regex = $this->regexBuilder->buildRegex(new Path('/start/*/*/*/stop'));
+        $matcher = new PathMatcher($regex);
 
         self::assertSame([
             'a',

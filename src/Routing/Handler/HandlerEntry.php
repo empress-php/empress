@@ -17,7 +17,7 @@ final class HandlerEntry
         private Path $path,
         private $handler
     ) {
-        $this->pathMatcher = new PathMatcher(new RegexBuilder($path));
+        $this->pathMatcher = new PathMatcher((new RegexBuilder())->buildRegex($this->path));
     }
 
     public function getType(): HandlerTypeEnum
