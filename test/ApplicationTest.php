@@ -18,13 +18,13 @@ final class ApplicationTest extends AsyncTestCase
     {
         $logger = $this->createMock(LoggerInterface::class);
         $configuration = (new ConfigurationBuilder())
-            ->withRequestLogger($logger)
+            ->withLogger($logger)
             ->build();
 
         $app = Application::create(1234, $configuration);
 
         self::assertSame(1234, $app->getPort());
-        self::assertSame($logger, $app->getConfiguration()->getRequestLogger());
+        self::assertSame($logger, $app->getConfiguration()->getLogger());
     }
 
     public function testOnServerStartStop(): \Generator

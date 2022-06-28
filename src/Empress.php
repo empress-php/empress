@@ -13,10 +13,8 @@ use Amp\Socket\Server;
 use Amp\Socket\ServerTlsContext;
 use Empress\Exception\ShutdownException;
 use Empress\Exception\StartupException;
-use Empress\Logging\DefaultLogger;
 use Exception;
 use Throwable;
-use function Amp\ByteStream\getStdout;
 use function Amp\call;
 use function Amp\Http\Server\Middleware\stack;
 
@@ -72,9 +70,15 @@ final class Empress
         }
 
         $middlewares = $config->getMiddlewares();
+
+        $logger = $config->getLogger();
         $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
         $logger = new DefaultLogger('Empress', getStdout());
         $options = $config->getServerOptions();
+
+        if ($config->getDebugMode()) {
+            $options = $options->withDebugMode();
+        }
 
         $this->server = new HttpServer(
             $sockets,

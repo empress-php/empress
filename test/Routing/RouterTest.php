@@ -261,43 +261,4 @@ final class RouterTest extends AsyncTestCase
 
         $router->setFallback(new DocumentRoot('/'));
     }
-
-    public function testDebugInfoIsLogged(): \Generator
-    {
-        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), fn () => null));
-
-        $request = $this->createStubRequest();
-
-        $requestLogger = $this->createMock(RequestLoggerInterface::class);
-        $requestLogger
-            ->expects(self::once())
-            ->method('debug')
-            ->with($request, self::isInstanceOf(Response::class), $this->collection)
-            ->willReturn(new Success());
-
-        $router = new Router($this->exceptionMapper, $this->statusMapper, $this->collection, $this->validatorRegistry, $requestLogger);
-
-        yield $router->onStart($this->getStubServer());
-
-        yield $router->handleRequest($request);
-    }
-
-    public function testDebugInfoIsLoggedOnError(): \Generator
-    {
-        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), fn () => null));
-
-        $request = $this->createStubRequest('POST');
-
-        $requestLogger = $this->createMock(RequestLoggerInterface::class);
-        $requestLogger
-            ->expects(self::once())
-            ->method('debug')
-            ->with($request, self::isInstanceOf(Response::class))
-            ->willReturn(new Success());
-
-        $router = new Router($this->exceptionMapper, $this->statusMapper, $this->collection, $this->validatorRegistry, $requestLogger);
-        yield $router->onStart($this->getStubServer());
-
-        yield $router->handleRequest($request);
-    }
 }

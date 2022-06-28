@@ -10,7 +10,9 @@ use Amp\Http\Server\Session\InMemoryStorage;
 use Amp\Http\Server\Session\Storage;
 use Amp\Socket\Certificate;
 use Amp\Socket\ServerTlsContext;
+use Empress\Logging\DefaultLogger;
 use Psr\Log\LoggerInterface;
+use function Amp\ByteStream\getStdout;
 
 final class ConfigurationBuilder
 {
@@ -21,6 +23,10 @@ final class ConfigurationBuilder
 
     private Options $options;
 
+    private LoggerInterface $logger;
+
+    private bool $debugMode = false;
+
     private ?ServerTlsContext $tlsContext = null;
 
     private ?int $tlsPort = null;
@@ -29,12 +35,12 @@ final class ConfigurationBuilder
 
     private Storage $sessionStorage;
 
-    private ?LoggerInterface $requestLogger = null;
 
     public function __construct()
     {
         $this->options = new Options();
         $this->sessionStorage = new InMemoryStorage();
+        $this->logger = new DefaultLogger('Empress', getStdout());
     }
 
     /**
@@ -53,6 +59,20 @@ final class ConfigurationBuilder
     public function withServerOptions(Options $options): self
     {
         $this->options = $options;
+
+        return $this;
+    }
+
+    public function withLogger(LoggerInterface $logger): self
+    {
+        $this->logger = $logger;
+
+        return $this;
+    }
+
+    public function withDebugMode(): self
+    {
+        $this->debugMode = true;
 
         return $this;
     }
@@ -84,23 +104,17 @@ final class ConfigurationBuilder
         return $this;
     }
 
-    public function withRequestLogger(LoggerInterface $logger): self
-    {
-        $this->requestLogger = $logger;
-
-        return $this;
-    }
-
     public function build(): Configuration
     {
         return new Configuration(
             $this->middlewares,
             $this->options,
             $this->sessionStorage,
+            $this->logger,
+            $this->debugMode,
             $this->staticContentPath,
             $this->tlsContext,
             $this->tlsPort,
-            $this->requestLogger
         );
     }
 }

@@ -17,7 +17,6 @@ use Amp\Promise;
 use Amp\Success;
 use Empress\Context;
 use Empress\Internal\ContextInjector;
-use Empress\Logging\RequestLoggerInterface;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerEntry;
@@ -44,8 +43,7 @@ final class Router implements RequestHandler, ServerObserver
         private ExceptionMapper $exceptionMapper,
         private StatusMapper $statusMapper,
         private HandlerCollection $handlerCollection,
-        private ValidatorRegistryInterface $validatorRegistry,
-        private ?RequestLoggerInterface $requestLogger = null
+        private ValidatorRegistryInterface $validatorRegistry
     ) {
     }
 
@@ -64,7 +62,7 @@ final class Router implements RequestHandler, ServerObserver
                 return $this->fallback->handleRequest($request);
             }
 
-            return $this->handleError($request, Status::NOT_FOUND);
+            return $this->errorHandler->handleError(Status::NOT_FOUND, null, $request);
         }
 
         $handlerType = HandlerTypeEnum::from($method);
@@ -73,7 +71,7 @@ final class Router implements RequestHandler, ServerObserver
         $handlerEntry = $entries->first();
 
         if ($handlerEntry === null) {
-            return $this->handleError($request, Status::METHOD_NOT_ALLOWED);
+            return $this->errorHandler->handleError(Status::METHOD_NOT_ALLOWED, null, $request);
         }
 
         return $this->dispatch($request, $handlerEntry, $filteredByPath, $path);
@@ -160,26 +158,7 @@ final class Router implements RequestHandler, ServerObserver
                 yield $this->exceptionMapper->process($injector);
             }
 
-            $response = $injector->getResponse();
-
-            if ($this->requestLogger !== null) {
-                yield $this->requestLogger->debug($request, $response, $handlerCollection);
-            }
-
-            return $response;
-        });
-    }
-
-    private function handleError(Request $request, int $status): Promise
-    {
-        return call(function () use ($request, $status) {
-            $response = yield $this->errorHandler->handleError($status, null, $request);
-
-            if ($this->requestLogger !== null) {
-                yield $this->requestLogger->debug($request, $response);
-            }
-
-            return $response;
+            return $injector->getResponse();
         });
     }
 }
