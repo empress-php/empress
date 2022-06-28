@@ -8,7 +8,6 @@ use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Amp\Success;
-use Empress\Logging\RequestLogger;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
@@ -78,14 +77,11 @@ final class Application implements ServerObserver
 
     public function getRouter(): Router
     {
-        $requestLogger = $this->configuration->getRequestLogger();
-
         return new Router(
             $this->exceptionMapper,
             $this->statusMapper,
             $this->routes->getHandlerCollection(),
-            $this->validatorRegistry,
-            $requestLogger ? new RequestLogger($requestLogger) : null
+            $this->validatorRegistry
         );
     }
 

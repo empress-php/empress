@@ -24,10 +24,11 @@ final class Configuration
         private array $middlewares,
         private Options $options,
         private Storage $sessionStorage,
+        private LoggerInterface $logger,
+        private bool $debugMode,
         private ?string $staticContentPath,
         private ?ServerTlsContext $tlsContext,
         private ?int $tlsPort,
-        private ?LoggerInterface $requestLogger
     ) {
     }
 
@@ -47,6 +48,21 @@ final class Configuration
     public function getServerOptions(): Options
     {
         return $this->options;
+    }
+
+    public function getSessionStorage(): Storage
+    {
+        return $this->sessionStorage;
+    }
+
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    public function getDebugMode(): bool
+    {
+        return $this->debugMode;
     }
 
     /**
@@ -69,11 +85,6 @@ final class Configuration
         return new DocumentRoot($this->staticContentPath);
     }
 
-    public function getSessionStorage(): Storage
-    {
-        return $this->sessionStorage;
-    }
-
     public function getTlsContext(): ?ServerTlsContext
     {
         return $this->tlsContext;
@@ -82,10 +93,5 @@ final class Configuration
     public function getTlsPort(): ?int
     {
         return $this->tlsPort;
-    }
-
-    public function getRequestLogger(): ?LoggerInterface
-    {
-        return $this->requestLogger;
     }
 }

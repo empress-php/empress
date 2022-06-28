@@ -8,9 +8,7 @@ use Amp\Http\Server\Response;
 use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
-use Amp\Success;
 use Empress\Context;
-use Empress\Logging\RequestLoggerInterface;
 use Empress\Routing\Exception\ExceptionHandler;
 use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
@@ -260,44 +258,5 @@ final class RouterTest extends AsyncTestCase
         yield $router->onStart($this->getStubServer());
 
         $router->setFallback(new DocumentRoot('/'));
-    }
-
-    public function testDebugInfoIsLogged(): \Generator
-    {
-        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), fn () => null));
-
-        $request = $this->createStubRequest();
-
-        $requestLogger = $this->createMock(RequestLoggerInterface::class);
-        $requestLogger
-            ->expects(self::once())
-            ->method('debug')
-            ->with($request, self::isInstanceOf(Response::class), $this->collection)
-            ->willReturn(new Success());
-
-        $router = new Router($this->exceptionMapper, $this->statusMapper, $this->collection, $this->validatorRegistry, $requestLogger);
-
-        yield $router->onStart($this->getStubServer());
-
-        yield $router->handleRequest($request);
-    }
-
-    public function testDebugInfoIsLoggedOnError(): \Generator
-    {
-        $this->collection->add(new HandlerEntry(HandlerTypeEnum::GET, new Path('/'), fn () => null));
-
-        $request = $this->createStubRequest('POST');
-
-        $requestLogger = $this->createMock(RequestLoggerInterface::class);
-        $requestLogger
-            ->expects(self::once())
-            ->method('debug')
-            ->with($request, self::isInstanceOf(Response::class))
-            ->willReturn(new Success());
-
-        $router = new Router($this->exceptionMapper, $this->statusMapper, $this->collection, $this->validatorRegistry, $requestLogger);
-        yield $router->onStart($this->getStubServer());
-
-        yield $router->handleRequest($request);
     }
 }
