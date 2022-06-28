@@ -16,11 +16,11 @@ final class DefaultLogger extends Logger
         $logHandler = new StreamHandler($outputStream);
         $logHandler->setFormatter(
             new ConsoleFormatter(
-            "[%datetime%] %channel%.%level_name%: %message% %context% %extra%:\r\n",
-            'd/M/Y:H:i:s z',
-            true,
-            true
-        )
+                "[%datetime%] %channel%.%level_name%: %message% %context% %extra%:\r\n",
+                'd/M/Y:H:i:s z',
+                true,
+                true
+            )
         );
 
         parent::__construct($name, [$logHandler]);

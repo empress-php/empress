@@ -86,6 +86,7 @@ final class Empress
             $options
         );
 
+        $this->server->setErrorHandler(new DefaultErrorHandler());
         $this->server->attach($this->application);
     }
 

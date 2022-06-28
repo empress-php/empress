@@ -2,46 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Are you ok?</title>
-    <style>
-        body {
-            background: #f3f3f3;
-            font-family: sans-serif;
-        }
-
-        .container {
-            background: white;
-            box-shadow: 0.5rem 0.5rem #efefef;
-            left: 50%;
-            padding: 5rem;
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .fixed {
-            bottom: 0;
-            color: #646464;
-            padding: 0.3rem;
-            position: fixed;
-            right: 0;
-        }
-
-        h1 {
-            color: #ee5a8e;
-        }
-
-        p {
-            color: #5fb7ef;
-        }
-    </style>
+    <title>{{error_code}} - yikes!</title>
 </head>
+<style>
+    body {
+        background: #f3f3f3;
+        font-family: sans-serif;
+    }
+
+    .container {
+        background: white;
+        box-shadow: 0.5rem 0.5rem #efefef;
+        left: 50%;
+        padding: 5rem;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .fixed {
+        bottom: 0;
+        color: #646464;
+        padding: 0.3rem;
+        position: fixed;
+        right: 0;
+    }
+
+    h1 {
+        color: #ee5a8e;
+    }
+
+    p {
+        color: #5fb7ef;
+    }
+</style>
 <body>
 <div class="container">
-    <h1>{{error_code}}</h1>
-    <p>{{error_description}}</p>
+    <h1>Oh no, it's {{error_code}}!</h1>
+    <p>A nasty error has occurred</p>
+    {{error_trace}}
 </div>
-<div class="fixed">Empress</div>
 </body>
 </html>
