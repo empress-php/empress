@@ -24,7 +24,7 @@ jobs:
       run: composer update --prefer-dist --optimize-autoloader --no-progress
 
     - name: Run ecs check
-      run: vendor/bin/ecs check --fix src/ test/
+      run: vendor/bin/ecs check src/ test/
 
     - name: Run psalm
       run: vendor/bin/psalm --no-cache
