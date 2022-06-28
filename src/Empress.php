@@ -73,7 +73,6 @@ final class Empress
 
         $logger = $config->getLogger();
         $sessionMiddleware = new SessionMiddleware($config->getSessionStorage());
-        $logger = new DefaultLogger('Empress', getStdout());
         $options = $config->getServerOptions();
 
         if ($config->getDebugMode()) {

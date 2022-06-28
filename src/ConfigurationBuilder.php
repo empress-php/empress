@@ -35,7 +35,6 @@ final class ConfigurationBuilder
 
     private Storage $sessionStorage;
 
-
     public function __construct()
     {
         $this->options = new Options();
