@@ -8,7 +8,7 @@ use Amp\ByteStream\ResourceOutputStream;
 use Amp\Loop;
 
 if (!\defined('DEV_NULL')) {
-    $dev = mb_stripos(\PHP_OS, 'WIN') === 0 ? '/dev/null' : 'nul';
+    $dev = str_contains(\PHP_OS, 'WIN') ? 'nul' : '/dev/null';
 
     \define('DEV_NULL', \fopen($dev, 'wb'));
 }
