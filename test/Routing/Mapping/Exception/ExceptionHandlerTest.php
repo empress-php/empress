@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Empress\Test\Routing\Exception;
+namespace Empress\Test\Routing\Mapping\Exception;
 
-use Empress\Routing\Exception\ExceptionHandler;
+use Empress\Routing\Mapping\Exception\ExceptionHandler;
 use Exception;
 use PHPUnit\Framework\TestCase;
 

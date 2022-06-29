@@ -9,16 +9,17 @@ use Amp\Http\Server\StaticContent\DocumentRoot;
 use Amp\Http\Status;
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Context;
-use Empress\Routing\Exception\ExceptionHandler;
-use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
 use Empress\Routing\Handler\HandlerCollectionInterface;
 use Empress\Routing\Handler\HandlerEntry;
 use Empress\Routing\Handler\HandlerTypeEnum;
+use Empress\Routing\Mapping\ContentTypeMatcher;
+use Empress\Routing\Mapping\Exception\ExceptionHandler;
+use Empress\Routing\Mapping\Exception\ExceptionMapper;
+use Empress\Routing\Mapping\Status\StatusHandler;
+use Empress\Routing\Mapping\Status\StatusMapper;
 use Empress\Routing\Path\Path;
 use Empress\Routing\Router;
-use Empress\Routing\Status\StatusHandler;
-use Empress\Routing\Status\StatusMapper;
 use Empress\Test\Helper\StubRequestTrait;
 use Empress\Test\Helper\StubServerTrait;
 use Empress\Validation\Registry\ValidatorRegistryInterface;
@@ -40,8 +41,10 @@ final class RouterTest extends AsyncTestCase
 
     protected function setUp(): void
     {
-        $this->exceptionMapper = new ExceptionMapper();
-        $this->statusMapper = new StatusMapper();
+        $contentTypeMatcher = new ContentTypeMatcher();
+
+        $this->exceptionMapper = new ExceptionMapper($contentTypeMatcher);
+        $this->statusMapper = new StatusMapper($contentTypeMatcher);
         $this->collection = new HandlerCollection();
         $this->validatorRegistry = $this->createMock(ValidatorRegistryInterface::class);
 

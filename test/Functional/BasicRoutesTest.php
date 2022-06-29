@@ -77,7 +77,7 @@ final class BasicRoutesTest extends FunctionalTestCase
 
     protected function getApplication(): Application
     {
-        $app = Application::create(self::PORT);
+        $app = Application::create(self::PORT, $this->getConfigurationBuilder()->build());
 
         $app->routes(function (Routes $routes): void {
             $routes->get('/', fn () => null);

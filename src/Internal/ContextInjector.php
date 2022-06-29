@@ -29,9 +29,8 @@ final class ContextInjector
 
     /**
      * Injects the context object into the handler.
-     * It runs the handler and returns a promise that will eventually resolve to a response.
      *
-     * @return Promise<Response>
+     * @return Promise<void>
      */
     public function inject(callable $handler): Promise
     {

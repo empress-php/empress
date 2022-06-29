@@ -41,15 +41,15 @@ final class StatusMappersTest extends FunctionalTestCase
 
     protected function getApplication(): Application
     {
-        $app = Application::create(self::PORT);
+        $app = Application::create(self::PORT, $this->getConfigurationBuilder()->build());
 
         $app->status(Status::NOT_FOUND, function (Context $ctx): void {
             $ctx->html('<h1>Not found</h1>');
-        }, ['Accept' => 'text/html']);
+        }, 'text/html');
 
         $app->status(Status::NOT_FOUND, function (Context $ctx): void {
             $ctx->json(['status' => 'Not found']);
-        }, ['Accept' => 'application/json']);
+        }, 'application/json');
 
         $app->routes(function (Routes $routes): void {
             $routes->get('/', fn (Context $ctx) => $ctx->status(Status::NOT_FOUND));

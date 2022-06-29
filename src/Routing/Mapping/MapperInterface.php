@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Empress\Routing;
+namespace Empress\Routing\Mapping;
 
 use Amp\Promise;
 use Empress\Internal\ContextInjector;
