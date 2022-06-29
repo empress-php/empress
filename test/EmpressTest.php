@@ -9,8 +9,7 @@ use Empress\Application;
 use Empress\ConfigurationBuilder;
 use Empress\Empress;
 use Empress\Exception\StartupException;
-use Empress\Logging\DefaultLogger;
-use function Empress\getDevNull;
+use Psr\Log\NullLogger;
 
 final class EmpressTest extends AsyncTestCase
 {
@@ -21,7 +20,7 @@ final class EmpressTest extends AsyncTestCase
         $app = Application::create(
             1234,
             (new ConfigurationBuilder())
-                ->withLogger(new DefaultLogger('', getDevNull()))
+                ->withLogger(new NullLogger())
                 ->build()
         );
         $empress = new Empress($app);
