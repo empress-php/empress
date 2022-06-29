@@ -8,13 +8,14 @@ use Amp\Http\Server\Server;
 use Amp\Http\Server\ServerObserver;
 use Amp\Promise;
 use Amp\Success;
-use Empress\Routing\Exception\ExceptionHandler;
-use Empress\Routing\Exception\ExceptionMapper;
 use Empress\Routing\Handler\HandlerCollection;
+use Empress\Routing\Mapping\ContentTypeMatcher;
+use Empress\Routing\Mapping\Exception\ExceptionHandler;
+use Empress\Routing\Mapping\Exception\ExceptionMapper;
+use Empress\Routing\Mapping\Status\StatusHandler;
+use Empress\Routing\Mapping\Status\StatusMapper;
 use Empress\Routing\Router;
 use Empress\Routing\Routes;
-use Empress\Routing\Status\StatusHandler;
-use Empress\Routing\Status\StatusMapper;
 use Empress\Validation\Registry\DefaultValidatorRegistry;
 use Empress\Validation\Registry\ValidatorRegistryInterface;
 use function Amp\call;
@@ -36,29 +37,31 @@ final class Application implements ServerObserver
 
     public static function create(int $port, ?Configuration $configuration = null, array $hosts = ['0.0.0.0', '[::]']): self
     {
+        $contentTypeMatcher = new ContentTypeMatcher();
+
         return new self(
             $port,
             $hosts,
             $configuration ?? (new ConfigurationBuilder())->build(),
-            new ExceptionMapper(),
-            new StatusMapper(),
+            new ExceptionMapper($contentTypeMatcher),
+            new StatusMapper($contentTypeMatcher),
             new Routes(new HandlerCollection()),
             new DefaultValidatorRegistry()
         );
     }
 
-    public function exception(string $exceptionClass, callable $callable): self
+    public function exception(string $exceptionClass, callable $callable, ?string $contentType = null): self
     {
-        $exceptionHandler = new ExceptionHandler($callable, $exceptionClass);
+        $exceptionHandler = new ExceptionHandler($callable, $exceptionClass, $contentType);
 
         $this->exceptionMapper->addHandler($exceptionHandler);
 
         return $this;
     }
 
-    public function status(int $status, callable $callable, array $headers = []): self
+    public function status(int $status, callable $callable, ?string $contentType = null): self
     {
-        $statusHandler = new StatusHandler($callable, $status, $headers);
+        $statusHandler = new StatusHandler($callable, $status, $contentType);
 
         $this->statusMapper->addHandler($statusHandler);
 

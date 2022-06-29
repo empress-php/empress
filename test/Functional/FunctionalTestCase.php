@@ -13,8 +13,11 @@ use Amp\Http\Client\Request;
 use Amp\PHPUnit\AsyncTestCase;
 use Amp\Promise;
 use Empress\Application;
+use Empress\ConfigurationBuilder;
 use Empress\Empress;
+use Empress\Logging\DefaultLogger;
 use GuzzleHttp\Psr7\Uri;
+use function Empress\getDevNull;
 
 abstract class FunctionalTestCase extends AsyncTestCase
 {
@@ -56,7 +59,7 @@ abstract class FunctionalTestCase extends AsyncTestCase
             $request->setBody($body);
         }
 
-        if (isset($headers)) {
+        if (count($headers) > 0) {
             $request->setHeaders($headers);
         }
 
@@ -66,6 +69,14 @@ abstract class FunctionalTestCase extends AsyncTestCase
     protected function getCookies(): Promise
     {
         return $this->cookieJar->get(new Uri($this->getHost()));
+    }
+
+    protected function getConfigurationBuilder(): ConfigurationBuilder
+    {
+        $configurationBuilder = new ConfigurationBuilder();
+
+        return $configurationBuilder
+            ->withLogger(new DefaultLogger('', getDevNull()));
     }
 
     abstract protected function getApplication(): Application;

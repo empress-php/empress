@@ -26,7 +26,9 @@ final class StaticContentTest extends FunctionalTestCase
 
     protected function getApplication(): Application
     {
-        $configuration = (new ConfigurationBuilder())
+        $configurationBuilder = $this->getConfigurationBuilder();
+
+        $configuration = $configurationBuilder
             ->withStaticContentPath(__DIR__ . '/Resources')
             ->build();
 

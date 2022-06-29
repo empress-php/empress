@@ -6,8 +6,11 @@ namespace Empress\Test;
 
 use Amp\PHPUnit\AsyncTestCase;
 use Empress\Application;
+use Empress\ConfigurationBuilder;
 use Empress\Empress;
 use Empress\Exception\StartupException;
+use Empress\Logging\DefaultLogger;
+use function Empress\getDevNull;
 
 final class EmpressTest extends AsyncTestCase
 {
@@ -15,7 +18,12 @@ final class EmpressTest extends AsyncTestCase
     {
         $this->expectException(StartupException::class);
 
-        $app = Application::create(1234);
+        $app = Application::create(
+            1234,
+            (new ConfigurationBuilder())
+                ->withLogger(new DefaultLogger('', getDevNull()))
+                ->build()
+        );
         $empress = new Empress($app);
 
         yield $empress->boot();

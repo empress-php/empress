@@ -9,8 +9,11 @@ use Amp\Http\Client\Response;
 use Amp\Http\Server\FormParser\Form;
 use Amp\Http\Status;
 use Empress\Application;
+use Empress\ConfigurationBuilder;
 use Empress\Context;
+use Empress\Logging\DefaultLogger;
 use Empress\Routing\Routes;
+use function Empress\getDevNull;
 
 final class BasicRoutesTest extends FunctionalTestCase
 {
@@ -77,7 +80,7 @@ final class BasicRoutesTest extends FunctionalTestCase
 
     protected function getApplication(): Application
     {
-        $app = Application::create(self::PORT);
+        $app = Application::create(self::PORT, $this->getConfigurationBuilder()->build());
 
         $app->routes(function (Routes $routes): void {
             $routes->get('/', fn () => null);

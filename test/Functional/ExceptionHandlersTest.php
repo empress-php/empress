@@ -31,7 +31,7 @@ final class ExceptionHandlersTest extends FunctionalTestCase
 
     protected function getApplication(): Application
     {
-        $app = Application::create(self::PORT);
+        $app = Application::create(self::PORT, $this->getConfigurationBuilder()->build());
 
         $app->exception(\Exception::class, function (Context $ctx, \Exception $e): void {
             $ctx->json([

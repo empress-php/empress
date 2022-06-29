@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Empress\Routing\Status;
+namespace Empress\Routing\Mapping\Status;
 
 use Amp\Promise;
 use Empress\Internal\ContextInjector;
-use Empress\Routing\MapperInterface;
+use Empress\Routing\Mapping\ContentTypeMatcher;
+use Empress\Routing\Mapping\MapperInterface;
 use function Amp\call;
 
 final class StatusMapper implements MapperInterface
@@ -15,6 +16,10 @@ final class StatusMapper implements MapperInterface
      * @var StatusHandler[]
      */
     private array $handlers = [];
+
+    public function __construct(private readonly ContentTypeMatcher $contentTypeMatcher)
+    {
+    }
     
     public function addHandler(StatusHandler $handler): void
     {
@@ -31,8 +36,8 @@ final class StatusMapper implements MapperInterface
 
             foreach ($this->handlers as $handler) {
                 if ($handler->getStatus() === $statusCode) {
-                    if ($handler->hasHeaders()) {
-                        if ($handler->satisfiesHeaders($request)) {
+                    if ($handler->hasContentType()) {
+                        if ($this->contentTypeMatcher->match($handler, $request)) {
                             return yield $injector->inject($handler->getCallable());
                         }
                     } else {
@@ -43,6 +48,7 @@ final class StatusMapper implements MapperInterface
 
             if (isset($candidates[$statusCode])) {
                 $candidate = $candidates[$statusCode];
+
                 return yield $injector->inject($candidate->getCallable());
             }
 

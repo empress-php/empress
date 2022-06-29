@@ -8,7 +8,9 @@ use Amp\ByteStream\ResourceOutputStream;
 use Amp\Loop;
 
 if (!\defined('DEV_NULL')) {
-    \define('DEV_NULL', \fopen('/dev/null', 'wb'));
+    $dev = stripos(PHP_OS, 'WIN') === 0 ? '/dev/null' : 'nul';
+
+    \define('DEV_NULL',  \fopen($dev, 'wb'));
 }
 
 function getDevNull(): ResourceOutputStream
