@@ -8,7 +8,7 @@ use Amp\Http\Server\Request;
 
 final class ContentTypeMatcher
 {
-    public function match(ContentTypeAwareHandlerInterface $handler, Request $request)
+    public function match(ContentTypeAwareHandlerInterface $handler, Request $request): bool
     {
         if ($handler->getContentType() === null) {
             return true;
