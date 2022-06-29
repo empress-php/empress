@@ -15,9 +15,8 @@ use Amp\Promise;
 use Empress\Application;
 use Empress\ConfigurationBuilder;
 use Empress\Empress;
-use Empress\Logging\DefaultLogger;
 use GuzzleHttp\Psr7\Uri;
-use function Empress\getDevNull;
+use Psr\Log\NullLogger;
 
 abstract class FunctionalTestCase extends AsyncTestCase
 {
@@ -76,7 +75,7 @@ abstract class FunctionalTestCase extends AsyncTestCase
         $configurationBuilder = new ConfigurationBuilder();
 
         return $configurationBuilder
-            ->withLogger(new DefaultLogger('', getDevNull()));
+            ->withLogger(new NullLogger());
     }
 
     abstract protected function getApplication(): Application;
