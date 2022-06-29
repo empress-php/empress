@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Empress\Routing\Mapping\Exception;
 
-use Amp\Http\Server\Response;
 use Amp\Promise;
 use Amp\Success;
 use Empress\Internal\ContextInjector;

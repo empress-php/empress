@@ -8,7 +8,6 @@ use Empress\Routing\Mapping\ContentTypeAwareHandlerInterface;
 
 final class StatusHandler implements ContentTypeAwareHandlerInterface
 {
-
     /**
      * @param callable $callable
      */

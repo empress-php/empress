@@ -6,7 +6,6 @@ namespace Empress\Test\Functional;
 
 use Amp\Http\Client\Response;
 use Empress\Application;
-use Empress\ConfigurationBuilder;
 use Empress\Routing\Routes;
 
 final class StaticContentTest extends FunctionalTestCase

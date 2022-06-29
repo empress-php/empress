@@ -9,9 +9,5 @@ use Empress\Internal\ContextInjector;
 
 interface MapperInterface
 {
-
-    /**
-     * @return Promise
-     */
     public function process(ContextInjector $injector): Promise;
 }
