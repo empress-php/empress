@@ -7,7 +7,7 @@ namespace Empress\Internal;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\Response;
 use Amp\Promise;
-use Empress\Context;
+use Empress\ContextInterface;
 use Throwable;
 use function Amp\call;
 
@@ -22,7 +22,7 @@ use function Amp\call;
 final class ContextInjector
 {
     public function __construct(
-        private Context $context,
+        private ContextInterface $context,
         private ?Throwable $exception = null
     ) {
     }

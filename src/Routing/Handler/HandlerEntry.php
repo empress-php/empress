@@ -12,10 +12,13 @@ final class HandlerEntry
 {
     private PathMatcher $pathMatcher;
 
+    /**
+     * @param callable $handler
+     */
     public function __construct(
         private HandlerTypeEnum $type,
         private Path $path,
-        private $handler
+        private mixed $handler
     ) {
         $this->pathMatcher = new PathMatcher((new RegexBuilder())->buildRegex($this->path));
     }
