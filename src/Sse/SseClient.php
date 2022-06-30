@@ -25,12 +25,12 @@ final class SseClient
 
     public function data(string $data): Promise
     {
-        return $this->emitter->emit('data: ' . $data . "\n\n");
+        return $this->emitter->emit($this->chunkify($data) . "\n\n");
     }
 
     public function event(string $name, string $data): Promise
     {
-        return $this->emitter->emit('event: ' . $name . "\n" . 'data: ' . $data . "\n\n");
+        return $this->emitter->emit('event: ' . $name . "\n" . $this->chunkify($data) . "\n\n");
     }
 
     public function close(): void
@@ -41,5 +41,12 @@ final class SseClient
     public function stream(): InputStream
     {
         return new IteratorStream($this->emitter->iterate());
+    }
+
+    private function chunkify(string $data): string
+    {
+        $chunks = explode("\n", $data);
+
+        return \rtrim(\implode('', \array_map(fn ($chunk) => 'data: ' . $chunk . "\n", $chunks)));
     }
 }
