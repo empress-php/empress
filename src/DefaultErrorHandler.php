@@ -12,10 +12,6 @@ use Amp\Success;
 
 final class DefaultErrorHandler implements ErrorHandler
 {
-    public function __construct()
-    {
-    }
-
     public function handleError(int $statusCode, ?string $reason = null, ?Request $request = null): Promise
     {
         static $errorHtml;

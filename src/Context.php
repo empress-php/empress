@@ -6,9 +6,11 @@ namespace Empress;
 
 use Amp\ByteStream\InputStream;
 use Amp\Http\Cookie\CookieAttributes;
+use Amp\Http\Cookie\InvalidCookieException;
 use Amp\Http\Cookie\RequestCookie;
 use Amp\Http\Cookie\ResponseCookie;
 use Amp\Http\Server\FormParser\BufferingParser;
+use Amp\Http\Server\FormParser\Form;
 use Amp\Http\Server\FormParser\StreamingParser;
 use Amp\Http\Server\Request;
 use Amp\Http\Server\RequestBody;
@@ -20,6 +22,7 @@ use Amp\Promise;
 use ArrayAccess;
 use Empress\Routing\HaltException;
 use Empress\Routing\Router;
+use Empress\Sse\SseClient;
 use Empress\Validation\Registry\ValidatorRegistryInterface;
 use Empress\Validation\ValidationContext;
 use LogicException;
@@ -28,10 +31,6 @@ use function Amp\Http\Server\redirectTo;
 
 final class Context implements ArrayAccess, ContextInterface
 {
-    private Request $request;
-
-    private Response $response;
-
     private BufferingParser $bufferingParser;
 
     private StreamingParser $streamingParser;
@@ -48,13 +47,11 @@ final class Context implements ArrayAccess, ContextInterface
 
     private InputStream|string $stringOrStream;
 
-    private ValidatorRegistryInterface $validatorRegistry;
-
-    public function __construct(Request $request, ValidatorRegistryInterface $validatorRegistry, ?Response $response = null)
-    {
-        $this->request = $request;
-        $this->response = $response ?? new Response();
-
+    public function __construct(
+        private Request $request,
+        private ValidatorRegistryInterface $validatorRegistry,
+        private Response $response = new Response()
+    ) {
         $this->bufferingParser = new BufferingParser();
         $this->streamingParser = new StreamingParser();
 
@@ -67,8 +64,6 @@ final class Context implements ArrayAccess, ContextInterface
         $this->session = $this->request->getAttribute(Session::class);
 
         $this->stringOrStream = '';
-
-        $this->validatorRegistry = $validatorRegistry;
     }
 
     /**
@@ -103,11 +98,20 @@ final class Context implements ArrayAccess, ContextInterface
         throw new LogicException('Cannot unset values of an existing request object');
     }
 
+    /**
+     * Returns request body.
+     *
+     */
     public function requestBody(): RequestBody
     {
         return $this->request->getBody();
     }
 
+    /**
+     * Returns buffered request body.
+     *
+     * @return Promise<string>
+     */
     public function bufferedBody(): Promise
     {
         return $this->request->getBody()->buffer();
@@ -122,16 +126,26 @@ final class Context implements ArrayAccess, ContextInterface
         });
     }
 
+    /**
+     * @see \Amp\Http\Server\FormParser\StreamingParser::parseForm
+     */
     public function streamedForm(): Iterator
     {
         return $this->streamingParser->parseForm($this->request);
     }
 
+    /**
+     * @psalm-return Promise<Form>
+     * @see \Amp\Http\Server\FormParser\BufferingParser::parseForm
+     */
     public function bufferedForm(): Promise
     {
         return $this->bufferingParser->parseForm($this->request);
     }
 
+    /**
+     * @return Promise<ValidationContext>
+     */
     public function validatedForm(): Promise
     {
         return call(function () {
@@ -141,42 +155,70 @@ final class Context implements ArrayAccess, ContextInterface
         });
     }
 
+    /**
+     * Gets request query as string.
+     */
     public function queryString(): string
     {
         return $this->queryString;
     }
 
+    /**
+     * Gets request query as array.
+     */
     public function queryArray(): array
     {
         return $this->queryArray;
     }
 
+    /**
+     * Gets session associated with this request.
+     */
     public function session(): Session
     {
         return $this->session;
     }
 
+    /**
+     * Gets a request attribute.
+     */
     public function attr(string $name): mixed
     {
         return $this->request->getAttribute($name);
     }
 
+    /**
+     * Checks for a request attribute.
+     */
     public function hasAttr(string $name): bool
     {
         return $this->request->hasAttribute($name);
     }
 
+    /**
+     * Gets a request cookie.
+     */
     public function cookie(string $name): ?RequestCookie
     {
         return $this->request->getCookie($name);
     }
 
+    /**
+     * Gets all request cookies.
+     *
+     * @return RequestCookie[]
+     */
     public function cookies(): array
     {
         return $this->request->getCookies();
     }
 
-    public function responseCookie(string $name, string $value = '', ?CookieAttributes $attributes = null): ContextInterface
+    /**
+     * Sets a response cookie.
+     *
+     * @throws InvalidCookieException
+     */
+    public function responseCookie(string $name, string $value = '', ?CookieAttributes $attributes = null): self
     {
         $cookie = new ResponseCookie($name, $value, $attributes);
         $this->response->setCookie($cookie);
@@ -184,74 +226,112 @@ final class Context implements ArrayAccess, ContextInterface
         return $this;
     }
 
-    public function removeCookie(string $name): ContextInterface
+    /**
+     * Removes a response cookie.
+     */
+    public function removeCookie(string $name): self
     {
         $this->response->removeCookie($name);
 
         return $this;
     }
 
+    /**
+     * Gets request port.
+     */
     public function port(): ?int
     {
         return $this->request->getUri()->getPort();
     }
 
+    /**
+     * Gets request host.
+     *
+     */
     public function host(): string
     {
         return $this->request->getUri()->getHost();
     }
 
+    /**
+     * Gets request method.
+     *
+     */
     public function method(): string
     {
         return $this->request->getMethod();
     }
 
+    /**
+     * Gets the user agent string.
+     */
     public function userAgent(): ?string
     {
         return $this->request->getHeader('User-Agent');
     }
 
-    public function redirect(string $uri, int $status = Status::FOUND): ContextInterface
+    /**
+     * Sets up a redirect.
+     */
+    public function redirect(string $uri, int $status = Status::FOUND): self
     {
         $this->response = redirectTo($uri, $status);
 
         return $this;
     }
 
-    public function status(int $status, ?string $reason = null): ContextInterface
+    /**
+     * Sets response status.
+     */
+    public function status(int $status, ?string $reason = null): self
     {
         $this->response->setStatus($status, $reason);
 
         return $this;
     }
 
-    public function contentType(string $contentType): ContextInterface
+    /**
+     * Sets response content type.
+     */
+    public function contentType(string $contentType): self
     {
         $this->response->setHeader('Content-Type', $contentType);
 
         return $this;
     }
 
-    public function header(string $name, mixed $value): ContextInterface
+    /**
+     * Sets a response header.
+     */
+    public function header(string $name, mixed $value): self
     {
         $this->response->setHeader($name, $value);
 
         return $this;
     }
 
-    public function removeHeader(string $name): ContextInterface
+    /**
+     * Removes a response header.
+     */
+    public function removeHeader(string $name): self
     {
         $this->response->removeHeader($name);
 
         return $this;
     }
 
+    /**
+     * Gets a request header.
+     */
     public function requestHeader(string $name): ?string
     {
         return $this->request->getHeader($name);
     }
 
-    public function response(InputStream|string $stringOrStream): ContextInterface
+    /**
+     * Sends a string or stream response.
+     */
+    public function response(InputStream|string $stringOrStream): self
     {
         $this->stringOrStream = $stringOrStream;
 
@@ -260,19 +340,30 @@ final class Context implements ArrayAccess, ContextInterface
         return $this;
     }
 
+    /**
+     * Gets response body to be sent.
+     */
     public function responseBody(): InputStream|string
     {
         return $this->stringOrStream;
     }
 
-    public function html(InputStream|string $stringOrStream): ContextInterface
+    /**
+     * Sends an HTML response.
+     */
+    public function html(InputStream|string $stringOrStream): self
     {
         return $this
             ->contentType('text/html')
             ->response($stringOrStream);
     }
 
-    public function json(mixed $data): ContextInterface
+    /**
+     * Sends a JSON response.
+     *
+     * @throws \JsonException
+     */
+    public function json(mixed $data): self
     {
         $this->contentType('application/json');
 
@@ -281,11 +372,31 @@ final class Context implements ArrayAccess, ContextInterface
         return $this->response($result);
     }
 
+    public function sse(callable $callback): self
+    {
+        $client = new SseClient();
+
+        call($callback, $client)
+            ->onResolve(fn () => $client->close());
+
+        return $this
+            ->response($client->stream())
+            ->contentType('text/event-stream; charset=utf-8');
+    }
+
+    /**
+     * Halts the execution of the current request handlers.
+     * It throws an instance of @see HaltException.
+     * This exception is not meant to be caught.
+     */
     public function halt(int $status = Status::OK, InputStream|string|null $stringOrStream = null, array $headers = []): void
     {
         throw new HaltException($status, $headers, $stringOrStream);
     }
 
+    /**
+     * Gets wildcard params from path.
+     */
     public function wildcards(): array
     {
         return $this->wildcards;
